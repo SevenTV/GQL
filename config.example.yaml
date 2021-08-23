@@ -1,0 +1,12 @@
+# Log Level
+level: info
+# Redis Settings
+redis_uri: redis://username:password@url/db
+# MongoDB Settings
+mongo_uri: mongodb://username:password@url:port/?authSource=db
+mongo_db: db
+# HTTP Server Settings
+conn_uri: 0.0.0.0:8080
+conn_type: tcp
+# URL to the web-app
+website_url: https://example.com/
