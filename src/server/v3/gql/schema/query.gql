@@ -4,6 +4,20 @@ type Query {
 		query: String!,
 		limit: Int,
 		after_id: String,
-		before_id: String
-	): EmoteResponse!
+		before_id: String,
+		sort: Sort
+		# providers: [Provider!],
+	): [EmoteTest]!
+}
+
+# Sorting cursor, binding a specific order to a value
+input Sort {
+	value: String!
+	order: SortOrder!
+}
+
+# The order with which sorting should occur, either ASCENDING or DESCENDING
+enum SortOrder {
+	ASCENDING
+	DESCENDING
 }

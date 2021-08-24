@@ -1,9 +1,5 @@
-type EmoteResponse {
-	total: Int!
-	emotes: [String!]!
-}
-
 type EmoteTest {
+	id: String!
 	name: String!
 }
 

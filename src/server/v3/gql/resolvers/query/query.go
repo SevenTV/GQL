@@ -37,3 +37,15 @@ func GenerateSelectedFieldMap(ctx context.Context) *SelectedField {
 		Children: children,
 	}
 }
+
+type Sort struct {
+	Value string    `json:"value"`
+	Order SortOrder `json:"order"`
+}
+
+type SortOrder string
+
+var (
+	SortOrderAscending  SortOrder = "ASCENDING"
+	SortOrderDescending SortOrder = "DESCENDING"
+)

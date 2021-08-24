@@ -2,6 +2,7 @@ package gql
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 
 	"github.com/SevenTV/ThreeLetterAPI/src/server/v3/gql/resolvers"
@@ -59,10 +60,32 @@ func GQL(app fiber.Router) fiber.Router {
 
 	// handleRequest: Process a GQL query, from either a GET or POST
 	handleRequest := func(c *fiber.Ctx, req gqlRequest) error {
-		result := schema.Exec(context.WithValue(context.Background(), utils.Key("user"), c.Locals("user")), req.Query, req.OperationName, req.Variables)
+		ctx := context.WithValue(context.Background(), utils.UserKey, c.Locals("user")) // Add auth user to context
+		ctx = context.WithValue(ctx, utils.ReqKey, c)                                   // Add request to context
+
+		// Execute the query
+		result := schema.Exec(ctx, req.Query, req.OperationName, req.Variables)
 		status := 200
 		if len(result.Errors) > 0 {
 			status = 400
+		}
+
+		// Insert metadata into the response
+		if c.Locals("meta") != nil {
+			b, err := json.Marshal(c.Locals("meta"))
+			if err != nil {
+				log.WithError(err).Error("gql, json")
+				return c.Status(500).JSON(fiber.Map{
+					"error": "decoding query meta failed",
+				})
+			}
+
+			newData := make([]byte, 0)
+			newData = append(newData, utils.S2B(`{"metadata":`)...)
+			newData = append(newData, b...)
+			newData = append(newData, byte(','))
+			newData = append(newData, result.Data[1:]...)
+			result.Data = newData
 		}
 
 		return c.Status(status).JSON(result)

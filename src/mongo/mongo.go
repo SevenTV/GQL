@@ -13,23 +13,22 @@ import (
 
 var Database *mongo.Database
 
+var ErrNoDocuments = mongo.ErrNoDocuments
+
 type Pipeline = mongo.Pipeline
 
 func init() {
-	uri := configure.Config.GetString("mongo_uri")
+	clientOptions := options.Client().ApplyURI(configure.Config.GetString("mongo_uri"))
+	if configure.Config.GetBool("mongo_direct") {
+		clientOptions.SetDirect(true)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		panic(err)
 	}
-
-	defer func() {
-		if err = client.Disconnect(ctx); err != nil {
-			panic(err)
-		}
-	}()
 
 	// Send a Ping
 	if err := client.Ping(ctx, readpref.Primary()); err != nil {
