@@ -1,3 +1,9 @@
 type Query {
-	hello_world: String!
+	# user(id: String!): User
+	emotes(
+		query: String!,
+		limit: Int,
+		after_id: String,
+		before_id: String
+	): EmoteResponse!
 }

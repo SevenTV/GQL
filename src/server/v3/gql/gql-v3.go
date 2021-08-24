@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/SevenTV/ThreeLetterAPI/src/server/v3/gql/resolvers"
 	"github.com/SevenTV/ThreeLetterAPI/src/utils"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gofiber/fiber/v2"
@@ -47,7 +48,7 @@ func GQL(app fiber.Router) fiber.Router {
 	if err != nil {
 		panic(err)
 	}
-	schema := graphql.MustParseSchema(s.String(), &Query{})
+	schema := graphql.MustParseSchema(s.String(), resolvers.Resolver(), graphql.UseFieldResolvers(), graphql.MaxDepth(5))
 
 	// Define CORS rules
 	gql.Use(cors.New(cors.Config{

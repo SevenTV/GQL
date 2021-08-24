@@ -11,7 +11,8 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/kr/pretty v0.3.0
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.8.1
 	go.mongodb.org/mongo-driver v1.7.1
 )
+
+replace github.com/graph-gophers/graphql-go => github.com/troydota/graphql-go v0.0.0-20210702180404-92fc941a47cf

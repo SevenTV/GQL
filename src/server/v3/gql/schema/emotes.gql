@@ -1,0 +1,53 @@
+type EmoteResponse {
+	total: Int!
+	emotes: [String!]!
+}
+
+type EmoteTest {
+	name: String!
+}
+
+# type Emote {
+# 	# Id of the emote
+# 	id: String!
+# 	# name of the emote
+# 	name: String!
+# 	# id of the owner of the emote
+# 	owner_id: String!
+# 	# visibility of the emote
+# 	visibility: Int!
+# 	# the mime/content-type of the emote
+# 	mime: String!
+# 	# the emote status
+# 	status: Int!
+# 	# tags for this emote
+# 	tags: [String!]!
+# 	# date of creation
+# 	created_at: String!
+# 	# Get the channels the emote is added to
+# 	channels(page: Int, limit: Int): [UserPartial]
+# 	# Get the amount of channels the emote is added to
+# 	channel_count: Int!
+# 	# Get the owner of this emote.
+# 	owner: User
+# 	# Get the reports on emote. Requries Permission.
+# 	#reports: [Report]
+# 	# The provider of this emote
+# 	provider: String!
+# 	# The third party provider's ID definition of this emote, if the provider is not 7TV
+# 	provider_id: String
+# 	# CDN URLs to this emote
+# 	urls: [[String!]!]!
+# 	# Get the amount of channels this emote is added to
+# 	channel_count: Int!
+# 	# Get the width of the emote in pixels
+# 	width: [Int!]!
+# 	# Get the height of the emote in pixels
+# 	height: [Int!]!
+# }
+# 
+# enum Provider {
+# 	APP
+# 	BTTV
+# 	FFZ
+# }
