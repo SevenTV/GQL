@@ -49,3 +49,8 @@ var (
 	SortOrderAscending  SortOrder = "ASCENDING"
 	SortOrderDescending SortOrder = "DESCENDING"
 )
+
+var sortOrderMap = map[string]int32{
+	string(SortOrderDescending): 1,
+	string(SortOrderAscending):  -1,
+}
