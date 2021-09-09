@@ -15,7 +15,7 @@ type Server struct {
 }
 
 func New() *Server {
-	l, err := net.Listen(configure.Config.GetString("conn_type"), configure.Config.GetString("conn_uri"))
+	l, err := net.Listen(configure.Config.GetString("http.type"), configure.Config.GetString("http.uri"))
 	if err != nil {
 		panic(err)
 	}

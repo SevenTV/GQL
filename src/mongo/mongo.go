@@ -18,8 +18,8 @@ var ErrNoDocuments = mongo.ErrNoDocuments
 type Pipeline = mongo.Pipeline
 
 func init() {
-	clientOptions := options.Client().ApplyURI(configure.Config.GetString("mongo_uri"))
-	if configure.Config.GetBool("mongo_direct") {
+	clientOptions := options.Client().ApplyURI(configure.Config.GetString("mongo.uri"))
+	if configure.Config.GetBool("mongo.direct") {
 		clientOptions.SetDirect(true)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
@@ -35,7 +35,7 @@ func init() {
 		panic(err)
 	}
 
-	Database = client.Database(configure.Config.GetString("mongo_db"))
+	Database = client.Database(configure.Config.GetString("mongo.db"))
 
 	log.Info("mongo, ok")
 }

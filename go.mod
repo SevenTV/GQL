@@ -7,6 +7,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/gobuffalo/packr/v2 v2.2.0
 	github.com/gofiber/fiber/v2 v2.17.0
+	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/graph-gophers/graphql-go v1.1.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/kr/pretty v0.3.0

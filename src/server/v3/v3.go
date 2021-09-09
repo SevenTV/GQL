@@ -1,13 +1,29 @@
 package v3
 
 import (
-	"github.com/SevenTV/ThreeLetterAPI/src/server/v3/gql"
+	"fmt"
+	"time"
+
+	"github.com/SevenTV/ThreeLetterAPI/src/auth"
 	"github.com/gofiber/fiber/v2"
 )
 
 func API(app fiber.Router) fiber.Router {
 	api := app.Group("/v3")
 
-	gql := gql.GQL(api)
+	gql := GQL(api)
+
+	tok, err := auth.SignJWT(auth.JWTClaimOptions{
+		UserID:       "YEAHBUT7TV",
+		TokenVersion: 0,
+		StandardClaims: auth.StandardClaims{
+			Audience:  "7tv.app",
+			ExpiresAt: time.Now().Add(time.Hour * 336).UnixMilli(),
+			IssuedAt:  time.Now().UnixMilli(),
+			Issuer:    "7tv.api.v3",
+		},
+	})
+	fmt.Println(tok, err)
+
 	return gql
 }
