@@ -1,7 +1,7 @@
 package resolvers
 
 import (
-	"github.com/SevenTV/ThreeLetterAPI/src/server/v3/gql/resolvers/query"
+	"github.com/SevenTV/ThreeLetterAPI/src/server/v3/resolvers/query"
 )
 
 func Resolver() *rootResolver {
