@@ -18,10 +18,14 @@ http:
     uri: 0.0.0.0:8080
     type: tcp
 
+    oauth_redirect_uri: ""
+
 # Auth Settings
 auth:
     secret: ""
 
-    allow_apps:
-        - TTV
-        - YTG
+    platforms:
+        - name: TTV
+          enabled: true
+        - name: YTG
+          enabled: true

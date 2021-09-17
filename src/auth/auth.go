@@ -6,6 +6,7 @@ import (
 	"github.com/SevenTV/ThreeLetterAPI/src/configure"
 	"github.com/SevenTV/ThreeLetterAPI/src/utils"
 	"github.com/golang-jwt/jwt/v4"
+	log "github.com/sirupsen/logrus"
 )
 
 type StandardClaims = jwt.StandardClaims
@@ -41,4 +42,12 @@ func VerifyJWT(token string, claim JWTClaimOptions) (*jwt.Token, error) {
 	)
 
 	return result, err
+}
+
+func init() {
+	var err error
+	googleConfig, err = getYTGConfig()
+	if err != nil {
+		log.WithError(err).Fatal("could not create the youtube service")
+	}
 }

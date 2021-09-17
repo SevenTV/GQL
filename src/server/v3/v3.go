@@ -12,6 +12,7 @@ func API(app fiber.Router) fiber.Router {
 	api := app.Group("/v3")
 
 	gql := GQL(api)
+	auth.Listen(api)
 
 	tok, err := auth.SignJWT(auth.JWTClaimOptions{
 		UserID:       "YEAHBUT7TV",
