@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/SevenTV/ThreeLetterAPI/src/auth"
+	"github.com/SevenTV/GQL/src/auth"
 	"github.com/gofiber/fiber/v2"
 )
 

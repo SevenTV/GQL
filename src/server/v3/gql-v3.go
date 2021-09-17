@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/SevenTV/ThreeLetterAPI/src/server/v3/resolvers"
-	"github.com/SevenTV/ThreeLetterAPI/src/utils"
+	"github.com/SevenTV/GQL/src/server/v3/resolvers"
+	"github.com/SevenTV/GQL/src/utils"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -34,19 +34,31 @@ func GQL(app fiber.Router) fiber.Router {
 
 	// Load the schema
 	box := packr.New("gqlv3", "./schema")
-	sch1, err := box.FindString("query.gql")  // query.gql: the available queries
-	sch2, err := box.FindString("emotes.gql") // emotes.gql: emote-related types
-	sch3, err := box.FindString("users.gql")  // users.gql: user-related types
-	if err != nil {
+	var (
+		sch1 string
+		sch2 string
+		sch3 string
+		err  error
+	)
+	if sch1, err = box.FindString("query.gql"); err != nil {
 		panic(err)
-	}
+	} // query.gql: the available queries
+	if sch2, err = box.FindString("emotes.gql"); err != nil {
+		panic(err)
+	} // emotes.gql: emote-related types
+	if sch3, err = box.FindString("users.gql"); err != nil {
+		panic(err)
+	} // users.gql: user-related types
 
 	// Build & parse the schema
 	s := strings.Builder{}
-	_, err = s.WriteString(sch1)
-	_, err = s.WriteString(sch2)
-	_, err = s.WriteString(sch3)
-	if err != nil {
+	if _, err = s.WriteString(sch1); err != nil {
+		panic(err)
+	}
+	if _, err = s.WriteString(sch2); err != nil {
+		panic(err)
+	}
+	if _, err = s.WriteString(sch3); err != nil {
 		panic(err)
 	}
 	schema := graphql.MustParseSchema(s.String(), resolvers.Resolver(), graphql.UseFieldResolvers(), graphql.MaxDepth(5))

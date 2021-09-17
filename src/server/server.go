@@ -3,8 +3,8 @@ package server
 import (
 	"net"
 
-	"github.com/SevenTV/ThreeLetterAPI/src/configure"
-	v3 "github.com/SevenTV/ThreeLetterAPI/src/server/v3"
+	"github.com/SevenTV/GQL/src/configure"
+	v3 "github.com/SevenTV/GQL/src/server/v3"
 	"github.com/gofiber/fiber/v2"
 	log "github.com/sirupsen/logrus"
 )

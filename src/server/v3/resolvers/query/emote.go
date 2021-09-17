@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/SevenTV/ThreeLetterAPI/src/structures"
+	"github.com/SevenTV/GQL/src/structures"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

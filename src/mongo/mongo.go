@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/SevenTV/ThreeLetterAPI/src/configure"
+	"github.com/SevenTV/GQL/src/configure"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

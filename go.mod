@@ -1,4 +1,4 @@
-module github.com/SevenTV/ThreeLetterAPI
+module github.com/SevenTV/GQL
 
 go 1.16
 

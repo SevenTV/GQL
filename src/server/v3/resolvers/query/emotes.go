@@ -6,9 +6,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/SevenTV/ThreeLetterAPI/src/mongo"
-	"github.com/SevenTV/ThreeLetterAPI/src/structures"
-	"github.com/SevenTV/ThreeLetterAPI/src/utils"
+	"github.com/SevenTV/GQL/src/mongo"
+	"github.com/SevenTV/GQL/src/structures"
+	"github.com/SevenTV/GQL/src/utils"
 	"github.com/gofiber/fiber/v2"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
