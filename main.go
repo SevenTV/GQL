@@ -7,8 +7,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/SevenTV/ThreeLetterAPI/src/configure"
-	"github.com/SevenTV/ThreeLetterAPI/src/server"
+	"github.com/SevenTV/GQL/src/configure"
+	"github.com/SevenTV/GQL/src/server"
 	"github.com/bugsnag/panicwrap"
 	log "github.com/sirupsen/logrus"
 )

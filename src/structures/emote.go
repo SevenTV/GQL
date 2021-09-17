@@ -3,7 +3,7 @@ package structures
 import (
 	"context"
 
-	"github.com/SevenTV/ThreeLetterAPI/src/mongo"
+	"github.com/SevenTV/GQL/src/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
