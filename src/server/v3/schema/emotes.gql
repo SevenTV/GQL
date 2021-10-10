@@ -3,6 +3,8 @@ type EmoteTest {
 	id: String!
 	# Name of the emote
 	name: String!
+	# Visibility bitfield of the emote
+	visibility: Int!
  	# CDN URLs to this emote
  	urls: [[String!]!]!
 }
