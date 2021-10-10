@@ -4,6 +4,7 @@ import (
 	"net"
 
 	"github.com/SevenTV/GQL/src/configure"
+	"github.com/SevenTV/GQL/src/server/middleware"
 	v3 "github.com/SevenTV/GQL/src/server/v3"
 	"github.com/gofiber/fiber/v2"
 	log "github.com/sirupsen/logrus"
@@ -26,6 +27,7 @@ func New() *Server {
 		}),
 		listener: l,
 	}
+	server.app.Use(middleware.Logger())
 
 	server.app.Use(func(c *fiber.Ctx) error {
 		c.Set("X-Node-ID", configure.NodeName)
