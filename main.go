@@ -10,7 +10,6 @@ import (
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/GQL/src/configure"
 	"github.com/SevenTV/GQL/src/server"
-	_ "github.com/SevenTV/GQL/src/tools"
 	"github.com/bugsnag/panicwrap"
 	log "github.com/sirupsen/logrus"
 )
