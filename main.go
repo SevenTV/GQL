@@ -12,6 +12,8 @@ import (
 	"github.com/SevenTV/GQL/src/server"
 	"github.com/bugsnag/panicwrap"
 	log "github.com/sirupsen/logrus"
+
+	_ "honnef.co/go/tools/cmd/staticcheck"
 )
 
 func main() {
