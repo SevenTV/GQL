@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/SevenTV/GQL/src/mongo"
-	"github.com/SevenTV/GQL/src/structures"
+	"github.com/SevenTV/Common/mongo"
+	"github.com/SevenTV/Common/structures"
 	"github.com/SevenTV/GQL/src/utils"
 	"github.com/gofiber/fiber/v2"
 	log "github.com/sirupsen/logrus"

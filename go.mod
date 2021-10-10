@@ -17,6 +17,7 @@ require (
 )
 
 require (
+	github.com/SevenTV/Common v0.0.0-20211010001640-e8bd8e053b65
 	github.com/andybalholm/brotli v1.0.2 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gobuffalo/envy v1.7.0 // indirect

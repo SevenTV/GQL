@@ -7,6 +7,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/GQL/src/configure"
 	"github.com/SevenTV/GQL/src/server"
 	"github.com/bugsnag/panicwrap"
@@ -29,6 +30,13 @@ func main() {
 		log.WithField("requested_exit_code", configCode).Warn("invalid exit code specified in config using 0 as new exit code")
 		configCode = 0
 	}
+
+	// Set up Mongo
+	mongo.Setup(mongo.SetupOptions{
+		URI:    configure.Config.GetString("mongo.uri"),
+		Direct: configure.Config.GetBool("mongo.direct"),
+		DB:     configure.Config.GetString("mongo.db"),
+	})
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
