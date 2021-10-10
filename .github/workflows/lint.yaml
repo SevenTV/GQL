@@ -30,8 +30,8 @@ jobs:
       - name: Set up staticcheck
         run: |
           wget -O staticcheck.tar.gz "https://github.com/dominikh/go-tools/releases/download/2021.1.1/staticcheck_linux_amd64.tar.gz"
-          tar xvzf staticcheck.tar.gz
-          mv staticcheck/staticcheck .
+          tar xvzf staticcheck.tar.gz && mv staticcheck staticcheck-bin
+          mv staticcheck-bin/staticcheck .
 
 
       - name: Lint
