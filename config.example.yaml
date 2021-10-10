@@ -12,6 +12,7 @@ redis:
 mongo:
     uri: mongodb://username:password@url:port/?authSource=db
     db: db
+    direct: false
 
 # HTTP Server Settings
 http:
@@ -22,6 +23,9 @@ http:
 auth:
     secret: ""
 
-    allow_apps:
-        - TTV
-        - YTG
+    platforms:
+        - name: TTV
+          enabled: true
+        - name: YTG
+          enabled: true
+
