@@ -29,8 +29,10 @@ jobs:
 
       - name: Set up staticcheck
         run: |
-          go mod download honnef.co/go/tools
-          go install honnef.co/go/tools/cmd/staticcheck
+          wget -O staticcheck.tar.gz "https://github.com/dominikh/go-tools/releases/download/2021.1.1/staticcheck_linux_amd64.tar.gz"
+          tar xvzf staticcheck.tar.gz
+          mv staticcheck/staticcheck .
+
 
       - name: Lint
-        run: staticcheck ./...
+        run: ./staticcheck ./...
