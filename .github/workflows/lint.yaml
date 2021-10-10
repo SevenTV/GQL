@@ -28,7 +28,9 @@ jobs:
           submodules: recursive
 
       - name: Set up staticcheck
-        run: go install honnef.co/go/tools/cmd/staticcheck
+        run: |
+          go mod download honnef.co/go/tools
+          go install honnef.co/go/tools/cmd/staticcheck
 
       - name: Lint
         run: staticcheck ./...
