@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/server/v3/resolvers"
-	"github.com/SevenTV/GQL/src/utils"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"

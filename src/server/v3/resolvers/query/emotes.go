@@ -8,8 +8,8 @@ import (
 
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
+	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/configure"
-	"github.com/SevenTV/GQL/src/utils"
 	"github.com/gofiber/fiber/v2"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"

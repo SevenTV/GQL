@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/SevenTV/Common/structures"
-	"github.com/SevenTV/GQL/src/utils"
+	"github.com/SevenTV/Common/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
