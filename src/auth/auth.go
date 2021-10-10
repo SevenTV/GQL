@@ -33,7 +33,7 @@ func VerifyJWT(token string, claim JWTClaimOptions) (*jwt.Token, error) {
 		claim,
 		func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("Bad jwt signing method, expected HMAC but got %v", t.Header["alg"])
+				return nil, fmt.Errorf("bad jwt signing method, expected HMAC but got %v", t.Header["alg"])
 			}
 
 			return utils.S2B(configure.Config.GetString("auth.secret")), nil
