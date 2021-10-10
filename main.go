@@ -33,9 +33,10 @@ func main() {
 
 	// Set up Mongo
 	mongo.Setup(mongo.SetupOptions{
-		URI:    configure.Config.GetString("mongo.uri"),
-		Direct: configure.Config.GetBool("mongo.direct"),
-		DB:     configure.Config.GetString("mongo.db"),
+		URI:     configure.Config.GetString("mongo.uri"),
+		Direct:  configure.Config.GetBool("mongo.direct"),
+		DB:      configure.Config.GetString("mongo.db"),
+		Indexes: configure.Indexes,
 	})
 
 	c := make(chan os.Signal, 1)
