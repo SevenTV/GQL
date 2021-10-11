@@ -30,7 +30,7 @@ func (*Query) HelloWorld() string {
 }
 
 func GQL(app fiber.Router) fiber.Router {
-	gql := app.Group("/gql")
+	gql := app.Group("/")
 
 	// Load the schema
 	box := packr.New("gqlv3", "./schema")
