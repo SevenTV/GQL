@@ -3,7 +3,7 @@ package server
 import (
 	"net"
 
-	"github.com/SevenTV/GQL/src/configure"
+	"github.com/SevenTV/Common/configure"
 	"github.com/SevenTV/GQL/src/server/middleware"
 	v3 "github.com/SevenTV/GQL/src/server/v3"
 	"github.com/gofiber/fiber/v2"

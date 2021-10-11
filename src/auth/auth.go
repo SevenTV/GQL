@@ -3,8 +3,8 @@ package auth
 import (
 	"fmt"
 
+	"github.com/SevenTV/Common/configure"
 	"github.com/SevenTV/Common/utils"
-	"github.com/SevenTV/GQL/src/configure"
 	"github.com/golang-jwt/jwt/v4"
 )
 

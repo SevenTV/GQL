@@ -16,7 +16,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-const EMOTES_QUERY_LIMIT int32 = 150
+const EMOTES_QUERY_LIMIT int32 = 300
 
 var searchRegex = regexp.MustCompile(`[.*+?^${}()|[\\]\\\\]`)
 

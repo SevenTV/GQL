@@ -7,8 +7,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/SevenTV/Common/configure"
 	"github.com/SevenTV/Common/mongo"
-	"github.com/SevenTV/GQL/src/configure"
 	"github.com/SevenTV/GQL/src/server"
 	"github.com/bugsnag/panicwrap"
 	log "github.com/sirupsen/logrus"
@@ -33,10 +33,10 @@ func main() {
 
 	// Set up Mongo
 	mongo.Setup(mongo.SetupOptions{
-		URI:     configure.Config.GetString("mongo.uri"),
-		Direct:  configure.Config.GetBool("mongo.direct"),
-		DB:      configure.Config.GetString("mongo.db"),
-		Indexes: configure.Indexes,
+		URI:    configure.Config.GetString("mongo.uri"),
+		Direct: configure.Config.GetBool("mongo.direct"),
+		DB:     configure.Config.GetString("mongo.db"),
+		// Indexes: configure.Indexes,
 	})
 
 	c := make(chan os.Signal, 1)
