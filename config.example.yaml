@@ -12,6 +12,7 @@ redis:
 mongo:
     uri: mongodb://username:password@url:port/?authSource=db
     db: db
+    direct: false
 
 # HTTP Server Settings
 http:
@@ -29,3 +30,7 @@ auth:
           enabled: true
         - name: YTG
           enabled: true
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
