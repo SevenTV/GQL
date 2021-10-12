@@ -6,5 +6,5 @@ import (
 )
 
 func API(gCtx global.Context, app fiber.Router) {
-	GQL(app)
+	GQL(gCtx, app)
 }

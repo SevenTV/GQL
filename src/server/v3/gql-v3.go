@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/SevenTV/Common/utils"
+	"github.com/SevenTV/GQL/src/global"
 	"github.com/SevenTV/GQL/src/server/v3/resolvers"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gofiber/fiber/v2"
@@ -29,7 +30,7 @@ func (*Query) HelloWorld() string {
 	return "Hello, world!!"
 }
 
-func GQL(app fiber.Router) {
+func GQL(gCtx global.Context, app fiber.Router) {
 	// Load the schema
 	box := packr.New("gqlv3", "./schema")
 	var (
@@ -59,7 +60,7 @@ func GQL(app fiber.Router) {
 	if _, err = s.WriteString(sch3); err != nil {
 		panic(err)
 	}
-	schema := graphql.MustParseSchema(s.String(), resolvers.Resolver(), graphql.UseFieldResolvers(), graphql.MaxDepth(5))
+	schema := graphql.MustParseSchema(s.String(), resolvers.Resolver(gCtx), graphql.UseFieldResolvers(), graphql.MaxDepth(5))
 
 	// Define CORS rules
 	app.Use(cors.New(cors.Config{
