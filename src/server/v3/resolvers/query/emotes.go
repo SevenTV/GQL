@@ -6,11 +6,12 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/SevenTV/GQL/src/mongo"
-	"github.com/SevenTV/GQL/src/structures"
-	"github.com/SevenTV/GQL/src/utils"
+	"github.com/SevenTV/Common/mongo"
+	"github.com/SevenTV/Common/structures"
+	"github.com/SevenTV/Common/utils"
+	"github.com/SevenTV/GQL/src/configure"
 	"github.com/gofiber/fiber/v2"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -119,9 +120,9 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 	}...)
 
 	// Begin the pipeline, fetching the emotes
-	cur, err := mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, pipeline)
+	cur, err := r.Ctx.Inst().Mongo.Collection(configure.CollectionNameEmotes).Aggregate(ctx, pipeline)
 	if err != nil && err != mongo.ErrNoDocuments {
-		log.WithError(err).Error("mongo")
+		logrus.WithError(err).Error("mongo")
 		return nil, err
 	}
 
@@ -129,7 +130,7 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 	var result emotesPipelineResult
 	cur.Next(ctx)
 	if err := cur.Decode(&result); err != nil {
-		log.WithError(err).Error("mongo")
+		logrus.WithError(err).Error("mongo")
 	}
 	cur.Close(ctx)
 
@@ -138,7 +139,7 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 	resolvers := make([]*EmoteResolver, len(emotes))
 	fields := GenerateSelectedFieldMap(ctx)
 	for i, emote := range emotes {
-		r, err := CreateEmoteResolver(ctx, emote, &emote.ID, fields.Children)
+		r, err := CreateEmoteResolver(r.Ctx, ctx, emote, &emote.ID, fields.Children)
 		if err != nil {
 			return nil, err
 		}
@@ -148,7 +149,7 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 
 	// Send extra meta to be returned with the query
 	// This contains the total amount of emotes seen in the query
-	req := ctx.Value(utils.ReqKey).(*fiber.Ctx)
+	req := ctx.Value(utils.Key("request")).(*fiber.Ctx)
 	req.Locals("meta", map[string]interface{}{
 		"emotes": map[string]interface{}{
 			"total": result.Count,

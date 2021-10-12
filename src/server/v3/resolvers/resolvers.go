@@ -1,6 +1,7 @@
 package resolvers
 
 import (
+	"github.com/SevenTV/GQL/src/global"
 	"github.com/SevenTV/GQL/src/server/v3/resolvers/query"
 )
 
@@ -12,4 +13,6 @@ func Resolver() *rootResolver {
 
 type rootResolver struct {
 	Query *query.Resolver
+
+	Ctx global.Context
 }

@@ -3,11 +3,14 @@ package query
 import (
 	"context"
 
+	"github.com/SevenTV/GQL/src/global"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/selection"
 )
 
-type Resolver struct{}
+type Resolver struct {
+	Ctx global.Context
+}
 
 func Fields(ctx context.Context) []*selection.SelectedField {
 	return graphql.SelectedFieldsFromContext(ctx)

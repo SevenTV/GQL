@@ -1,6 +1,10 @@
 type EmoteTest {
+	# ID of the emote
 	id: String!
+	# Name of the emote
 	name: String!
+ 	# CDN URLs to this emote
+ 	urls: [[String!]!]!
 }
 
 # type Emote {

@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/server/v3/resolvers"
-	"github.com/SevenTV/GQL/src/utils"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/graph-gophers/graphql-go"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // API v3 - GQL
@@ -29,9 +29,7 @@ func (*Query) HelloWorld() string {
 	return "Hello, world!!"
 }
 
-func GQL(app fiber.Router) fiber.Router {
-	gql := app.Group("/gql")
-
+func GQL(app fiber.Router) {
 	// Load the schema
 	box := packr.New("gqlv3", "./schema")
 	var (
@@ -64,7 +62,7 @@ func GQL(app fiber.Router) fiber.Router {
 	schema := graphql.MustParseSchema(s.String(), resolvers.Resolver(), graphql.UseFieldResolvers(), graphql.MaxDepth(5))
 
 	// Define CORS rules
-	gql.Use(cors.New(cors.Config{
+	app.Use(cors.New(cors.Config{
 		AllowOrigins:  "*",
 		ExposeHeaders: "X-Created-ID",
 		AllowMethods:  "GET,POST,PUT,PATCH,DELETE",
@@ -72,8 +70,8 @@ func GQL(app fiber.Router) fiber.Router {
 
 	// handleRequest: Process a GQL query, from either a GET or POST
 	handleRequest := func(c *fiber.Ctx, req gqlRequest) error {
-		ctx := context.WithValue(context.Background(), utils.UserKey, c.Locals("user")) // Add auth user to context
-		ctx = context.WithValue(ctx, utils.ReqKey, c)                                   // Add request to context
+		ctx := context.WithValue(context.Background(), utils.Key("user"), c.Locals("user")) // Add auth user to context
+		ctx = context.WithValue(ctx, utils.Key("request"), c)                               // Add request to context
 
 		// Execute the query
 		result := schema.Exec(ctx, req.Query, req.OperationName, req.Variables)
@@ -86,7 +84,7 @@ func GQL(app fiber.Router) fiber.Router {
 		if c.Locals("meta") != nil {
 			b, err := json.Marshal(c.Locals("meta"))
 			if err != nil {
-				log.WithError(err).Error("gql, json")
+				logrus.WithError(err).Error("gql, json")
 				return c.Status(500).JSON(fiber.Map{
 					"error": "decoding query meta failed",
 				})
@@ -104,26 +102,24 @@ func GQL(app fiber.Router) fiber.Router {
 	}
 
 	// Handle query via POST
-	gql.Post("/", func(c *fiber.Ctx) error {
+	app.Post("/", func(c *fiber.Ctx) error {
 		req := gqlRequest{}
 		err := c.BodyParser(&req)
 		if err != nil {
-			log.WithError(err).Error("gql.v3, post(BodyParser)")
+			logrus.WithError(err).Error("gql.v3, post(BodyParser)")
 		}
 
 		return handleRequest(c, req)
 	})
 
 	// Handle query via GET
-	gql.Get("/", func(c *fiber.Ctx) error {
+	app.Get("/", func(c *fiber.Ctx) error {
 		req := gqlRequest{}
 		err := c.QueryParser(&req)
 		if err != nil {
-			log.WithError(err).Error("gql.v3, get(QueryParser)")
+			logrus.WithError(err).Error("gql.v3, get(QueryParser)")
 		}
 
 		return handleRequest(c, req)
 	})
-
-	return gql
 }

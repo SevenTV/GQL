@@ -3,89 +3,89 @@ package configure
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"os"
 	"strings"
 
-	"github.com/fsnotify/fsnotify"
-	"github.com/kr/pretty"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
-type Cfg struct {
+type Config struct {
 	Level      string `mapstructure:"level" json:"level"`
 	ConfigFile string `mapstructure:"config_file" json:"config_file"`
-}
 
-// default config
-var defaultConf = Cfg{
-	ConfigFile: "config.yaml",
-}
+	WebsiteURL string `mapstructure:"website_url" json:"website_url"`
 
-var Config = viper.New()
+	NodeName string `mapstructure:"node_name" json:"node_name"`
 
-// Capture environment variables
-var NodeName string = os.Getenv("NODE_NAME")
-var PodName string = os.Getenv("POD_NAME")
-var PodIP string = os.Getenv("POD_IP")
+	GoogleCredentials string `mapstructure:"google_credentials" json:"google_credentials"`
 
-func initLog() {
-	if l, err := log.ParseLevel(Config.GetString("level")); err == nil {
-		log.SetLevel(l)
-		log.SetReportCaller(true)
-	}
+	CdnURL string `mapstructure:"cdn_url" json:"cdn_url"`
+
+	Redis struct {
+		URI string `mapstructure:"uri" json:"uri"`
+	} `mapstructure:"redis" json:"redis"`
+
+	Mongo struct {
+		URI string `mapstructure:"uri" json:"uri"`
+		DB  string `mapstructure:"db" json:"db"`
+	} `mapstructure:"http" json:"mongo"`
+
+	Http struct {
+		URI              string `mapstructure:"uri" json:"uri"`
+		Type             string `mapstructure:"type" json:"type"`
+		OauthRedirectURI string `mapstructure:"oauth_redirect_uri" json:"oauth_redirect_uri"`
+	} `mapstructure:"http" json:"http"`
+
+	Auth struct {
+		Secret string `mapstructure:"secret" json:"secret"`
+
+		Platforms []struct {
+			Name    string `mapstructure:"name" json:"name"`
+			Enabled bool   `mapstructure:"enabled" json:"enabled"`
+		} `mapstructure:"platforms" json:"platforms"`
+	} `mapstructure:"auth" json:"auth"`
 }
 
 func checkErr(err error) {
 	if err != nil {
-		log.WithError(err).Fatal("config")
+		logrus.WithError(err).Fatal("config")
 	}
 }
 
-func init() {
-	if NodeName == "" {
-		NodeName = "STANDALONE"
-	}
-	if PodName == "" {
-		PodName = "STANDALONE"
-	}
+func New() *Config {
+	config := viper.New()
 
-	log.SetFormatter(&log.JSONFormatter{})
 	// Default config
-	b, _ := json.Marshal(defaultConf)
+	b, _ := json.Marshal(Config{
+		ConfigFile: "config.yaml",
+	})
+	tmp := viper.New()
 	defaultConfig := bytes.NewReader(b)
-	viper.SetConfigType("json")
-	checkErr(viper.ReadConfig(defaultConfig))
-	checkErr(Config.MergeConfigMap(viper.AllSettings()))
+	tmp.SetConfigType("json")
+	checkErr(tmp.ReadConfig(defaultConfig))
+	checkErr(config.MergeConfigMap(viper.AllSettings()))
 
 	// File
-	Config.SetConfigFile(Config.GetString("config_file"))
-	Config.AddConfigPath(".")
-	err := Config.ReadInConfig()
+	config.SetConfigFile(config.GetString("config_file"))
+	config.AddConfigPath(".")
+	err := config.ReadInConfig()
 	if err != nil {
-		log.Warning(err)
-		log.Info("Using default config")
+		logrus.Warning(err)
+		logrus.Info("Using default config")
 	} else {
-		checkErr(Config.MergeInConfig())
+		checkErr(config.MergeInConfig())
 	}
 
 	// Environment
 	replacer := strings.NewReplacer(".", "_")
-	Config.SetEnvKeyReplacer(replacer)
-	Config.AllowEmptyEnv(true)
-	Config.AutomaticEnv()
-
-	// Log
-	initLog()
+	config.SetEnvKeyReplacer(replacer)
+	config.SetEnvPrefix("7TV")
+	config.AllowEmptyEnv(true)
+	config.AutomaticEnv()
 
 	// Print final config
-	c := Cfg{}
-	checkErr(Config.Unmarshal(&c))
-	log.Debugf("Current configurations: \n%# v", pretty.Formatter(c))
+	c := &Config{}
+	checkErr(config.Unmarshal(&c))
 
-	Config.WatchConfig()
-	Config.OnConfigChange(func(_ fsnotify.Event) {
-		fmt.Println("Config has changed")
-	})
+	return c
 }
