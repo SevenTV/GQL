@@ -30,7 +30,3 @@ auth:
           enabled: true
         - name: YTG
           enabled: true
-<<<<<<< HEAD
-=======
-
->>>>>>> master
