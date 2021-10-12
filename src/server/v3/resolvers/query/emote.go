@@ -48,6 +48,11 @@ func (r *EmoteResolver) Name() string {
 	return r.Emote.Name
 }
 
+// Visibility: the visibility bitfield for the emote
+func (r *EmoteResolver) Visibility() int32 {
+	return r.Emote.Visibility
+}
+
 // URLs: resolves a list of cdn urls for the emote
 func (r *EmoteResolver) URLs() [][]string {
 	result := make([][]string, 4) // 4 length because there are 4 CDN sizes supported (1x, 2x, 3x, 4x)
@@ -62,4 +67,14 @@ func (r *EmoteResolver) URLs() [][]string {
 
 	r.Emote.URLs = result
 	return r.Emote.URLs
+}
+
+// Width: the emote's image width
+func (r *EmoteResolver) Width() []int32 {
+	return r.Emote.Width
+}
+
+// Height: the emote's image height
+func (r *EmoteResolver) Height() []int32 {
+	return r.Emote.Height
 }
