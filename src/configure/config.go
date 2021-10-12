@@ -26,7 +26,7 @@ type Config struct {
 	Mongo struct {
 		URI string `mapstructure:"uri" json:"uri"`
 		DB  string `mapstructure:"db" json:"db"`
-	} `mapstructure:"http" json:"mongo"`
+	} `mapstructure:"mongo" json:"mongo"`
 
 	Http struct {
 		URI              string `mapstructure:"uri" json:"uri"`
