@@ -17,8 +17,6 @@ type Config struct {
 
 	NodeName string `mapstructure:"node_name" json:"node_name"`
 
-	GoogleCredentials string `mapstructure:"google_credentials" json:"google_credentials"`
-
 	CdnURL string `mapstructure:"cdn_url" json:"cdn_url"`
 
 	Redis struct {
