@@ -23,10 +23,10 @@ func New(gCtx global.Context) (instance.Youtube, error) {
 	// Parse google config
 	config, err := google.ConfigFromJSON(utils.S2B(gCtx.Config().GoogleCredentials), youtube.YoutubeScope)
 	if err != nil {
-		logrus.WithError(err).Error("auth, oauth2, unable to parse google config: %v", err)
+		logrus.WithError(err).Error("auth, oauth2, unable to parse google config")
 		return nil, err
 	}
-	config.RedirectURL = fmt.Sprintf("%v/youtube", gCtx.Config().Http.OauthRedirectURI)
+	config.RedirectURL = fmt.Sprintf("%s/youtube", gCtx.Config().Http.OauthRedirectURI)
 
 	return &youtubeInst{
 		googleConfig: config,
