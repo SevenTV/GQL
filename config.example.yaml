@@ -19,6 +19,8 @@ http:
     uri: 0.0.0.0:8080
     type: tcp
 
+    oauth_redirect_uri: ""
+
 # Auth Settings
 auth:
     secret: ""
@@ -28,4 +30,3 @@ auth:
           enabled: true
         - name: YTG
           enabled: true
-

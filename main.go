@@ -1,75 +1,75 @@
 package main
 
 import (
+	"context"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
 
-	"github.com/SevenTV/Common/configure"
 	"github.com/SevenTV/Common/mongo"
+	"github.com/SevenTV/GQL/src/configure"
+	"github.com/SevenTV/GQL/src/global"
 	"github.com/SevenTV/GQL/src/server"
 	"github.com/bugsnag/panicwrap"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
+	configure.InitLogging("info")
+
 	// Catch panics - send alert to discord channel optionally
 	exitStatus, err := panicwrap.BasicWrap(panicHandler)
 	if err != nil {
-		log.WithError(err).Fatal("panic handler failed")
+		logrus.WithError(err).Fatal("panic handler failed")
 	}
 	if exitStatus >= 0 {
 		os.Exit(exitStatus)
 	}
-	log.Info("API v3 - GQL: starting up")
+	logrus.Info("API v3 - GQL: starting up")
 
-	configCode := configure.Config.GetInt("exit_code")
-	if configCode > 125 || configCode < 0 {
-		log.WithField("requested_exit_code", configCode).Warn("invalid exit code specified in config using 0 as new exit code")
-		configCode = 0
-	}
+	gCtx, gCancel := global.WithCancel(global.New(context.Background(), configure.New()))
 
 	// Set up Mongo
-	mongo.Setup(mongo.SetupOptions{
-		URI:    configure.Config.GetString("mongo.uri"),
-		Direct: configure.Config.GetBool("mongo.direct"),
-		DB:     configure.Config.GetString("mongo.db"),
-		// Indexes: configure.Indexes,
+	ctx, cancel := context.WithTimeout(gCtx, time.Second*15)
+	mongoInst, err := mongo.Setup(ctx, mongo.SetupOptions{
+		URI:     gCtx.Config().Mongo.URI,
+		DB:      gCtx.Config().Mongo.DB,
+		Indexes: configure.Indexes,
 	})
+	cancel()
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to connect to mongo")
+	}
+
+	gCtx.Inst().Mongo = mongoInst
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 
-	s := server.New()
+	serverDone := server.New(gCtx)
 
 	// Handle graceful shutdown
+	done := make(chan struct{})
 	go func() {
 		sig := <-c
-		log.WithField("sig", sig).Info("stop issued")
+		logrus.WithField("sig", sig).Info("stop issued")
 
 		start := time.Now().UnixNano()
 
-		wg := sync.WaitGroup{}
+		gCancel()
 
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			if err := s.Shutdown(); err != nil {
-				log.WithError(err).Error("failed to shutdown server")
-			}
-		}()
-		wg.Wait()
+		<-serverDone
 
-		log.WithField("duration", float64(time.Now().UnixNano()-start)/10e5).Infof("shutdown")
-		os.Exit(configCode)
+		logrus.WithField("duration", float64(time.Now().UnixNano()-start)/10e5).Infof("shutdown")
+		close(done)
 	}()
-	select {}
+	<-done
+	os.Exit(0)
 }
 
 func panicHandler(output string) {
-	log.Errorf("PANIC OCCURED:\n\n%s\n", output)
+	logrus.Errorf("PANIC OCCURED:\n\n%s\n", output)
 	// Try to send a message to discord
 	// discord.SendPanic(output)
 
