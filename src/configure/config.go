@@ -87,5 +87,7 @@ func New() *Config {
 	c := &Config{}
 	checkErr(config.Unmarshal(&c))
 
+	InitLogging(c.Level)
+
 	return c
 }
