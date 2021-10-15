@@ -30,3 +30,6 @@ auth:
           enabled: true
         - name: YTG
           enabled: true
+
+credentials:
+    jwt_secret: ""

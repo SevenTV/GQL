@@ -10,7 +10,6 @@ import (
 	"github.com/SevenTV/GQL/src/server/v3/resolvers"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/sirupsen/logrus"
 )
@@ -61,13 +60,6 @@ func GQL(gCtx global.Context, app fiber.Router) {
 		panic(err)
 	}
 	schema := graphql.MustParseSchema(s.String(), resolvers.Resolver(gCtx), graphql.UseFieldResolvers(), graphql.MaxDepth(5))
-
-	// Define CORS rules
-	app.Use(cors.New(cors.Config{
-		AllowOrigins:  "*",
-		ExposeHeaders: "X-Created-ID",
-		AllowMethods:  "GET,POST,PUT,PATCH,DELETE",
-	}))
 
 	// handleRequest: Process a GQL query, from either a GET or POST
 	handleRequest := func(c *fiber.Ctx, req gqlRequest) error {

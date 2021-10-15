@@ -42,6 +42,10 @@ type Config struct {
 			Enabled bool   `mapstructure:"enabled" json:"enabled"`
 		} `mapstructure:"platforms" json:"platforms"`
 	} `mapstructure:"auth" json:"auth"`
+
+	Credentials struct {
+		JWTSecret string `mapstructure:"jwt_secret" json:"jwt_secret"`
+	} `mapstructure:"credentials" json:"credentials"`
 }
 
 func checkErr(err error) {

@@ -1,0 +1,6 @@
+
+type User {
+    id: String!
+    username: String!
+    display_name: String!
+}

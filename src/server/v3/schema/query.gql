@@ -1,5 +1,5 @@
 type Query {
-	# user(id: String!): User
+	user(id: String!): User!
 	emotes(
 		query: String!,
 		limit: Int,

@@ -11,7 +11,6 @@ require (
 	github.com/bugsnag/panicwrap v1.3.4
 	github.com/gobuffalo/packr/v2 v2.8.1
 	github.com/gofiber/fiber/v2 v2.20.1
-	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/graph-gophers/graphql-go v1.1.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.9.0
@@ -24,6 +23,7 @@ require (
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/gobuffalo/logger v1.0.3 // indirect
 	github.com/gobuffalo/packd v1.0.0 // indirect
+	github.com/golang-jwt/jwt/v4 v4.1.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
