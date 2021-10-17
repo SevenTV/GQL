@@ -9,6 +9,7 @@ import (
 //
 // Input: User
 // Adds Field: "roles" as []Role
+// Output: User
 var UserRelationRoles = []bson.D{
 	// Step 1: Lookup ROLE entitlements matching the input user
 	{{
@@ -58,6 +59,7 @@ var UserRelationRoles = []bson.D{
 //
 // Input: User
 // Adds Field: "editors" as []UserEditor with the "user" field added to each UserEditor object
+// Output: User
 var UserRelationEditors = []bson.D{
 	// Step 1: Lookup user editors
 	{{

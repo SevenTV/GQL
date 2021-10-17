@@ -23,7 +23,7 @@ type UserResolver struct {
 
 // CreateUserResolver: generate a GQL resolver for a User
 func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structures.User, userID *primitive.ObjectID, fields map[string]*SelectedField) (*UserResolver, error) {
-	ub := structures.NewUserBuilder()
+	ub := structures.NewUserBuilder(user)
 
 	if user == nil && userID == nil {
 		return nil, fmt.Errorf("unresolvable")
@@ -48,7 +48,7 @@ func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structur
 
 		// Relation: Editors
 		if _, ok := fields["editors"]; ok {
-
+			pipeline = append(pipeline, aggregations.UserRelationEditors...)
 		}
 
 		cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, pipeline)
@@ -146,4 +146,33 @@ func (r *UserResolver) Roles() ([]*RoleResolver, error) {
 	}
 
 	return resolvers, nil
+}
+
+func (r *UserResolver) Editors() ([]*UserEditorResolvable, error) {
+	result := make([]*UserEditorResolvable, len(r.User.Editors))
+
+	fields := GenerateSelectedFieldMap(r.ctx)
+	for i, editor := range r.User.Editors {
+		ur, err := CreateUserResolver(r.gCtx, r.ctx, editor.User, &editor.User.ID, fields.Children)
+		if err != nil {
+			return nil, err
+		}
+
+		fmt.Println(editor.ID, ur.User.ID)
+		result[i] = &UserEditorResolvable{
+			User:        ur,
+			Connections: []string{},
+			Permissions: 0,
+			Visible:     true,
+		}
+	}
+
+	return result, nil
+}
+
+type UserEditorResolvable struct {
+	User        *UserResolver `json:"user"`
+	Connections []string      `json:"connections"`
+	Permissions int32         `json:"permissions"`
+	Visible     bool          `json:"visible"`
 }

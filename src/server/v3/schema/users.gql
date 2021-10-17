@@ -7,6 +7,14 @@ type User {
     avatar_url: String!
     biography: String!
     roles: [Role]!
+    editors: [UserEditor]!
+}
+
+type UserEditor {
+    user: User
+    connections: [String!]!
+    permissions: Int!
+    visible: Boolean!
 }
 
 type Role {
