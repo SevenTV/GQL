@@ -10,6 +10,7 @@ import (
 	"github.com/SevenTV/Common/structures"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/configure"
+	"github.com/SevenTV/GQL/src/server/v3/aggregations"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -104,6 +105,16 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 		}
 	}
 
+	// Create a sub-pipeline for emotes
+	// This is to fetch relational data in advance
+	emoteSubPipeline := mongo.Pipeline{
+		{{
+			Key:   "$limit",
+			Value: limit,
+		}},
+	}
+	emoteSubPipeline = append(emoteSubPipeline, aggregations.EmoteRelationOwner...)
+
 	// Complete the pipeline
 	pipeline = append(pipeline, []bson.D{
 		// Step 2: a faceted call, which simultaneously gets emotes and returns total query-scoped collection count
@@ -111,7 +122,7 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 			Key: "$facet",
 			Value: bson.M{
 				"_count": []bson.M{{"$count": "value"}},
-				"emotes": []bson.M{{"$limit": limit}},
+				"emotes": emoteSubPipeline,
 			},
 		}},
 		// Remove the _count array value, replacing it by "count" as int

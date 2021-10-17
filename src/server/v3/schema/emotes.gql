@@ -17,6 +17,9 @@ type Emote {
 	# Whether or not the emote is animated
 	animated: Boolean!
 
+	# The user who owns this emote
+	owner: User
+
  	# CDN URLs to this emote
  	urls: [[String!]!]!
 }

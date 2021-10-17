@@ -93,3 +93,12 @@ func (r *EmoteResolver) Height() []int32 {
 func (r *EmoteResolver) Animated() bool {
 	return r.Emote.Animated
 }
+
+// Owner: the user who owns the emote
+func (r *EmoteResolver) Owner() (*UserResolver, error) {
+	if r.Emote.Owner == nil {
+		return nil, nil
+	}
+
+	return CreateUserResolver(r.gCtx, r.ctx, r.Emote.Owner, &r.Emote.Owner.ID, GenerateSelectedFieldMap(r.ctx).Children)
+}

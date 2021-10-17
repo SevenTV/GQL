@@ -87,3 +87,35 @@ var UserRelationEditors = []bson.D{
 		},
 	}},
 }
+
+// Emote Relations
+//
+// Input: Emote
+// Adds Field: "owner" as User
+var EmoteRelationOwner = []bson.D{
+	// Step 1: Lookup emote owners
+	{{
+		Key: "$lookup",
+		Value: mongo.LookupWithPipeline{
+			From: mongo.CollectionNameUsers,
+			Let:  bson.M{"owner_id": "$owner"},
+			Pipeline: &mongo.Pipeline{
+				bson.D{{
+					Key: "$match",
+					Value: bson.M{
+						"$expr": bson.M{"$eq": bson.A{"$_id", "$$owner_id"}},
+					},
+				}},
+			},
+			As: "owner_user",
+		},
+	}},
+	{{
+		Key: "$set",
+		Value: bson.M{
+			"owner_user": bson.M{
+				"$first": "$owner_user",
+			},
+		},
+	}},
+}
