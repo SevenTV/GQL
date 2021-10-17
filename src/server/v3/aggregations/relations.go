@@ -92,30 +92,48 @@ var UserRelationEditors = []bson.D{
 //
 // Input: Emote
 // Adds Field: "owner" as User
-var EmoteRelationOwner = []bson.D{
-	// Step 1: Lookup emote owners
-	{{
-		Key: "$lookup",
-		Value: mongo.LookupWithPipeline{
-			From: mongo.CollectionNameUsers,
-			Let:  bson.M{"owner_id": "$owner"},
-			Pipeline: &mongo.Pipeline{
-				bson.D{{
-					Key: "$match",
-					Value: bson.M{
-						"$expr": bson.M{"$eq": bson.A{"$_id", "$$owner_id"}},
-					},
-				}},
+// Output: Emote
+func GetEmoteRelationshipOwner(opt GetEmoteRelationshipOwnerOptions) []bson.D {
+	up := mongo.Pipeline{
+		bson.D{{
+			Key: "$match",
+			Value: bson.M{
+				"$expr": bson.M{"$eq": bson.A{"$_id", "$$owner_id"}},
 			},
-			As: "owner_user",
-		},
-	}},
-	{{
-		Key: "$set",
-		Value: bson.M{
-			"owner_user": bson.M{
-				"$first": "$owner_user",
+		}},
+	}
+	if opt.Editors {
+		up = append(up, UserRelationEditors...)
+	}
+	if opt.Roles {
+		up = append(up, UserRelationRoles...)
+	}
+
+	p := mongo.Pipeline{
+		// Step 1: Lookup emote owners
+		{{
+			Key: "$lookup",
+			Value: mongo.LookupWithPipeline{
+				From:     mongo.CollectionNameUsers,
+				Let:      bson.M{"owner_id": "$owner"},
+				Pipeline: &up,
+				As:       "owner_user",
 			},
-		},
-	}},
+		}},
+		{{
+			Key: "$set",
+			Value: bson.M{
+				"owner_user": bson.M{
+					"$first": "$owner_user",
+				},
+			},
+		}},
+	}
+
+	return p
+}
+
+type GetEmoteRelationshipOwnerOptions struct {
+	Editors bool
+	Roles   bool
 }

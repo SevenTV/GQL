@@ -113,7 +113,20 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 			Value: limit,
 		}},
 	}
-	emoteSubPipeline = append(emoteSubPipeline, aggregations.EmoteRelationOwner...)
+	// Add owner data?
+	{
+		fields := GenerateSelectedFieldMap(ctx).Children
+		if _, ok := fields["owner"]; ok {
+			o := fields["owner"]
+
+			_, qEditors := o.Children["editors"]
+			_, qRoles := o.Children["roles"]
+			emoteSubPipeline = append(emoteSubPipeline, aggregations.GetEmoteRelationshipOwner(aggregations.GetEmoteRelationshipOwnerOptions{
+				Editors: qEditors,
+				Roles:   qRoles,
+			})...)
+		}
+	}
 
 	// Complete the pipeline
 	pipeline = append(pipeline, []bson.D{

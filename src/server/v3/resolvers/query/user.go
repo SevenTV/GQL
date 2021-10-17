@@ -153,12 +153,15 @@ func (r *UserResolver) Editors() ([]*UserEditorResolvable, error) {
 
 	fields := GenerateSelectedFieldMap(r.ctx)
 	for i, editor := range r.User.Editors {
+		if editor.User == nil {
+			continue
+		}
+
 		ur, err := CreateUserResolver(r.gCtx, r.ctx, editor.User, &editor.User.ID, fields.Children)
 		if err != nil {
 			return nil, err
 		}
 
-		fmt.Println(editor.ID, ur.User.ID)
 		result[i] = &UserEditorResolvable{
 			User:        ur,
 			Connections: []string{},
