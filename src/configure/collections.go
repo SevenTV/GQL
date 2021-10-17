@@ -2,8 +2,6 @@ package configure
 
 import (
 	"github.com/SevenTV/Common/mongo"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var (
@@ -19,12 +17,4 @@ var (
 	CollectionNameNotificationsRead mongo.CollectionName = "notifications_read"
 )
 
-var Indexes = []mongo.IndexRef{
-	{
-		Collection: CollectionNameUsers,
-		Index: mongo.IndexModel{
-			Keys:    bson.M{"username": 1},
-			Options: options.Index().SetUnique(true),
-		},
-	},
-}
+var Indexes = []mongo.IndexRef{}
