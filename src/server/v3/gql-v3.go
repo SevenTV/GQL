@@ -36,6 +36,7 @@ func GQL(gCtx global.Context, app fiber.Router) {
 		sch1 string
 		sch2 string
 		sch3 string
+		sch4 string
 		err  error
 	)
 	if sch1, err = box.FindString("query.gql"); err != nil {
@@ -47,6 +48,9 @@ func GQL(gCtx global.Context, app fiber.Router) {
 	if sch3, err = box.FindString("users.gql"); err != nil {
 		panic(err)
 	} // users.gql: user-related types
+	if sch4, err = box.FindString("mutation.gql"); err != nil {
+		panic(err)
+	}
 
 	// Build & parse the schema
 	s := strings.Builder{}
@@ -57,6 +61,9 @@ func GQL(gCtx global.Context, app fiber.Router) {
 		panic(err)
 	}
 	if _, err = s.WriteString(sch3); err != nil {
+		panic(err)
+	}
+	if _, err = s.WriteString(sch4); err != nil {
 		panic(err)
 	}
 	schema := graphql.MustParseSchema(s.String(), resolvers.Resolver(gCtx), graphql.UseFieldResolvers(), graphql.MaxDepth(5))

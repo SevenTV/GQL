@@ -1,10 +1,22 @@
-type EmoteTest {
+type Emote {
 	# ID of the emote
 	id: String!
 	# Name of the emote
 	name: String!
 	# Visibility bitfield of the emote
 	visibility: Int!
+	# Status of the emote
+	status: Int!
+	# Emote search tags	
+	tags: [String!]!
+
+	# Emote width
+	width: [Int!]!
+	# Emote height
+	height: [Int!]!
+	# Whether or not the emote is animated
+	animated: Boolean!
+
  	# CDN URLs to this emote
  	urls: [[String!]!]!
 }

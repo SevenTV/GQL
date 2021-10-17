@@ -7,7 +7,7 @@ type Query {
 		before_id: String,
 		sort: Sort
 		# providers: [Provider!],
-	): [EmoteTest]!
+	): [Emote]!
 }
 
 # Sorting cursor, binding a specific order to a value

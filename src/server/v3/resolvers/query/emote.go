@@ -53,6 +53,16 @@ func (r *EmoteResolver) Visibility() int32 {
 	return r.Emote.Visibility
 }
 
+// Status: emote status
+func (r *EmoteResolver) Status() int32 {
+	return r.Emote.Status
+}
+
+// Tags: emote search tags
+func (r *EmoteResolver) Tags() []string {
+	return r.Emote.Tags
+}
+
 // URLs: resolves a list of cdn urls for the emote
 func (r *EmoteResolver) URLs() [][]string {
 	result := make([][]string, 4) // 4 length because there are 4 CDN sizes supported (1x, 2x, 3x, 4x)
@@ -77,4 +87,9 @@ func (r *EmoteResolver) Width() []int32 {
 // Height: the emote's image height
 func (r *EmoteResolver) Height() []int32 {
 	return r.Emote.Height
+}
+
+// Animated: whether or not the emote is animated
+func (r *EmoteResolver) Animated() bool {
+	return r.Emote.Animated
 }
