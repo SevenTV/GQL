@@ -121,9 +121,11 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 
 			_, qEditors := o.Children["editors"]
 			_, qRoles := o.Children["roles"]
-			emoteSubPipeline = append(emoteSubPipeline, aggregations.GetEmoteRelationshipOwner(aggregations.GetEmoteRelationshipOwnerOptions{
-				Editors: qEditors,
-				Roles:   qRoles,
+			_, qChannelEmotes := o.Children["channel_emotes"]
+			emoteSubPipeline = append(emoteSubPipeline, aggregations.GetEmoteRelationshipOwner(aggregations.UserRelationshipOptions{
+				Editors:       qEditors,
+				Roles:         qRoles,
+				ChannelEmotes: qChannelEmotes,
 			})...)
 		}
 	}

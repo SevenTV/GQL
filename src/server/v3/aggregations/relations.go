@@ -93,7 +93,7 @@ var UserRelationEditors = []bson.D{
 // Input: Emote
 // Adds Field: "owner" as User
 // Output: Emote
-func GetEmoteRelationshipOwner(opt GetEmoteRelationshipOwnerOptions) []bson.D {
+func GetEmoteRelationshipOwner(opt UserRelationshipOptions) []bson.D {
 	up := mongo.Pipeline{
 		bson.D{{
 			Key: "$match",
@@ -133,7 +133,41 @@ func GetEmoteRelationshipOwner(opt GetEmoteRelationshipOwnerOptions) []bson.D {
 	return p
 }
 
-type GetEmoteRelationshipOwnerOptions struct {
-	Editors bool
-	Roles   bool
+// Emote Relations
+//
+// Input: Emote
+// Adds Field: "channel_emotes" as []UserEmote with the "emote" field added to each UserEmote object
+// Output: Emote
+var UserRelationChannelEmotes = []bson.D{
+	// Step 1: Lookup user editors
+	{{
+		Key: "$lookup",
+		Value: mongo.Lookup{
+			From:         mongo.CollectionNameEmotes,
+			LocalField:   "channel_emotes.id",
+			ForeignField: "_id",
+			As:           "channel_emote",
+		},
+	}},
+	// Step 2: iterate over emotes
+	{{
+		Key: "$unwind",
+		Value: bson.M{
+			"path":              "$channel_emote",
+			"includeArrayIndex": "emote",
+		},
+	}},
+	// Step 3: Set "emote" property to each UserEmote object in the original emotes array
+	{{
+		Key: "$addFields",
+		Value: bson.M{
+			"channel_emotes.emote": "$channel_emote",
+		},
+	}},
+}
+
+type UserRelationshipOptions struct {
+	Editors       bool
+	Roles         bool
+	ChannelEmotes bool
 }

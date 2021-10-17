@@ -51,6 +51,11 @@ func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structur
 			pipeline = append(pipeline, aggregations.UserRelationEditors...)
 		}
 
+		// Relation: Channel Emotes
+		if _, ok := fields["channel_emotes"]; ok {
+			pipeline = append(pipeline, aggregations.UserRelationChannelEmotes...)
+		}
+
 		cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, pipeline)
 		if err != nil {
 			return nil, err
@@ -173,9 +178,41 @@ func (r *UserResolver) Editors() ([]*UserEditorResolvable, error) {
 	return result, nil
 }
 
+func (r *UserResolver) ChannelEmotes() ([]*UserEmoteResolvable, error) {
+	result := make([]*UserEmoteResolvable, len(r.User.ChannelEmotes))
+
+	fields := GenerateSelectedFieldMap(r.ctx)
+	for i, emote := range r.User.ChannelEmotes {
+		if emote == nil {
+			continue
+		}
+
+		er, err := CreateEmoteResolver(r.gCtx, r.ctx, emote.Emote, nil, fields.Children)
+		if err != nil {
+			return nil, err
+		}
+
+		result[i] = &UserEmoteResolvable{
+			Emote:       er,
+			Connections: []string{},
+			Alias:       "",
+			ZeroWidth:   false,
+		}
+	}
+
+	return result, nil
+}
+
 type UserEditorResolvable struct {
 	User        *UserResolver `json:"user"`
 	Connections []string      `json:"connections"`
 	Permissions int32         `json:"permissions"`
 	Visible     bool          `json:"visible"`
+}
+
+type UserEmoteResolvable struct {
+	Emote       *EmoteResolver `json:"emote"`
+	Connections []string       `json:"connections,omitempty"`
+	Alias       string         `json:"alias,omitempty"`
+	ZeroWidth   bool           `json:"zero_width,omitempty"`
 }

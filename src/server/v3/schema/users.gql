@@ -8,6 +8,7 @@ type User {
     biography: String!
     roles: [Role]!
     editors: [UserEditor]!
+    channel_emotes: [UserEmote]!
 }
 
 type UserEditor {
@@ -15,6 +16,13 @@ type UserEditor {
     connections: [String!]!
     permissions: Int!
     visible: Boolean!
+}
+
+type UserEmote {
+    emote: Emote
+    connections: [String!]!
+    alias: String!
+    zero_width: Boolean!
 }
 
 type Role {
