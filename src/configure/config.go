@@ -32,6 +32,8 @@ type Config struct {
 		URI              string `mapstructure:"uri" json:"uri"`
 		Type             string `mapstructure:"type" json:"type"`
 		OauthRedirectURI string `mapstructure:"oauth_redirect_uri" json:"oauth_redirect_uri"`
+
+		QuotaDefaultLimit int `mapstructure:"quota_default_limit" json:"quota_default_limit"`
 	} `mapstructure:"http" json:"http"`
 
 	Auth struct {

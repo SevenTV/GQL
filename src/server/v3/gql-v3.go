@@ -73,10 +73,11 @@ func GQL(gCtx global.Context, app fiber.Router) {
 
 	// handleRequest: Process a GQL query, from either a GET or POST
 	handleRequest := func(c *fiber.Ctx, req gqlRequest) error {
+		defaultQuota := gCtx.Config().Http.QuotaDefaultLimit
 		quota := &helpers.Quota{
 			C:      c,
-			Limit:  100,
-			Points: 100,
+			Limit:  defaultQuota,
+			Points: defaultQuota,
 			Fields: map[string]int{},
 		}
 		ctx := context.WithValue(context.Background(), helpers.UserKey, c.Locals("user")) // Add auth user to context

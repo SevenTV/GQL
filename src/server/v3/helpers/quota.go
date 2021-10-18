@@ -27,7 +27,10 @@ func (q *Quota) Decrease(amount int, object string, field string) bool {
 	defer q.lock.Unlock()
 
 	q.Points -= amount
-	q.Fields[fmt.Sprintf("%s.%s", object, field)] = amount
+
+	fieldName := fmt.Sprintf("%s.%s", object, field)
+	q.Fields[fieldName] += amount
+
 	return q.Check()
 }
 

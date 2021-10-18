@@ -19,7 +19,8 @@ http:
     uri: 0.0.0.0:8080
     type: tcp
 
-    oauth_redirect_uri: ""
+    # Quota settings
+    quota_default_limit: 1000
 
 # Auth Settings
 auth:

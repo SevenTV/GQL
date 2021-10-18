@@ -135,7 +135,7 @@ func (r *EmoteResolver) Animated() bool {
 
 // Owner: the user who owns the emote
 func (r *EmoteResolver) Owner() (*UserResolver, error) {
-	if ok := r.quota.Decrease(5, "Emote", "Owner"); !ok {
+	if ok := r.quota.Decrease(3, "Emote", "Owner"); !ok {
 		return nil, nil
 	}
 
