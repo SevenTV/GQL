@@ -3,10 +3,13 @@ package v3
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/global"
+	"github.com/SevenTV/GQL/src/server/v3/helpers"
 	"github.com/SevenTV/GQL/src/server/v3/resolvers"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gofiber/fiber/v2"
@@ -70,8 +73,15 @@ func GQL(gCtx global.Context, app fiber.Router) {
 
 	// handleRequest: Process a GQL query, from either a GET or POST
 	handleRequest := func(c *fiber.Ctx, req gqlRequest) error {
-		ctx := context.WithValue(context.Background(), utils.Key("user"), c.Locals("user")) // Add auth user to context
-		ctx = context.WithValue(ctx, utils.Key("request"), c)                               // Add request to context
+		quota := &helpers.Quota{
+			C:      c,
+			Limit:  100,
+			Points: 100,
+			Fields: map[string]int{},
+		}
+		ctx := context.WithValue(context.Background(), helpers.UserKey, c.Locals("user")) // Add auth user to context
+		ctx = context.WithValue(ctx, utils.Key("request"), c)
+		ctx = context.WithValue(ctx, helpers.QuotaKey, quota) // Add request to context
 
 		// Execute the query
 		result := schema.Exec(ctx, req.Query, req.OperationName, req.Variables)
@@ -96,6 +106,23 @@ func GQL(gCtx global.Context, app fiber.Router) {
 			newData = append(newData, byte(','))
 			newData = append(newData, result.Data[1:]...)
 			result.Data = newData
+		}
+
+		// Set quota headers
+		c.Set("X-Quota-Limit", strconv.Itoa(quota.Limit))
+		c.Set("X-Quota-Remaining", strconv.Itoa(quota.Points))
+		{
+			// Set quota info
+			b, _ := json.Marshal(quota.Fields)
+
+			c.Set("X-Quota-Usage", utils.B2S(b))
+		}
+		if !quota.Check() {
+			return c.Status(fiber.StatusTooManyRequests).JSON(&fiber.Map{
+				"status": fiber.ErrTooManyRequests,
+				"error":  "You are being limited",
+				"reason": fmt.Sprintf("Quota Exceeded: %d points left out of %d", quota.Points, quota.Limit),
+			})
 		}
 
 		return c.Status(status).JSON(result)
