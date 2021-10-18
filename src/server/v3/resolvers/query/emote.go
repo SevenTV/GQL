@@ -43,52 +43,32 @@ func CreateEmoteResolver(gCtx global.Context, ctx context.Context, emote *struct
 
 // ID: resolves the ID of the emote
 func (r *EmoteResolver) ID() string {
-	if ok := r.quota.DecreaseByOne("Emote", "ID"); !ok {
-		return ""
-	}
-
 	return r.Emote.ID.Hex()
 }
 
 // Name: resolves the name of the emote
 func (r *EmoteResolver) Name() string {
-	if ok := r.quota.DecreaseByOne("Emote", "Name"); !ok {
-		return ""
-	}
-
 	return r.Emote.Name
 }
 
 // Visibility: the visibility bitfield for the emote
 func (r *EmoteResolver) Visibility() int32 {
-	if ok := r.quota.DecreaseByOne("Emote", "Visibility"); !ok {
-		return 0
-	}
-
 	return r.Emote.Visibility
 }
 
 // Status: emote status
 func (r *EmoteResolver) Status() int32 {
-	if ok := r.quota.DecreaseByOne("Emote", "Status"); !ok {
-		return 0
-	}
-
 	return r.Emote.Status
 }
 
 // Tags: emote search tags
 func (r *EmoteResolver) Tags() []string {
-	if ok := r.quota.DecreaseByOne("Emote", "Tags"); !ok {
-		return nil
-	}
-
 	return r.Emote.Tags
 }
 
 // URLs: resolves a list of cdn urls for the emote
 func (r *EmoteResolver) URLs() [][]string {
-	if ok := r.quota.Decrease(2, "Emote", "URLs"); !ok {
+	if ok := r.quota.DecreaseByOne("Emote", "URLs"); !ok {
 		return nil
 	}
 
@@ -108,34 +88,22 @@ func (r *EmoteResolver) URLs() [][]string {
 
 // Width: the emote's image width
 func (r *EmoteResolver) Width() []int32 {
-	if ok := r.quota.DecreaseByOne("Emote", "Width"); !ok {
-		return nil
-	}
-
 	return r.Emote.Width
 }
 
 // Height: the emote's image height
 func (r *EmoteResolver) Height() []int32 {
-	if ok := r.quota.DecreaseByOne("Emote", "Height"); !ok {
-		return nil
-	}
-
 	return r.Emote.Height
 }
 
 // Animated: whether or not the emote is animated
 func (r *EmoteResolver) Animated() bool {
-	if ok := r.quota.DecreaseByOne("Emote", "Animated"); !ok {
-		return false
-	}
-
 	return r.Emote.Animated
 }
 
 // Owner: the user who owns the emote
 func (r *EmoteResolver) Owner() (*UserResolver, error) {
-	if ok := r.quota.Decrease(3, "Emote", "Owner"); !ok {
+	if ok := r.quota.Decrease(2, "Emote", "Owner"); !ok {
 		return nil, nil
 	}
 

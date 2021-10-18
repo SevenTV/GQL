@@ -2,13 +2,19 @@ package v3
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
+	"unicode"
 
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/global"
+	"github.com/SevenTV/GQL/src/instance"
 	"github.com/SevenTV/GQL/src/server/v3/helpers"
 	"github.com/SevenTV/GQL/src/server/v3/resolvers"
 	"github.com/gobuffalo/packr/v2"
@@ -35,39 +41,18 @@ func (*Query) HelloWorld() string {
 func GQL(gCtx global.Context, app fiber.Router) {
 	// Load the schema
 	box := packr.New("gqlv3", "./schema")
-	var (
-		sch1 string
-		sch2 string
-		sch3 string
-		sch4 string
-		err  error
-	)
-	if sch1, err = box.FindString("query.gql"); err != nil {
-		panic(err)
-	} // query.gql: the available queries
-	if sch2, err = box.FindString("emotes.gql"); err != nil {
-		panic(err)
-	} // emotes.gql: emote-related types
-	if sch3, err = box.FindString("users.gql"); err != nil {
-		panic(err)
-	} // users.gql: user-related types
-	if sch4, err = box.FindString("mutation.gql"); err != nil {
-		panic(err)
-	}
 
-	// Build & parse the schema
 	s := strings.Builder{}
-	if _, err = s.WriteString(sch1); err != nil {
-		panic(err)
-	}
-	if _, err = s.WriteString(sch2); err != nil {
-		panic(err)
-	}
-	if _, err = s.WriteString(sch3); err != nil {
-		panic(err)
-	}
-	if _, err = s.WriteString(sch4); err != nil {
-		panic(err)
+	files := []string{"query.gql", "emotes.gql", "users.gql", "mutation.gql"}
+	for _, f := range files {
+		sch, err := box.FindString(f)
+		if err != nil {
+			logrus.WithError(err).Fatal("gql, schema, box")
+		}
+
+		if _, err = s.WriteString(sch); err != nil {
+			logrus.WithError(err).Error("gql, schema, strings.Builder")
+		}
 	}
 	schema := graphql.MustParseSchema(s.String(), resolvers.Resolver(gCtx), graphql.UseFieldResolvers(), graphql.MaxDepth(5))
 
@@ -84,8 +69,37 @@ func GQL(gCtx global.Context, app fiber.Router) {
 		ctx = context.WithValue(ctx, utils.Key("request"), c)
 		ctx = context.WithValue(ctx, helpers.QuotaKey, quota) // Add request to context
 
+		// Check if the user is allowed to make queries
+		clientIP := base64.URLEncoding.EncodeToString(utils.S2B(c.Get("Cf-Connecting-IP", c.IP())))
+		if badQueries, _ := gCtx.Inst().Redis.RawClient().HLen(ctx, fmt.Sprintf("%s:blocked-queries:client-ip:%s", instance.RedisPrefix, clientIP)).Result(); badQueries >= 25 {
+			return c.Status(fiber.StatusForbidden).JSON(&fiber.Map{
+				"status": fiber.ErrForbidden,
+				"error":  "You are temporarily blocked from using this API",
+			})
+		}
+
+		// Check if the query is allowed
+		h := sha256.New()
+		h.Write(utils.S2B(strings.Map(func(r rune) rune {
+			if unicode.IsSpace(r) {
+				return -1
+			}
+			return r
+		}, req.Query)))
+		qh := hex.EncodeToString((h.Sum(nil))) // the hash of this query
+		redisKey := fmt.Sprintf("%s:blocked-queries:query:%s", instance.RedisPrefix, qh)
+		if exists, err := gCtx.Inst().Redis.RawClient().Exists(ctx, redisKey).Result(); err != nil {
+			logrus.WithError(err).Error("redis down? this request will pass without checking if it's blocked")
+		} else if exists == 1 {
+			return c.Status(fiber.StatusForbidden).JSON(&fiber.Map{
+				"status": fiber.ErrForbidden,
+				"error":  "This query is blocked",
+			})
+		}
+
 		// Execute the query
 		result := schema.Exec(ctx, req.Query, req.OperationName, req.Variables)
+
 		status := 200
 		if len(result.Errors) > 0 {
 			status = 400
@@ -119,9 +133,17 @@ func GQL(gCtx global.Context, app fiber.Router) {
 			c.Set("X-Quota-Usage", utils.B2S(b))
 		}
 		if !quota.Check() {
+
+			// Temporarily block this query
+			pipeline := gCtx.Inst().Redis.RawClient().Pipeline()
+			pipeline.SetEX(ctx, redisKey, "", time.Hour)
+			pipeline.HSet(ctx, fmt.Sprintf("%s:blocked-queries", instance.RedisPrefix), qh, clientIP)
+			pipeline.HSet(ctx, fmt.Sprintf("%s:blocked-queries:client-ip:%s", instance.RedisPrefix, clientIP), qh, req.Query)
+			pipeline.Exec(ctx)
+
 			return c.Status(fiber.StatusTooManyRequests).JSON(&fiber.Map{
 				"status": fiber.ErrTooManyRequests,
-				"error":  "You are being limited",
+				"error":  "You are being rate limited",
 				"reason": fmt.Sprintf("Quota Exceeded: %d points left out of %d", quota.Points, quota.Limit),
 			})
 		}
