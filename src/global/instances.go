@@ -6,4 +6,5 @@ import (
 
 type Instances struct {
 	Mongo instance.Mongo
+	Redis instance.Redis
 }

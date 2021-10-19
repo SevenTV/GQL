@@ -7,11 +7,13 @@ import (
 	"github.com/SevenTV/Common/structures"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/global"
+	"github.com/SevenTV/GQL/src/server/v3/helpers"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type EmoteResolver struct {
-	ctx context.Context
+	ctx   context.Context
+	quota *helpers.Quota
 	*structures.EmoteBuilder
 
 	fields map[string]*SelectedField
@@ -32,6 +34,7 @@ func CreateEmoteResolver(gCtx global.Context, ctx context.Context, emote *struct
 
 	return &EmoteResolver{
 		ctx:          ctx,
+		quota:        ctx.Value(helpers.QuotaKey).(*helpers.Quota),
 		EmoteBuilder: &eb,
 		fields:       fields,
 		gCtx:         gCtx,
@@ -65,6 +68,10 @@ func (r *EmoteResolver) Tags() []string {
 
 // URLs: resolves a list of cdn urls for the emote
 func (r *EmoteResolver) URLs() [][]string {
+	if ok := r.quota.DecreaseByOne("Emote", "URLs"); !ok {
+		return nil
+	}
+
 	result := make([][]string, 4) // 4 length because there are 4 CDN sizes supported (1x, 2x, 3x, 4x)
 
 	for i := 1; i <= 4; i++ {
@@ -96,6 +103,10 @@ func (r *EmoteResolver) Animated() bool {
 
 // Owner: the user who owns the emote
 func (r *EmoteResolver) Owner() (*UserResolver, error) {
+	if ok := r.quota.Decrease(2, "Emote", "Owner"); !ok {
+		return nil, nil
+	}
+
 	if r.Emote.Owner == nil {
 		return nil, nil
 	}

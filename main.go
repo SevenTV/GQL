@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/SevenTV/Common/mongo"
+	"github.com/SevenTV/Common/redis"
 	"github.com/SevenTV/GQL/src/configure"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/SevenTV/GQL/src/server"
@@ -42,7 +43,18 @@ func main() {
 		logrus.WithError(err).Fatal("failed to connect to mongo")
 	}
 
+	// Set up Redis
+	ctx, cancel = context.WithTimeout(gCtx, time.Second*15)
+	redisInst, err := redis.Setup(ctx, redis.SetupOptions{
+		URI: gCtx.Config().Redis.URI,
+	})
+	cancel()
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to connect to redis")
+	}
+
 	gCtx.Inst().Mongo = mongoInst
+	gCtx.Inst().Redis = redisInst
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
