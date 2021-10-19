@@ -58,6 +58,8 @@ func GQL(gCtx global.Context, app fiber.Router) {
 
 	// handleRequest: Process a GQL query, from either a GET or POST
 	handleRequest := func(c *fiber.Ctx, req gqlRequest) error {
+		c.Set("Content-Type", "application/json")
+
 		defaultQuota := gCtx.Config().Http.QuotaDefaultLimit
 		quota := &helpers.Quota{
 			C:      c,
@@ -87,8 +89,14 @@ func GQL(gCtx global.Context, app fiber.Router) {
 			}
 			return r
 		}, req.Query)))
-		qh := hex.EncodeToString((h.Sum(nil))) // the hash of this query
-		redisKey := fmt.Sprintf("%s:blocked-queries:query:%s", instance.RedisPrefix, qh)
+		trimmedQueryHash := hex.EncodeToString((h.Sum(nil))) // the hash of this query without any whitespace
+
+		h.Reset()
+		h.Write(utils.S2B(req.Query))
+		fullQueryHash := hex.EncodeToString(h.Sum(nil)) // the full hash of the query, used for automatic persisted queries
+		apqKey := fmt.Sprintf("%s:persisted-query:%s", instance.RedisPrefix, fullQueryHash)
+
+		redisKey := fmt.Sprintf("%s:blocked-queries:query:%s", instance.RedisPrefix, trimmedQueryHash)
 		if exists, err := gCtx.Inst().Redis.RawClient().Exists(ctx, redisKey).Result(); err != nil {
 			logrus.WithError(err).Error("redis down? this request will pass without checking if it's blocked")
 		} else if exists == 1 {
@@ -142,7 +150,7 @@ func GQL(gCtx global.Context, app fiber.Router) {
 			// Temporarily block this query
 			pipeline := gCtx.Inst().Redis.RawClient().Pipeline()
 			pipeline.SetEX(ctx, redisKey, req.Query, time.Hour)
-			pipeline.LPush(ctx, clientIPKey, qh)
+			pipeline.LPush(ctx, clientIPKey, trimmedQueryHash)
 			pipeline.Expire(ctx, clientIPKey, time.Hour)
 			if _, err := pipeline.Exec(ctx); err != nil {
 				logrus.WithError(err).Error("redis, pipeline.Exec")
@@ -155,7 +163,15 @@ func GQL(gCtx global.Context, app fiber.Router) {
 			})
 		}
 
-		return c.Status(status).JSON(result)
+		// Marshal the response
+		b, _ := json.Marshal(result)
+
+		// Automatic Persisted Query (APQ)
+		if _, err := gCtx.Inst().Redis.RawClient().SetEX(ctx, apqKey, utils.B2S(b), time.Minute).Result(); err != nil {
+			logrus.WithError(err).Error("redis")
+		}
+
+		return c.Status(status).Send(b)
 	}
 
 	// Handle query via POST
@@ -171,12 +187,39 @@ func GQL(gCtx global.Context, app fiber.Router) {
 
 	// Handle query via GET
 	app.Get("/", func(c *fiber.Ctx) error {
-		req := gqlRequest{}
-		err := c.QueryParser(&req)
+		ctx := c.Context()
+		req := &gqlGetQuery{}
+		err := c.QueryParser(req)
 		if err != nil {
 			logrus.WithError(err).Error("gql.v3, get(QueryParser)")
 		}
 
-		return handleRequest(c, req)
+		persistedQuery := &gqlPersistedQuery{}
+		if err = json.Unmarshal(utils.S2B(req.Extensions), persistedQuery); err != nil {
+			return c.Status(fiber.StatusBadRequest).SendString(err.Error())
+		}
+
+		apqKey := fmt.Sprintf("%s:persisted-query:%s", instance.RedisPrefix, persistedQuery.PersistedQuery.Sha256Hash)
+		if r, err := gCtx.Inst().Redis.RawClient().Get(ctx, apqKey).Result(); err != nil {
+			logrus.WithError(err).Error("reis")
+		} else if r != "" {
+			return c.SendString(r)
+		}
+
+		return c.SendStatus(400)
+		// return handleRequest(c, req)
 	})
+}
+
+type gqlGetQuery struct {
+	OperationName string `url:"operationName" json:"operationName"`
+	Variables     string `url:"variables" json:"variables"`
+	Extensions    string `url:"extensions" json:"extensions"`
+}
+
+type gqlPersistedQuery struct {
+	PersistedQuery struct {
+		Version    int    `url:"version" json:"version"`
+		Sha256Hash string `url:"sha256Hash" json:"sha256Hash"`
+	} `url:"persistedQuery" json:"persistedQuery"`
 }
