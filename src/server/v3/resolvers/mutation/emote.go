@@ -16,7 +16,7 @@ func (r *Resolver) Emote(ctx context.Context, args struct {
 	ID string
 }) (*query.EmoteResolver, error) {
 	// Get current user
-	user := ctx.Value("user").(*structures.User)
+	user := ctx.Value(helpers.UserKey).(*structures.User)
 	if user == nil {
 		return nil, helpers.ErrAccessDenied
 	}
