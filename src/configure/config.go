@@ -29,10 +29,11 @@ type Config struct {
 	} `mapstructure:"mongo" json:"mongo"`
 
 	Http struct {
-		URI               string `mapstructure:"uri" json:"uri"`
-		Type              string `mapstructure:"type" json:"type"`
-		OauthRedirectURI  string `mapstructure:"oauth_redirect_uri" json:"oauth_redirect_uri"`
-		QuotaDefaultLimit int32  `mapstructure:"quota_default_limit" json:"quota_default_limit"`
+		URI                string `mapstructure:"uri" json:"uri"`
+		Type               string `mapstructure:"type" json:"type"`
+		OauthRedirectURI   string `mapstructure:"oauth_redirect_uri" json:"oauth_redirect_uri"`
+		QuotaDefaultLimit  int32  `mapstructure:"quota_default_limit" json:"quota_default_limit"`
+		QuotaMaxBadQueries int64  `mapstructure:"quota_max_bad_queries" json:"quota_max_bad_queries"`
 	} `mapstructure:"http" json:"http"`
 
 	Auth struct {

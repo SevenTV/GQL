@@ -19,8 +19,10 @@ http:
     uri: 0.0.0.0:8080
     type: tcp
 
-    # Quota settings
+    # The default amount of quota points granted on a new query
     quota_default_limit: 1000
+    # The maximum amount of queries exceeding quota before a client's IP is temporarily blocked
+    quota_max_bad_queries: 5
 
 # Auth Settings
 auth:
