@@ -72,7 +72,7 @@ func GQL(gCtx global.Context, app fiber.Router) {
 		// Check if the user is allowed to make queries
 		clientIP := base64.URLEncoding.EncodeToString(utils.S2B(c.Get("Cf-Connecting-IP", c.IP())))
 		clientIPKey := fmt.Sprintf("%s:blocked-queries:client-ip:%s", instance.RedisPrefix, clientIP)
-		if badQueries, _ := gCtx.Inst().Redis.RawClient().HLen(ctx, clientIPKey).Result(); badQueries >= 25 {
+		if badQueries, _ := gCtx.Inst().Redis.RawClient().LLen(ctx, clientIPKey).Result(); badQueries >= 3 {
 			return c.Status(fiber.StatusForbidden).JSON(&fiber.Map{
 				"status": fiber.ErrForbidden,
 				"error":  "You are temporarily blocked from using this API",
@@ -142,7 +142,7 @@ func GQL(gCtx global.Context, app fiber.Router) {
 			// Temporarily block this query
 			pipeline := gCtx.Inst().Redis.RawClient().Pipeline()
 			pipeline.SetEX(ctx, redisKey, req.Query, time.Hour)
-			pipeline.HSet(ctx, clientIPKey, qh, req.Query)
+			pipeline.LPush(ctx, clientIPKey, qh)
 			pipeline.Expire(ctx, clientIPKey, time.Hour)
 			if _, err := pipeline.Exec(ctx); err != nil {
 				logrus.WithError(err).Error("redis, pipeline.Exec")
