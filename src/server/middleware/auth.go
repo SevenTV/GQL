@@ -54,6 +54,7 @@ func Auth(gCtx global.Context) func(c *fiber.Ctx) error {
 			return c.Status(401).JSON(&fiber.Map{"error": "Token Version Mismatch"})
 		}
 
+		c.Locals("user", user)
 		return c.Next()
 	}
 }

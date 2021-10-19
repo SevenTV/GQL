@@ -1,6 +1,34 @@
 
 type User {
     id: String!
+    user_type: String!
     username: String!
     display_name: String!
+    avatar_url: String!
+    biography: String!
+    roles: [Role]!
+    editors: [UserEditor]!
+    channel_emotes: [UserEmote]!
+}
+
+type UserEditor {
+    user: User
+    connections: [String!]!
+    permissions: Int!
+    visible: Boolean!
+}
+
+type UserEmote {
+    emote: Emote
+    connections: [String!]!
+    alias: String!
+    zero_width: Boolean!
+}
+
+type Role {
+    id: String!
+    name: String!
+    color: Int!
+    allowed: String!
+    denied: String!
 }

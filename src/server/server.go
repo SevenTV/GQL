@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/SevenTV/GQL/src/global"
+	"github.com/SevenTV/GQL/src/server/middleware"
 	v3 "github.com/SevenTV/GQL/src/server/v3"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
@@ -28,6 +29,7 @@ func New(gCtx global.Context) <-chan struct{} {
 		c.Set("X-Node-ID", gCtx.Config().NodeName)
 		return c.Next()
 	})
+	app.Use(middleware.Logger())
 
 	// v3
 	v3.API(gCtx, app.Group("/v3"))
