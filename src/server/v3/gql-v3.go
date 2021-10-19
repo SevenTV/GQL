@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unicode"
 
@@ -61,9 +62,9 @@ func GQL(gCtx global.Context, app fiber.Router) {
 		defaultQuota := gCtx.Config().Http.QuotaDefaultLimit
 		quota := &helpers.Quota{
 			C:      c,
-			Limit:  defaultQuota,
-			Points: defaultQuota,
-			Fields: map[string]int{},
+			Limit:  &defaultQuota,
+			Points: &defaultQuota,
+			Fields: sync.Map{},
 		}
 		ctx := context.WithValue(context.Background(), helpers.UserKey, c.Locals("user")) // Add auth user to context
 		ctx = context.WithValue(ctx, utils.Key("request"), c)
@@ -124,16 +125,20 @@ func GQL(gCtx global.Context, app fiber.Router) {
 		}
 
 		// Set quota headers
-		c.Set("X-Quota-Limit", strconv.Itoa(quota.Limit))
-		c.Set("X-Quota-Remaining", strconv.Itoa(quota.Points))
+		c.Set("X-Quota-Limit", strconv.Itoa(int(quota.GetLimit())))
+		c.Set("X-Quota-Remaining", strconv.Itoa(int(quota.GetPoints())))
 		{
 			// Set quota info
-			b, _ := json.Marshal(quota.Fields)
+			usage := make(map[string]int32)
+			quota.Fields.Range(func(key, value interface{}) bool {
+				usage[key.(string)] = value.(int32)
+				return true
+			})
+			b, _ := json.Marshal(usage)
 
 			c.Set("X-Quota-Usage", utils.B2S(b))
 		}
 		if !quota.Check() {
-
 			// Temporarily block this query
 			pipeline := gCtx.Inst().Redis.RawClient().Pipeline()
 			pipeline.SetEX(ctx, redisKey, "", time.Hour)
@@ -144,7 +149,7 @@ func GQL(gCtx global.Context, app fiber.Router) {
 			return c.Status(fiber.StatusTooManyRequests).JSON(&fiber.Map{
 				"status": fiber.ErrTooManyRequests,
 				"error":  "You are being rate limited",
-				"reason": fmt.Sprintf("Quota Exceeded: %d points left out of %d", quota.Points, quota.Limit),
+				"reason": fmt.Sprintf("Quota Exceeded: %d points left out of %d", quota.GetPoints(), quota.GetLimit()),
 			})
 		}
 
