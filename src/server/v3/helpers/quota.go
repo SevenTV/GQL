@@ -9,8 +9,7 @@ import (
 )
 
 type Quota struct {
-	lock sync.Mutex
-	C    *fiber.Ctx
+	C *fiber.Ctx
 	// The initial amount of Quota Points
 	Limit *int32 `json:"limit"`
 	// Quota Points available
