@@ -2,7 +2,7 @@ package helpers
 
 import "github.com/SevenTV/Common/utils"
 
-var (
+const (
 	UserKey  = utils.Key("user")
 	QuotaKey = utils.Key("quota")
 )
