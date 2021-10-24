@@ -20,8 +20,8 @@ type Emote {
 	# The user who owns this emote
 	owner: User
 
- 	# CDN URLs to this emote
- 	urls: [[String!]!]!
+ 	# CDN Links to this emote
+ 	links: [[String!]!]!
 }
 
 # type Emote {

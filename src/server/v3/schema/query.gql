@@ -1,5 +1,7 @@
 type Query {
 	user(id: String!): User!
+
+	emote(id: String!): Emote
 	emotes(
 		query: String!,
 		limit: Int,

@@ -4,10 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/global"
+	"github.com/SevenTV/GQL/src/server/v3/aggregations"
 	"github.com/SevenTV/GQL/src/server/v3/helpers"
+	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -21,17 +25,55 @@ type EmoteResolver struct {
 }
 
 func CreateEmoteResolver(gCtx global.Context, ctx context.Context, emote *structures.Emote, emoteID *primitive.ObjectID, fields map[string]*SelectedField) (*EmoteResolver, error) {
-	eb := structures.EmoteBuilder{Emote: emote}
-
-	if eb.Emote == nil && emoteID == nil {
+	if emote == nil && emoteID == nil {
 		return nil, fmt.Errorf("Unresolvable")
 	}
-	if eb.Emote == nil {
-		if _, err := eb.FetchByID(ctx, gCtx.Inst().Mongo, *emoteID); err != nil {
-			return nil, err
+	var pipeline mongo.Pipeline
+	if emote == nil {
+		pipeline = mongo.Pipeline{
+			{{Key: "$match", Value: bson.M{"_id": emoteID}}},
+		}
+		emote = &structures.Emote{}
+	} else {
+		pipeline = mongo.Pipeline{
+			{{
+				Key: "$replaceRoot",
+				Value: bson.M{
+					"newRoot": emote,
+				},
+			}},
 		}
 	}
 
+	// Query owner sub-fields
+	if of, ok := fields["owner"]; ok && emote.Owner == nil {
+		_, qEditors := of.Children["editors"]
+		_, qRoles := of.Children["roles"]
+		if !qRoles {
+			_, qRoles = of.Children["tag_color"]
+		}
+		_, qChannelEmotes := of.Children["channel_emotes"]
+		opt := aggregations.UserRelationshipOptions{
+			Editors:       qEditors,
+			Roles:         qRoles,
+			ChannelEmotes: qChannelEmotes,
+		}
+
+		pipeline = append(pipeline, aggregations.GetEmoteRelationshipOwner(opt)...)
+	}
+
+	if len(pipeline) > 1 {
+		cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, pipeline)
+		if err != nil {
+			logrus.WithError(err).Error("mongo")
+			return nil, err
+		}
+		cur.Next(ctx)
+		cur.Decode(emote)
+		cur.Close(ctx)
+	}
+
+	eb := structures.EmoteBuilder{Emote: emote}
 	return &EmoteResolver{
 		ctx:          ctx,
 		quota:        ctx.Value(helpers.QuotaKey).(*helpers.Quota),
@@ -39,6 +81,21 @@ func CreateEmoteResolver(gCtx global.Context, ctx context.Context, emote *struct
 		fields:       fields,
 		gCtx:         gCtx,
 	}, nil
+}
+
+func (r *Resolver) Emote(ctx context.Context, args struct {
+	ID string
+}) (*EmoteResolver, error) {
+	//user, ok := ctx.Value(helpers.UserKey).(*structures.User)
+
+	// Parse ID
+	emoteID, err := primitive.ObjectIDFromHex(args.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	fields := GenerateSelectedFieldMap(ctx)
+	return CreateEmoteResolver(r.Ctx, ctx, nil, &emoteID, fields.Children)
 }
 
 // ID: resolves the ID of the emote
@@ -67,7 +124,7 @@ func (r *EmoteResolver) Tags() []string {
 }
 
 // URLs: resolves a list of cdn urls for the emote
-func (r *EmoteResolver) URLs() [][]string {
+func (r *EmoteResolver) Links() [][]string {
 	if ok := r.quota.DecreaseByOne("Emote", "URLs"); !ok {
 		return nil
 	}
@@ -82,8 +139,8 @@ func (r *EmoteResolver) URLs() [][]string {
 		result[i-1] = a
 	}
 
-	r.Emote.URLs = result
-	return r.Emote.URLs
+	r.Emote.Links = result
+	return r.Emote.Links
 }
 
 // Width: the emote's image width

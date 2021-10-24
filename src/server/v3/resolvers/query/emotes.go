@@ -121,6 +121,9 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 
 			_, qEditors := o.Children["editors"]
 			_, qRoles := o.Children["roles"]
+			if !qRoles {
+				_, qRoles = o.Children["tag_color"]
+			}
 			_, qChannelEmotes := o.Children["channel_emotes"]
 			emoteSubPipeline = append(emoteSubPipeline, aggregations.GetEmoteRelationshipOwner(aggregations.UserRelationshipOptions{
 				Editors:       qEditors,
@@ -165,6 +168,10 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 	resolvers := make([]*EmoteResolver, len(emotes))
 	fields := GenerateSelectedFieldMap(ctx)
 	for i, emote := range emotes {
+		if emote.Owner == nil {
+			emote.Owner = structures.DeletedUser
+		}
+
 		r, err := CreateEmoteResolver(r.Ctx, ctx, emote, &emote.ID, fields.Children)
 		if err != nil {
 			return nil, err

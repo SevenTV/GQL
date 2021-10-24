@@ -3,6 +3,7 @@ package query
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
@@ -23,51 +24,65 @@ type UserResolver struct {
 
 // CreateUserResolver: generate a GQL resolver for a User
 func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structures.User, userID *primitive.ObjectID, fields map[string]*SelectedField) (*UserResolver, error) {
-	ub := structures.NewUserBuilder(user)
-
 	if user == nil && userID == nil {
 		return nil, fmt.Errorf("unresolvable")
 	}
-	if user == nil {
-		ub.User = &structures.User{}
 
-		// Begin aggregation pipeline
-		pipeline := mongo.Pipeline{
-			bson.D{{
+	var pipeline mongo.Pipeline
+	if user == nil {
+		pipeline = mongo.Pipeline{
+			{{
 				Key: "$match",
 				Value: bson.M{
 					"_id": userID,
 				},
 			}},
 		}
+		user = &structures.User{}
+	} else {
+		pipeline = mongo.Pipeline{
+			{{
+				Key: "$replaceRoot",
+				Value: bson.M{
+					"newRoot": user,
+				},
+			}},
+		}
+	}
 
-		// Relation: Roles
-		if _, ok := fields["roles"]; ok {
+	// Relation: Roles
+	if _, ok := fields["roles"]; ok && user.Roles == nil {
+		pipeline = append(pipeline, aggregations.UserRelationRoles...)
+	}
+	if _, ok := fields["tag_color"]; ok && user.Roles == nil {
+		if _, ok = fields["roles"]; !ok {
 			pipeline = append(pipeline, aggregations.UserRelationRoles...)
 		}
+	}
 
-		// Relation: Editors
-		if _, ok := fields["editors"]; ok {
-			pipeline = append(pipeline, aggregations.UserRelationEditors...)
-		}
+	// Relation: Editors
+	if _, ok := fields["editors"]; ok && user.Editors == nil {
+		pipeline = append(pipeline, aggregations.UserRelationEditors...)
+	}
 
-		// Relation: Channel Emotes
-		if _, ok := fields["channel_emotes"]; ok {
-			pipeline = append(pipeline, aggregations.UserRelationChannelEmotes...)
-		}
+	// Relation: Channel Emotes
+	if _, ok := fields["channel_emotes"]; ok && user.ChannelEmotes == nil {
+		pipeline = append(pipeline, aggregations.UserRelationChannelEmotes...)
+	}
 
+	if len(pipeline) > 1 {
 		cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, pipeline)
 		if err != nil {
 			return nil, err
 		}
-
 		cur.Next(ctx)
 		cur.Close(ctx)
-		if err = cur.Decode(ub.User); err != nil {
+		if err = cur.Decode(user); err != nil {
 			return nil, err
 		}
 	}
 
+	ub := structures.NewUserBuilder(user)
 	return &UserResolver{
 		ctx:         ctx,
 		UserBuilder: ub,
@@ -151,6 +166,21 @@ func (r *UserResolver) Roles() ([]*RoleResolver, error) {
 	}
 
 	return resolvers, nil
+}
+
+func (r *UserResolver) TagColor() int32 {
+	if len(r.User.Roles) == 0 {
+		return 0
+	}
+
+	sort.Slice(r.User.Roles, func(i, j int) bool {
+		a := r.User.Roles[i]
+		b := r.User.Roles[j]
+
+		return a.Position > b.Position
+	})
+
+	return r.User.Roles[0].Color
 }
 
 func (r *UserResolver) Editors() ([]*UserEditorResolvable, error) {

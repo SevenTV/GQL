@@ -6,6 +6,7 @@ type User {
     display_name: String!
     avatar_url: String!
     biography: String!
+    tag_color: Int!
     roles: [Role]!
     editors: [UserEditor]!
     channel_emotes: [UserEmote]!
