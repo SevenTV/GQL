@@ -66,8 +66,22 @@ func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structur
 	}
 
 	// Relation: Channel Emotes
-	if _, ok := fields["channel_emotes"]; ok && user.ChannelEmotes == nil {
-		pipeline = append(pipeline, aggregations.UserRelationChannelEmotes...)
+	if _, ok := fields["channel_emotes"]; ok {
+		fetched := true
+		if user.ChannelEmotes == nil {
+			fetched = false
+		} else {
+			for _, ce := range user.ChannelEmotes {
+				if ce.Emote == nil {
+					fetched = false
+					break
+				}
+			}
+		}
+
+		if !fetched {
+			pipeline = append(pipeline, aggregations.UserRelationChannelEmotes...)
+		}
 	}
 
 	if len(pipeline) > 1 {
@@ -217,7 +231,7 @@ func (r *UserResolver) ChannelEmotes() ([]*UserEmoteResolvable, error) {
 			continue
 		}
 
-		er, err := CreateEmoteResolver(r.gCtx, r.ctx, emote.Emote, nil, fields.Children)
+		er, err := CreateEmoteResolver(r.gCtx, r.ctx, emote.Emote, &emote.ID, fields.Children)
 		if err != nil {
 			return nil, err
 		}

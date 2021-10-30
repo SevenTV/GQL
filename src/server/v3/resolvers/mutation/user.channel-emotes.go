@@ -77,13 +77,7 @@ func (r *Resolver) SetChannelEmote(ctx context.Context, args struct {
 		return nil, err
 	}
 
-	// Update the document
-	if _, err = r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).UpdateByID(ctx, targetUser.ID, um.UserBuilder.Update); err != nil {
-		logrus.WithError(err).Error("mongo")
-		return nil, helpers.ErrInternalServerError
-	}
-
-	return nil, nil
+	return query.CreateUserResolver(r.Ctx, ctx, targetUser, &targetUser.ID, query.GenerateSelectedFieldMap(ctx).Children)
 }
 
 type channelEmoteInput struct {
