@@ -1,4 +1,16 @@
 
 type Mutation {
-    emote(id: String!): Emote
+    setChannelEmote(user_id: String!, target: UserEmoteInput!, action: ListItemAction!): User
+}
+
+input UserEmoteInput {
+    id: String!
+    channels: [String!]
+    alias: String
+}
+
+enum ListItemAction {
+    ADD
+    UPDATE
+    REMOVE
 }

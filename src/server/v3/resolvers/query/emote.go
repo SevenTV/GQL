@@ -26,7 +26,7 @@ type EmoteResolver struct {
 
 func CreateEmoteResolver(gCtx global.Context, ctx context.Context, emote *structures.Emote, emoteID *primitive.ObjectID, fields map[string]*SelectedField) (*EmoteResolver, error) {
 	if emote == nil && emoteID == nil {
-		return nil, fmt.Errorf("Unresolvable")
+		return nil, fmt.Errorf("unresolvable")
 	}
 	var pipeline mongo.Pipeline
 	if emote == nil {
@@ -62,7 +62,7 @@ func CreateEmoteResolver(gCtx global.Context, ctx context.Context, emote *struct
 		pipeline = append(pipeline, aggregations.GetEmoteRelationshipOwner(opt)...)
 	}
 
-	if len(pipeline) > 1 {
+	if emote.ID.IsZero() && len(pipeline) > 0 {
 		cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, pipeline)
 		if err != nil {
 			logrus.WithError(err).Error("mongo")
@@ -73,11 +73,11 @@ func CreateEmoteResolver(gCtx global.Context, ctx context.Context, emote *struct
 		cur.Close(ctx)
 	}
 
-	eb := structures.EmoteBuilder{Emote: emote}
+	eb := &structures.EmoteBuilder{Emote: emote}
 	return &EmoteResolver{
 		ctx:          ctx,
 		quota:        ctx.Value(helpers.QuotaKey).(*helpers.Quota),
-		EmoteBuilder: &eb,
+		EmoteBuilder: eb,
 		fields:       fields,
 		gCtx:         gCtx,
 	}, nil
@@ -158,6 +158,10 @@ func (r *EmoteResolver) Animated() bool {
 	return r.Emote.Animated
 }
 
+func (r *EmoteResolver) AVIF() bool {
+	return r.Emote.AVIF
+}
+
 // Owner: the user who owns the emote
 func (r *EmoteResolver) Owner() (*UserResolver, error) {
 	if ok := r.quota.Decrease(2, "Emote", "Owner"); !ok {
@@ -169,4 +173,75 @@ func (r *EmoteResolver) Owner() (*UserResolver, error) {
 	}
 
 	return CreateUserResolver(r.gCtx, r.ctx, r.Emote.Owner, &r.Emote.Owner.ID, GenerateSelectedFieldMap(r.ctx).Children)
+}
+
+func (r *EmoteResolver) Channels(ctx context.Context, args struct {
+	AfterID string
+	Limit   *int32
+}) ([]*UserResolver, error) {
+	emote := r.Emote
+
+	// Parse ID to go from
+	// afterID, _ := primitive.ObjectIDFromHex(args.AfterID)
+
+	// Define limit
+	limit := int32(20)
+	if args.Limit != nil {
+		limit = *args.Limit
+		if limit < 1 {
+			limit = 1
+		} else if limit > 250 {
+			limit = 250
+		}
+	}
+
+	// Pipeline
+	pipeline := mongo.Pipeline{
+		{{
+			Key: "$match",
+			Value: bson.M{
+				"channel_emotes.id": emote.ID,
+			},
+		}},
+		{{
+			Key: "$lookup",
+			Value: mongo.Lookup{
+				From:         "roles",
+				LocalField:   "role_ids",
+				ForeignField: "_id",
+				As:           "_role",
+			},
+		}},
+		{{
+			Key: "$sort",
+			Value: bson.M{
+				"_role.position": -1,
+			},
+		}},
+		// {{Key: "$limit", Value: limit}},
+	}
+
+	users := []*structures.User{}
+	cur, err := r.gCtx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, pipeline)
+	if err != nil {
+		logrus.WithError(err).Error("mongo")
+		return nil, err
+	}
+
+	if err = cur.All(ctx, &users); err != nil {
+		logrus.WithError(err).Error("mongo")
+		return nil, err
+	}
+
+	resolvers := []*UserResolver{}
+	for _, usr := range users {
+		resolver, err := CreateUserResolver(r.gCtx, ctx, usr, &usr.ID, r.fields)
+		if err != nil {
+			return nil, err
+		}
+
+		resolvers = append(resolvers, resolver)
+	}
+
+	return resolvers, nil
 }

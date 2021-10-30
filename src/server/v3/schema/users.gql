@@ -33,3 +33,12 @@ type Role {
     allowed: String!
     denied: String!
 }
+
+type PartialUser {
+    id: String!
+    user_type: String!
+    username: String!
+    display_name: String!
+    avatar_url: String!
+    biography: String!
+}
