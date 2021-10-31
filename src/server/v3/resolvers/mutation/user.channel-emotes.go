@@ -65,7 +65,7 @@ func (r *Resolver) SetChannelEmote(ctx context.Context, args struct {
 	}
 
 	// Do the mutation
-	um, err = um.SetChannelEmote(ctx, r.Ctx.Inst().Mongo, mutations.SetChannelEmoteOptions{
+	_, err = um.SetChannelEmote(ctx, r.Ctx.Inst().Mongo, mutations.SetChannelEmoteOptions{
 		Actor:    actor,
 		EmoteID:  emoteID,
 		Channels: []primitive.ObjectID{},
