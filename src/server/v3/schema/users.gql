@@ -23,7 +23,6 @@ type UserEmote {
     emote: Emote
     connections: [String!]!
     alias: String!
-    zero_width: Boolean!
 }
 
 type Role {
@@ -32,4 +31,13 @@ type Role {
     color: Int!
     allowed: String!
     denied: String!
+}
+
+type PartialUser {
+    id: String!
+    user_type: String!
+    username: String!
+    display_name: String!
+    avatar_url: String!
+    biography: String!
 }

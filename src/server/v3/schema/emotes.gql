@@ -4,7 +4,7 @@ type Emote {
 	# Name of the emote
 	name: String!
 	# Visibility bitfield of the emote
-	visibility: Int!
+	flags: Int!
 	# Status of the emote
 	status: Int!
 	# Emote search tags	
@@ -16,9 +16,13 @@ type Emote {
 	height: [Int!]!
 	# Whether or not the emote is animated
 	animated: Boolean!
+	# Whether or not the emote is available in AVIF (AV1 Image File) Format
+	avif: Boolean!
 
 	# The user who owns this emote
 	owner: User
+	# The channels where this emote is active
+	channels(limit: Int, after_id: String!): [PartialUser]!
 
  	# CDN Links to this emote
  	links: [[String!]!]!
