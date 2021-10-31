@@ -109,8 +109,8 @@ func (r *EmoteResolver) Name() string {
 }
 
 // Visibility: the visibility bitfield for the emote
-func (r *EmoteResolver) Visibility() int32 {
-	return r.Emote.Visibility
+func (r *EmoteResolver) Flags() int32 {
+	return int32(r.Emote.Flags)
 }
 
 // Status: emote status

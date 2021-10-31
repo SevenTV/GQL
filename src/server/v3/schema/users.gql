@@ -23,7 +23,6 @@ type UserEmote {
     emote: Emote
     connections: [String!]!
     alias: String!
-    zero_width: Boolean!
 }
 
 type Role {

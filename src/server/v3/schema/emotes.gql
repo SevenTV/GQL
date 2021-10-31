@@ -4,7 +4,7 @@ type Emote {
 	# Name of the emote
 	name: String!
 	# Visibility bitfield of the emote
-	visibility: Int!
+	flags: Int!
 	# Status of the emote
 	status: Int!
 	# Emote search tags	

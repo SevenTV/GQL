@@ -231,6 +231,9 @@ func (r *UserResolver) ChannelEmotes() ([]*UserEmoteResolvable, error) {
 			continue
 		}
 
+		if emote.Emote != nil {
+			emote.Emote.Name = emote.Alias
+		}
 		er, err := CreateEmoteResolver(r.gCtx, r.ctx, emote.Emote, &emote.ID, fields.Children)
 		if err != nil {
 			return nil, err
@@ -239,8 +242,7 @@ func (r *UserResolver) ChannelEmotes() ([]*UserEmoteResolvable, error) {
 		result[i] = &UserEmoteResolvable{
 			Emote:       er,
 			Connections: []string{},
-			Alias:       "",
-			ZeroWidth:   false,
+			Alias:       emote.Alias,
 		}
 	}
 
@@ -258,5 +260,4 @@ type UserEmoteResolvable struct {
 	Emote       *EmoteResolver `json:"emote"`
 	Connections []string       `json:"connections,omitempty"`
 	Alias       string         `json:"alias,omitempty"`
-	ZeroWidth   bool           `json:"zero_width,omitempty"`
 }
