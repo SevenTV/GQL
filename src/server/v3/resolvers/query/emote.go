@@ -63,13 +63,14 @@ func CreateEmoteResolver(gCtx global.Context, ctx context.Context, emote *struct
 	}
 
 	if emote.ID.IsZero() && len(pipeline) > 0 {
-		cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, pipeline)
-		if err != nil {
+		cur, _ := gCtx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, pipeline)
+		if ok := cur.TryNext(ctx); !ok {
+			return nil, helpers.ErrUnknownEmote
+		}
+		if err := cur.Decode(emote); err != nil {
 			logrus.WithError(err).Error("mongo")
 			return nil, err
 		}
-		cur.Next(ctx)
-		cur.Decode(emote)
 		cur.Close(ctx)
 	}
 

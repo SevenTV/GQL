@@ -10,6 +10,7 @@ import (
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/SevenTV/GQL/src/server/v3/aggregations"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -92,6 +93,7 @@ func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structur
 		cur.Next(ctx)
 		cur.Close(ctx)
 		if err = cur.Decode(user); err != nil {
+			logrus.WithError(err).Error("mongo")
 			return nil, err
 		}
 	}
@@ -231,7 +233,7 @@ func (r *UserResolver) ChannelEmotes() ([]*UserEmoteResolvable, error) {
 			continue
 		}
 
-		if emote.Emote != nil {
+		if emote.Alias != "" && emote.Emote != nil {
 			emote.Emote.Name = emote.Alias
 		}
 		er, err := CreateEmoteResolver(r.gCtx, r.ctx, emote.Emote, &emote.ID, fields.Children)

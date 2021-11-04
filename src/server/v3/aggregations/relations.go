@@ -135,7 +135,7 @@ func GetEmoteRelationshipOwner(opt UserRelationshipOptions) []bson.D {
 
 // Emote Relations
 //
-// Input: Emote
+// Input: User
 // Adds Field: "channel_emotes" as []UserEmote with the "emote" field added to each UserEmote object
 // Output: Emote
 var UserRelationChannelEmotes = []bson.D{
@@ -146,22 +146,31 @@ var UserRelationChannelEmotes = []bson.D{
 			From:         mongo.CollectionNameEmotes,
 			LocalField:   "channel_emotes.id",
 			ForeignField: "_id",
-			As:           "channel_emote",
-		},
-	}},
-	// Step 2: iterate over emotes
-	{{
-		Key: "$unwind",
-		Value: bson.M{
-			"path":              "$channel_emote",
-			"includeArrayIndex": "emote",
+			As:           "_ce",
 		},
 	}},
 	// Step 3: Set "emote" property to each UserEmote object in the original emotes array
 	{{
-		Key: "$addFields",
+		Key: "$set",
 		Value: bson.M{
-			"channel_emotes.emote": "$channel_emote",
+			"channel_emotes": bson.M{
+				"$map": bson.M{
+					"input": "$channel_emotes",
+					"in": bson.M{
+						"$mergeObjects": bson.A{
+							"$$this",
+							bson.M{
+								"emote": bson.M{
+									"$arrayElemAt": bson.A{
+										"$_ce",
+										bson.M{"$indexOfArray": bson.A{"$_ce._id", "$$this.id"}},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}},
 }
