@@ -3,10 +3,10 @@ package mutation
 import (
 	"context"
 
+	"github.com/SevenTV/Common/aggregations"
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
 	"github.com/SevenTV/Common/structures/mutations"
-	"github.com/SevenTV/GQL/src/server/v3/aggregations"
 	"github.com/SevenTV/GQL/src/server/v3/helpers"
 	"github.com/SevenTV/GQL/src/server/v3/resolvers/query"
 	"github.com/sirupsen/logrus"

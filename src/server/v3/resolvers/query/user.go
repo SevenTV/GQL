@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/SevenTV/Common/aggregations"
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/global"
-	"github.com/SevenTV/GQL/src/server/v3/aggregations"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

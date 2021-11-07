@@ -3,11 +3,11 @@ package middleware
 import (
 	"strings"
 
+	"github.com/SevenTV/Common/aggregations"
 	"github.com/SevenTV/Common/auth"
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
 	"github.com/SevenTV/GQL/src/global"
-	"github.com/SevenTV/GQL/src/server/v3/aggregations"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
