@@ -98,6 +98,16 @@ func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structur
 		}
 	}
 
+	// Sort roles
+	if len(user.Roles) > 0 {
+		sort.Slice(user.Roles, func(i, j int) bool {
+			a := user.Roles[i]
+			b := user.Roles[j]
+
+			return a.Position > b.Position
+		})
+	}
+
 	ub := structures.NewUserBuilder(user)
 	return &UserResolver{
 		ctx:         ctx,
@@ -188,13 +198,6 @@ func (r *UserResolver) TagColor() int32 {
 	if len(r.User.Roles) == 0 {
 		return 0
 	}
-
-	sort.Slice(r.User.Roles, func(i, j int) bool {
-		a := r.User.Roles[i]
-		b := r.User.Roles[j]
-
-		return a.Position > b.Position
-	})
 
 	return r.User.Roles[0].Color
 }
