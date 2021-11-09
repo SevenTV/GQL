@@ -31,6 +31,7 @@ type Role {
     color: Int!
     allowed: String!
     denied: String!
+    position: Int!
 }
 
 type PartialUser {
