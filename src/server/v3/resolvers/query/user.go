@@ -2,8 +2,10 @@ package query
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/SevenTV/Common/aggregations"
 	"github.com/SevenTV/Common/mongo"
@@ -82,6 +84,18 @@ func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structur
 
 		if !fetched {
 			pipeline = append(pipeline, aggregations.UserRelationChannelEmotes...)
+		}
+	}
+
+	// Relation: Connections
+	if _, ok := fields["connections"]; ok {
+		fetched := true
+		if user.Connections == nil {
+			fetched = false
+		}
+
+		if !fetched {
+			pipeline = append(pipeline, aggregations.UserRelationConnections...)
 		}
 	}
 
@@ -254,6 +268,41 @@ func (r *UserResolver) ChannelEmotes() ([]*UserEmoteResolvable, error) {
 	return result, nil
 }
 
+func (r *UserResolver) Connections() ([]*UserConnectionResolvable, error) {
+	conns := make([]*UserConnectionResolvable, len(r.User.Connections))
+	for i, c := range r.User.Connections {
+		var (
+			b   []byte
+			err error
+		)
+		// Decode connection data
+		switch c.Platform {
+		case structures.UserConnectionPlatformTwitch:
+			d := &structures.TwitchConnection{}
+			if err = bson.Unmarshal(c.Data, d); err == nil {
+				b, err = json.Marshal(d)
+			}
+		case structures.UserConnectionPlatformYouTube:
+			d := &structures.YouTubeConnection{}
+			if err = bson.Unmarshal(c.Data, d); err == nil {
+				b, err = json.Marshal(d)
+			}
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		conns[i] = &UserConnectionResolvable{
+			ID:       c.ID.Hex(),
+			Platform: string(c.Platform),
+			LinkedAt: c.LinkedAt.Format(time.RFC3339),
+			Data:     utils.B2S(b),
+		}
+	}
+
+	return conns, nil
+}
+
 type UserEditorResolvable struct {
 	User        *UserResolver `json:"user"`
 	Connections []string      `json:"connections"`
@@ -265,4 +314,11 @@ type UserEmoteResolvable struct {
 	Emote       *EmoteResolver `json:"emote"`
 	Connections []string       `json:"connections,omitempty"`
 	Alias       string         `json:"alias,omitempty"`
+}
+
+type UserConnectionResolvable struct {
+	ID       string `json:"id"`
+	Platform string `json:"platform"`
+	LinkedAt string `json:"linked_at"`
+	Data     string `json:"data"`
 }

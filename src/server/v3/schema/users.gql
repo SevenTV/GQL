@@ -10,6 +10,7 @@ type User {
     roles: [Role]!
     editors: [UserEditor]!
     channel_emotes: [UserEmote]!
+    connections: [UserConnection]!
 }
 
 type UserEditor {
@@ -23,6 +24,13 @@ type UserEmote {
     emote: Emote
     connections: [String!]!
     alias: String!
+}
+
+type UserConnection {
+    id: String!
+    platform: String!
+    linked_at: String!
+    data: String!
 }
 
 type Role {
