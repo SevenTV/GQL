@@ -10,6 +10,7 @@ type User {
     roles: [Role]!
     editors: [UserEditor]!
     channel_emotes: [UserEmote]!
+    owned_emotes: [Emote]!
     connections: [UserConnection]!
 }
 
@@ -28,6 +29,7 @@ type UserEmote {
 
 type UserConnection {
     id: String!
+    display_name: String!
     platform: String!
     linked_at: String!
     data: String!

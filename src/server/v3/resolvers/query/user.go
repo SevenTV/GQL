@@ -87,6 +87,10 @@ func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structur
 		}
 	}
 
+	if _, ok := fields["owned_emotes"]; ok && user.OwnedEmotes == nil {
+		pipeline = append(pipeline, aggregations.UserRelationOwnedEmotes...)
+	}
+
 	// Relation: Connections
 	if _, ok := fields["connections"]; ok {
 		fetched := true
@@ -241,12 +245,13 @@ func (r *UserResolver) Editors() ([]*UserEditorResolvable, error) {
 	return result, nil
 }
 
+// ChannelEmotes: user's active channel emotes
 func (r *UserResolver) ChannelEmotes() ([]*UserEmoteResolvable, error) {
 	result := make([]*UserEmoteResolvable, len(r.User.ChannelEmotes))
 
 	fields := GenerateSelectedFieldMap(r.ctx)
 	for i, emote := range r.User.ChannelEmotes {
-		if emote == nil {
+		if emote == nil || emote.Emote == nil {
 			continue
 		}
 
@@ -268,23 +273,42 @@ func (r *UserResolver) ChannelEmotes() ([]*UserEmoteResolvable, error) {
 	return result, nil
 }
 
+// OwnedEmotes: user's owned emotes
+func (r *UserResolver) OwnedEmotes(ctx context.Context) ([]*EmoteResolver, error) {
+	resolvers := make([]*EmoteResolver, len(r.User.OwnedEmotes))
+
+	for i, e := range r.User.OwnedEmotes {
+		resolver, err := CreateEmoteResolver(r.gCtx, ctx, e, &e.ID, r.fields)
+		if resolver == nil {
+			return nil, err
+		}
+
+		resolvers[i] = resolver
+	}
+
+	return resolvers, nil
+}
+
 func (r *UserResolver) Connections() ([]*UserConnectionResolvable, error) {
 	conns := make([]*UserConnectionResolvable, len(r.User.Connections))
 	for i, c := range r.User.Connections {
 		var (
-			b   []byte
-			err error
+			displayName string
+			b           []byte
+			err         error
 		)
 		// Decode connection data
 		switch c.Platform {
 		case structures.UserConnectionPlatformTwitch:
 			d := &structures.TwitchConnection{}
 			if err = bson.Unmarshal(c.Data, d); err == nil {
+				displayName = d.DisplayName
 				b, err = json.Marshal(d)
 			}
 		case structures.UserConnectionPlatformYouTube:
 			d := &structures.YouTubeConnection{}
 			if err = bson.Unmarshal(c.Data, d); err == nil {
+				displayName = d.Title
 				b, err = json.Marshal(d)
 			}
 		}
@@ -293,10 +317,11 @@ func (r *UserResolver) Connections() ([]*UserConnectionResolvable, error) {
 		}
 
 		conns[i] = &UserConnectionResolvable{
-			ID:       c.ID.Hex(),
-			Platform: string(c.Platform),
-			LinkedAt: c.LinkedAt.Format(time.RFC3339),
-			Data:     utils.B2S(b),
+			ID:          c.ID.Hex(),
+			DisplayName: displayName,
+			Platform:    string(c.Platform),
+			LinkedAt:    c.LinkedAt.Format(time.RFC3339),
+			Data:        utils.B2S(b),
 		}
 	}
 
@@ -317,8 +342,9 @@ type UserEmoteResolvable struct {
 }
 
 type UserConnectionResolvable struct {
-	ID       string `json:"id"`
-	Platform string `json:"platform"`
-	LinkedAt string `json:"linked_at"`
-	Data     string `json:"data"`
+	ID          string `json:"id"`
+	DisplayName string `json:"display_name"`
+	Platform    string `json:"platform"`
+	LinkedAt    string `json:"linked_at"`
+	Data        string `json:"data"`
 }
