@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/SevenTV/Common/aggregations"
@@ -117,14 +116,7 @@ func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structur
 	}
 
 	// Sort roles
-	if len(user.Roles) > 0 {
-		sort.Slice(user.Roles, func(i, j int) bool {
-			a := user.Roles[i]
-			b := user.Roles[j]
-
-			return a.Position > b.Position
-		})
-	}
+	user.SortRoles()
 
 	ub := structures.NewUserBuilder(user)
 	return &UserResolver{

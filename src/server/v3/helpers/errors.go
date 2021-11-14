@@ -12,4 +12,5 @@ var (
 	ErrUnknownRole         ErrorGQL = fmt.Errorf("unknown role")
 	ErrBadObjectID         ErrorGQL = fmt.Errorf("bad object id")
 	ErrInternalServerError ErrorGQL = fmt.Errorf("internal server error")
+	ErrBadInt              ErrorGQL = fmt.Errorf("bad int")
 )
