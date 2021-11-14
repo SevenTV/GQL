@@ -51,7 +51,7 @@ func (r *Resolver) SetUserRole(ctx context.Context, args struct {
 		UserBuilder: ub,
 	}
 	if _, err = um.SetRole(ctx, r.Ctx.Inst().Mongo, mutations.SetUserRoleOptions{
-		RoleID: role.ID,
+		Role:   role,
 		Actor:  actor,
 		Action: args.Action,
 	}); err != nil {

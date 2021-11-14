@@ -11,6 +11,7 @@ type Mutation {
 
     # Create a role
     createRole(data: CreateRoleInput!): Role
+    editRole(role_id: String!, data: EditRoleInput!): Role
     deleteRole(role_id: String!): String!
 }
 
@@ -25,6 +26,13 @@ input CreateRoleInput {
     color: Int!
     allowed: String!
     denied: String!
+}
+input EditRoleInput {
+    name: String
+    color: Int
+    allowed: String
+    denied: String
+    position: Int
 }
 
 enum ListItemAction {
