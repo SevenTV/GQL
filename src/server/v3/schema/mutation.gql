@@ -1,6 +1,11 @@
 
 type Mutation {
+    ### User Mutations
+
+    # Add, Update or Remove a channel emote for a user
     setChannelEmote(user_id: String!, target: UserEmoteInput!, action: ListItemAction!): User
+    # Add or Remove a user's role
+    setUserRole(user_id: String!, role_id: String!, action: ListItemAction!): User
 }
 
 input UserEmoteInput {

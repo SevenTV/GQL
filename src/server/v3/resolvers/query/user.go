@@ -182,7 +182,10 @@ func (r *UserResolver) Username() string {
 
 // DisplayName: the user's display name
 func (r *UserResolver) DisplayName() string {
-	return r.User.Username
+	if r.User.DisplayName == "" {
+		return r.User.Username
+	}
+	return r.User.DisplayName
 }
 
 func (r *UserResolver) CreatedAt() string {
