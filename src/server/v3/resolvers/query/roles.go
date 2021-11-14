@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"sort"
 
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
@@ -36,6 +37,12 @@ func (r *Resolver) Roles(ctx context.Context) ([]*RoleResolver, error) {
 		logrus.WithError(err).Error("mongo")
 		return nil, err
 	}
+	sort.Slice(roles, func(i, j int) bool {
+		a := roles[i]
+		b := roles[j]
+
+		return a.Position > b.Position
+	})
 
 	fields := GenerateSelectedFieldMap(ctx)
 	resolvers := make([]*RoleResolver, len(roles))

@@ -8,6 +8,8 @@ import (
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
 	"github.com/SevenTV/GQL/src/global"
+	"github.com/SevenTV/GQL/src/server/v3/helpers"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -42,6 +44,27 @@ func CreateRoleResolver(gCtx global.Context, ctx context.Context, role *structur
 		fields:      fields,
 		gCtx:        gCtx,
 	}, nil
+}
+
+func (r *Resolver) Role(ctx context.Context, args struct {
+	ID string
+}) (*RoleResolver, error) {
+	role := &structures.Role{}
+	roleID, err := primitive.ObjectIDFromHex(args.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameRoles).FindOne(ctx, bson.M{"_id": roleID}).Decode(role); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, helpers.ErrUnknownRole
+		}
+
+		logrus.WithError(err).Error("mongo")
+		return nil, err
+	}
+
+	return CreateRoleResolver(r.Ctx, ctx, role, &role.ID, GenerateSelectedFieldMap(ctx).Children)
 }
 
 // ID: the role's ID

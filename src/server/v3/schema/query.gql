@@ -12,6 +12,7 @@ type Query {
 	): [Emote]!
 
 	roles: [Role]!
+	role(id: String!): Role
 }
 
 # Sorting cursor, binding a specific order to a value
