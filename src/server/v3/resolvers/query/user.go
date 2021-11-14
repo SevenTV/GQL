@@ -185,6 +185,10 @@ func (r *UserResolver) DisplayName() string {
 	return r.User.Username
 }
 
+func (r *UserResolver) CreatedAt() string {
+	return r.User.ID.Timestamp().Format(time.RFC3339)
+}
+
 // AvatarURL: an HTTP URL to the user's avatar
 func (r *UserResolver) AvatarURL() string {
 	return r.User.AvatarURL

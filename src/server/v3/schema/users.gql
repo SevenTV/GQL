@@ -4,6 +4,7 @@ type User {
     user_type: String!
     username: String!
     display_name: String!
+    created_at: String!
     avatar_url: String!
     biography: String!
     tag_color: Int!
