@@ -1,7 +1,7 @@
 
 type Report {
 	id: String!
-	target_kind: String!
+	target_kind: TargetKind!
 	target: User
 	reporter: User
 	subject: String!
@@ -9,6 +9,11 @@ type Report {
 	priority: Int!
 	status: ReportStatus!
 	created_at: String!
+}
+
+enum TargetKind {
+	EMOTE
+	USER
 }
 
 enum ReportStatus {
