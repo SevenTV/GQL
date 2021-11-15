@@ -9,6 +9,8 @@ var (
 	ErrAccessDenied        ErrorGQL = fmt.Errorf("access denied")
 	ErrUnknownEmote        ErrorGQL = fmt.Errorf("unknown emote")
 	ErrUnknownUser         ErrorGQL = fmt.Errorf("unknown user")
+	ErrUnknownRole         ErrorGQL = fmt.Errorf("unknown role")
 	ErrBadObjectID         ErrorGQL = fmt.Errorf("bad object id")
 	ErrInternalServerError ErrorGQL = fmt.Errorf("internal server error")
+	ErrBadInt              ErrorGQL = fmt.Errorf("bad int")
 )

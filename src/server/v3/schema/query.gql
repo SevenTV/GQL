@@ -10,6 +10,9 @@ type Query {
 		sort: Sort
 		# providers: [Provider!],
 	): [Emote]!
+
+	roles: [Role]!
+	role(id: String!): Role
 }
 
 # Sorting cursor, binding a specific order to a value

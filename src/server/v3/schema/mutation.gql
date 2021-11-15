@@ -1,12 +1,38 @@
 
 type Mutation {
+    ### User Mutations
+
+    # Add, Update or Remove a channel emote for a user
     setChannelEmote(user_id: String!, target: UserEmoteInput!, action: ListItemAction!): User
+    # Add or Remove a user's role
+    setUserRole(user_id: String!, role_id: String!, action: ListItemAction!): User
+
+    ### Role Mutations
+
+    # Create a role
+    createRole(data: CreateRoleInput!): Role
+    editRole(role_id: String!, data: EditRoleInput!): Role
+    deleteRole(role_id: String!): String!
 }
 
 input UserEmoteInput {
     id: String!
     channels: [String!]
     alias: String
+}
+
+input CreateRoleInput {
+    name: String!
+    color: Int!
+    allowed: String!
+    denied: String!
+}
+input EditRoleInput {
+    name: String
+    color: Int
+    allowed: String
+    denied: String
+    position: Int
 }
 
 enum ListItemAction {
