@@ -43,7 +43,7 @@ func GQL(gCtx global.Context, app fiber.Router) {
 	// Load the schema
 	box := packr.New("gqlv3", "./schema")
 	s := strings.Builder{}
-	files := []string{"query.gql", "emotes.gql", "users.gql", "mutation.gql"}
+	files := []string{"query.gql", "emotes.gql", "users.gql", "reports.gql", "mutation.gql"}
 	for _, f := range files {
 		sch, err := box.FindString(f)
 		if err != nil {

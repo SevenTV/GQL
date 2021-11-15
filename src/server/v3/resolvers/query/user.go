@@ -102,7 +102,7 @@ func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structur
 		}
 	}
 
-	if len(pipeline) > 1 {
+	if user.ID.IsZero() || len(pipeline) > 1 {
 		cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, pipeline)
 		if err != nil {
 			return nil, err

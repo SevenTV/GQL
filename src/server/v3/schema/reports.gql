@@ -1,0 +1,18 @@
+
+type Report {
+	id: String!
+	target_kind: String!
+	target: User
+	reporter: User
+	subject: String!
+	body: String!
+	priority: Int!
+	status: ReportStatus!
+	created_at: String!
+}
+
+enum ReportStatus {
+	OPEN
+	ASSIGNED
+	CLOSED
+}
