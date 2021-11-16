@@ -57,6 +57,11 @@ func CreateReportResolver(gCtx global.Context, ctx context.Context, report *stru
 		pipeline = append(pipeline, aggregations.ReportRelationReporter...)
 	}
 
+	// Relation: assignees
+	if _, ok := fields["assignees"]; ok {
+		pipeline = append(pipeline, aggregations.ReportRelationAssignees...)
+	}
+
 	if rb.Report.ID.IsZero() || len(pipeline) > 1 {
 		cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameReports).Aggregate(ctx, pipeline)
 		if err != nil {
@@ -118,6 +123,21 @@ func (r *ReportResolver) Reporter(ctx context.Context) (*UserResolver, error) {
 	}
 
 	return CreateUserResolver(r.gCtx, ctx, r.Report.Reporter, &r.Report.ReporterID, GenerateSelectedFieldMap(ctx).Children)
+}
+
+func (r *ReportResolver) Assignees(ctx context.Context) ([]*UserResolver, error) {
+	resolvers := make([]*UserResolver, len(r.Report.Assignees))
+
+	for i, user := range r.Report.Assignees {
+		resolver, err := CreateUserResolver(r.gCtx, ctx, user, &user.ID, r.fields)
+		if err != nil {
+			return nil, err
+		}
+
+		resolvers[i] = resolver
+	}
+
+	return resolvers, nil
 }
 
 func (r *ReportResolver) Subject() string {
