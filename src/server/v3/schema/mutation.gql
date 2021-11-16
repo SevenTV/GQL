@@ -18,6 +18,7 @@ type Mutation {
 
     # Create a report
     createReport(data: CreateReportInput!): Report
+    editReport(report_id: String!, data: EditReportInput!): Report
 }
 
 input UserEmoteInput {
@@ -45,6 +46,20 @@ input CreateReportInput {
     target_id: String!
     subject: String!
     body: String!
+}
+
+input EditReportInput {
+    priority: Int
+    status: ReportStatus
+    assignee: String
+    note: EditReportNoteInput
+}
+
+input EditReportNoteInput {
+    timestamp: String!
+    content: String
+    internal: Boolean
+    reply: String
 }
 
 enum ListItemAction {
