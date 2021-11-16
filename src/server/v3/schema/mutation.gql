@@ -56,7 +56,7 @@ input EditReportInput {
 }
 
 input EditReportNoteInput {
-    timestamp: String!
+    timestamp: String
     content: String
     internal: Boolean
     reply: String

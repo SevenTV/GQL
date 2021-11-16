@@ -7,6 +7,7 @@ import (
 
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
+	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/server/v3/helpers"
 	"github.com/SevenTV/GQL/src/server/v3/resolvers/query"
 	"github.com/sirupsen/logrus"
@@ -143,6 +144,48 @@ func (r *Resolver) EditReport(ctx context.Context, args struct {
 			return nil, fmt.Errorf("invalid operator for assignee mutation")
 		}
 	}
+	if args.Data.Note != nil { // Adding or updating a report note
+		note := args.Data.Note
+		var n *structures.ReportNote
+		if note.Timestamp == nil {
+			if note.Content == nil {
+				return nil, fmt.Errorf("note content cannot be empty")
+			}
+
+			n = &structures.ReportNote{
+				Timestamp: time.Now(),
+				AuthorID:  actor.ID,
+				Content:   *note.Content,
+				Internal:  *utils.Ternary(note.Internal != nil, note.Internal, utils.BoolPointer(false)).(*bool),
+			}
+			rb.AddNote(n)
+		} else {
+			t, err := time.Parse(time.RFC3339, *note.Timestamp)
+			if err != nil {
+				return nil, err
+			}
+
+			// Find the report note to edit
+			ind := 0
+			for i, no := range report.Notes {
+				if no.Timestamp == t {
+					n = no
+					ind = i
+					break
+				}
+			}
+			if n == nil {
+				return nil, fmt.Errorf("report note not found")
+			}
+
+			if note.Content != nil {
+				rb.Update.Set(fmt.Sprintf("notes.%d.content", ind), note.Content)
+			}
+			if note.Internal != nil {
+				rb.Update.Set(fmt.Sprintf("notes.%d.internal", ind), note.Internal)
+			}
+		}
+	}
 
 	// Do update
 	if err = r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameReports).FindOneAndUpdate(ctx, bson.M{
@@ -169,8 +212,8 @@ type EditReportInput struct {
 }
 
 type EditReportNoteInput struct {
-	Timestamp time.Time `json:"timestamp"`
-	Content   *string   `json:"content"`
-	Internal  *bool     `json:"internal"`
-	Reply     *string   `json:"reply"`
+	Timestamp *string `json:"timestamp"`
+	Content   *string `json:"content"`
+	Internal  *bool   `json:"internal"`
+	Reply     *string `json:"reply"`
 }
