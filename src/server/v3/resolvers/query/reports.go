@@ -74,9 +74,6 @@ func (r *Resolver) Reports(ctx context.Context, args struct {
 	if _, ok := fields["reporter"]; ok {
 		pipeline = append(pipeline, aggregations.ReportRelationReporter...)
 	}
-	if _, ok := fields["target"]; ok {
-		pipeline = append(pipeline, aggregations.ReportRelationTarget...)
-	}
 	if _, ok := fields["assignees"]; ok {
 		pipeline = append(pipeline, aggregations.ReportRelationAssignees...)
 	}
@@ -98,7 +95,6 @@ func (r *Resolver) Reports(ctx context.Context, args struct {
 	for i, report := range reports {
 		resolver, err := CreateReportResolver(r.Ctx, ctx, report, &report.ID, fields)
 		if err != nil {
-			logrus.WithError(err).Error("mongo")
 			return nil, err
 		}
 		resolvers[i] = resolver

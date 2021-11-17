@@ -49,11 +49,6 @@ func CreateReportResolver(gCtx global.Context, ctx context.Context, report *stru
 		}
 	}
 
-	// Relation: target
-	if _, ok := fields["target"]; ok {
-		pipeline = append(pipeline, aggregations.ReportRelationTarget...)
-	}
-
 	// Relation: reporter
 	if _, ok := fields["reporter"]; ok {
 		pipeline = append(pipeline, aggregations.ReportRelationReporter...)
@@ -111,12 +106,8 @@ func (r *ReportResolver) TargetKind() string {
 	return string(r.Report.TargetKind)
 }
 
-func (r *ReportResolver) Target(ctx context.Context) (*UserResolver, error) {
-	if r.Report.TargetID.IsZero() {
-		return nil, nil
-	}
-
-	return CreateUserResolver(r.gCtx, ctx, r.Report.Target, &r.Report.TargetID, GenerateSelectedFieldMap(ctx).Children)
+func (r *ReportResolver) TargetID(ctx context.Context) string {
+	return r.Report.TargetID.Hex()
 }
 
 func (r *ReportResolver) Reporter(ctx context.Context) (*UserResolver, error) {
