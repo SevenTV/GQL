@@ -2,12 +2,14 @@ package query
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/SevenTV/Common/aggregations"
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
+	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/SevenTV/GQL/src/server/v3/helpers"
 	"github.com/sirupsen/logrus"
@@ -158,4 +160,19 @@ func (r *ReportResolver) Status() string {
 
 func (r *ReportResolver) CreatedAt() string {
 	return r.Report.CreatedAt.Format(time.RFC3339)
+}
+
+func (r *ReportResolver) Notes() ([]string, error) {
+	notes := make([]string, len(r.Report.Notes))
+
+	for i, no := range r.Report.Notes {
+		b, err := json.Marshal(no)
+		if err != nil {
+			return nil, err
+		}
+
+		notes[i] = utils.B2S(b)
+	}
+
+	return notes, nil
 }

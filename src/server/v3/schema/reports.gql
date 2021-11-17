@@ -10,6 +10,7 @@ type Report {
 	assignees: [User]!
 	status: ReportStatus!
 	created_at: String!
+	notes: [String!]!
 }
 
 enum TargetKind {
