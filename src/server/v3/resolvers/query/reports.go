@@ -75,7 +75,7 @@ func (r *Resolver) Reports(ctx context.Context, args struct {
 		pipeline = append(pipeline, aggregations.ReportRelationReporter...)
 	}
 	if _, ok := fields["assignees"]; ok {
-		pipeline = append(pipeline, aggregations.ReportRelationAssignees...)
+		pipeline = append(pipeline, aggregations.ReportRelationAssignees()...)
 	}
 
 	// Execute aggregation

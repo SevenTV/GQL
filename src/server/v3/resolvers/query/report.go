@@ -56,7 +56,7 @@ func CreateReportResolver(gCtx global.Context, ctx context.Context, report *stru
 
 	// Relation: assignees
 	if _, ok := fields["assignees"]; ok {
-		pipeline = append(pipeline, aggregations.ReportRelationAssignees...)
+		pipeline = append(pipeline, aggregations.ReportRelationAssignees()...)
 	}
 
 	if rb.Report.ID.IsZero() || len(pipeline) > 1 {

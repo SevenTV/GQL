@@ -18,8 +18,8 @@ import (
 
 const (
 	REPORT_SUBJECT_MIN_LENGTH      = 4
-	REPORT_SUBJECT_MAX_LENGTH      = 48
-	REPORT_BODY_MIN_LENGTH         = 8
+	REPORT_SUBJECT_MAX_LENGTH      = 72
+	REPORT_BODY_MIN_LENGTH         = 0
 	REPORT_BODY_MAX_LENGTH         = 2000
 	REPORT_ALLOWED_ACTIVE_PER_USER = 3
 )
@@ -81,6 +81,8 @@ func (r *Resolver) CreateReport(ctx context.Context, args struct {
 		SetSubject(args.Data.Subject).
 		SetBody(args.Data.Body).
 		SetCreatedAt(time.Now())
+	rb.Report.AssigneeIDs = []primitive.ObjectID{}
+	rb.Report.Notes = []*structures.ReportNote{}
 
 	result, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameReports).InsertOne(ctx, rb.Report)
 	if err != nil {
