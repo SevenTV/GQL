@@ -15,6 +15,7 @@ type Query {
 	role(id: String!): Role
 
 	reports(
+		status: ReportStatus,
 		limit: Int,
 		after_id: String
 		before_id: String

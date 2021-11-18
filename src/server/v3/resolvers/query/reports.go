@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/SevenTV/Common/aggregations"
 	"github.com/SevenTV/Common/mongo"
@@ -15,6 +16,7 @@ import (
 const REPORTS_QUERY_LIMIT int32 = 50
 
 func (r *Resolver) Reports(ctx context.Context, args struct {
+	Status   *structures.ReportStatus
 	Limit    *int32
 	AfterID  *string
 	BeforeID *string
@@ -42,6 +44,11 @@ func (r *Resolver) Reports(ctx context.Context, args struct {
 
 	// Paginate
 	pagination := bson.M{}
+	match := bson.M{}
+	if args.Status != nil {
+		fmt.Println(*args.Status)
+		match["status"] = *args.Status
+	}
 	if args.AfterID != nil && *args.AfterID != "" {
 		if afterID, err := primitive.ObjectIDFromHex(*args.AfterID); err != nil {
 			return nil, helpers.ErrBadObjectID
@@ -57,11 +64,12 @@ func (r *Resolver) Reports(ctx context.Context, args struct {
 		}
 	}
 	if len(pagination) > 0 {
+		match["_id"] = pagination
+	}
+	if len(match) > 0 {
 		pipeline = append(pipeline, bson.D{{
-			Key: "$match",
-			Value: bson.M{
-				"_id": pagination,
-			},
+			Key:   "$match",
+			Value: match,
 		}})
 	}
 	pipeline = append(pipeline, bson.D{{
