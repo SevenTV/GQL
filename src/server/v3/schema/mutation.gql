@@ -13,6 +13,12 @@ type Mutation {
     createRole(data: CreateRoleInput!): Role
     editRole(role_id: String!, data: EditRoleInput!): Role
     deleteRole(role_id: String!): String!
+
+    ### Report Mutations
+
+    # Create a report
+    createReport(data: CreateReportInput!): Report
+    editReport(report_id: String!, data: EditReportInput!): Report
 }
 
 input UserEmoteInput {
@@ -33,6 +39,27 @@ input EditRoleInput {
     allowed: String
     denied: String
     position: Int
+}
+
+input CreateReportInput {
+    target_kind: TargetKind!
+    target_id: String!
+    subject: String!
+    body: String!
+}
+
+input EditReportInput {
+    priority: Int
+    status: ReportStatus
+    assignee: String
+    note: EditReportNoteInput
+}
+
+input EditReportNoteInput {
+    timestamp: String
+    content: String
+    internal: Boolean
+    reply: String
 }
 
 enum ListItemAction {

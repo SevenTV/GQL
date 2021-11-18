@@ -10,7 +10,6 @@ import (
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
 	"github.com/SevenTV/Common/utils"
-	"github.com/SevenTV/GQL/src/configure"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -149,7 +148,7 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 	}...)
 
 	// Begin the pipeline, fetching the emotes
-	cur, err := r.Ctx.Inst().Mongo.Collection(configure.CollectionNameEmotes).Aggregate(ctx, pipeline)
+	cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, pipeline)
 	if err != nil && err != mongo.ErrNoDocuments {
 		logrus.WithError(err).Error("mongo")
 		return nil, err

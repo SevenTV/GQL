@@ -13,6 +13,14 @@ type Query {
 
 	roles: [Role]!
 	role(id: String!): Role
+
+	reports(
+		status: ReportStatus,
+		limit: Int,
+		after_id: String
+		before_id: String
+	): [Report]!
+	report(id: String!): Report
 }
 
 # Sorting cursor, binding a specific order to a value

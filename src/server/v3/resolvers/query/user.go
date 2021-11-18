@@ -11,6 +11,7 @@ import (
 	"github.com/SevenTV/Common/structures"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/global"
+	"github.com/SevenTV/GQL/src/server/v3/helpers"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -102,12 +103,14 @@ func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structur
 		}
 	}
 
-	if len(pipeline) > 1 {
+	if user.ID.IsZero() || len(pipeline) > 1 {
 		cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, pipeline)
 		if err != nil {
 			return nil, err
 		}
-		cur.Next(ctx)
+		if ok := cur.TryNext(ctx); !ok {
+			return nil, helpers.ErrUnknownUser
+		}
 		cur.Close(ctx)
 		if err = cur.Decode(user); err != nil {
 			logrus.WithError(err).Error("mongo")
