@@ -249,10 +249,10 @@ func (r *UserResolver) Editors() ([]*UserEditorResolvable, error) {
 
 // ChannelEmotes: user's active channel emotes
 func (r *UserResolver) ChannelEmotes() ([]*UserEmoteResolvable, error) {
-	result := make([]*UserEmoteResolvable, len(r.User.ChannelEmotes))
+	result := []*UserEmoteResolvable{}
 
 	fields := GenerateSelectedFieldMap(r.ctx)
-	for i, emote := range r.User.ChannelEmotes {
+	for _, emote := range r.User.ChannelEmotes {
 		if emote == nil || emote.Emote == nil {
 			continue
 		}
@@ -265,11 +265,11 @@ func (r *UserResolver) ChannelEmotes() ([]*UserEmoteResolvable, error) {
 			return nil, err
 		}
 
-		result[i] = &UserEmoteResolvable{
+		result = append(result, &UserEmoteResolvable{
 			Emote:       er,
 			Connections: []string{},
 			Alias:       emote.Alias,
-		}
+		})
 	}
 
 	return result, nil

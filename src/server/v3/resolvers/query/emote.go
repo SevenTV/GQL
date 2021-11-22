@@ -31,7 +31,10 @@ func CreateEmoteResolver(gCtx global.Context, ctx context.Context, emote *struct
 	var pipeline mongo.Pipeline
 	if emote == nil {
 		pipeline = mongo.Pipeline{
-			{{Key: "$match", Value: bson.M{"_id": emoteID}}},
+			{{Key: "$match", Value: bson.M{
+				"_id":    emoteID,
+				"status": bson.M{"$gte": structures.EmoteStatusProcessing},
+			}}},
 		}
 		emote = &structures.Emote{}
 	} else {
@@ -116,7 +119,7 @@ func (r *EmoteResolver) Flags() int32 {
 
 // Status: emote status
 func (r *EmoteResolver) Status() int32 {
-	return r.Emote.Status
+	return int32(r.Emote.Status)
 }
 
 // Tags: emote search tags
@@ -144,23 +147,9 @@ func (r *EmoteResolver) Links() [][]string {
 	return r.Emote.Links
 }
 
-// Width: the emote's image width
-func (r *EmoteResolver) Width() []int32 {
-	return r.Emote.Width
-}
-
-// Height: the emote's image height
-func (r *EmoteResolver) Height() []int32 {
-	return r.Emote.Height
-}
-
 // Animated: whether or not the emote is animated
 func (r *EmoteResolver) Animated() bool {
-	return r.Emote.Animated
-}
-
-func (r *EmoteResolver) AVIF() bool {
-	return r.Emote.AVIF
+	return r.Emote.FrameCount > 1
 }
 
 // Owner: the user who owns the emote
