@@ -7,6 +7,9 @@ type Mutation {
     # Add or Remove a user's role
     setUserRole(user_id: String!, role_id: String!, action: ListItemAction!): User
 
+    ### Emote Mutations
+    editEmote(emote_id: String!, data: EditEmoteInput!): Emote
+
     ### Role Mutations
 
     # Create a role
@@ -25,6 +28,13 @@ input UserEmoteInput {
     id: String!
     channels: [String!]
     alias: String
+}
+
+input EditEmoteInput {
+    name: String
+    flags: Int
+    owner_id: String
+    tags: [String!]
 }
 
 input CreateRoleInput {
