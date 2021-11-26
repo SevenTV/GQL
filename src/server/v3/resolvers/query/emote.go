@@ -65,7 +65,7 @@ func CreateEmoteResolver(gCtx global.Context, ctx context.Context, emote *struct
 		pipeline = append(pipeline, aggregations.GetEmoteRelationshipOwner(opt)...)
 	}
 
-	if emote.ID.IsZero() && len(pipeline) > 0 {
+	if emote.ID.IsZero() || len(pipeline) > 0 {
 		cur, _ := gCtx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, pipeline)
 		if ok := cur.TryNext(ctx); !ok {
 			return nil, helpers.ErrUnknownEmote
