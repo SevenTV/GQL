@@ -8,6 +8,8 @@ type Mutation {
     setUserRole(user_id: String!, role_id: String!, action: ListItemAction!): User
 
     ### Emote Mutations
+
+    # Edit an emote
     editEmote(emote_id: String!, data: EditEmoteInput!): Emote
 
     ### Role Mutations
@@ -21,7 +23,15 @@ type Mutation {
 
     # Create a report
     createReport(data: CreateReportInput!): Report
+    # Edit a report
     editReport(report_id: String!, data: EditReportInput!): Report
+
+    ### Ban Mutations
+
+    # Create a ban
+    createBan(victim_id: String!, reason: String!, effects: [BanEffect!]!, expire_at: String): Ban
+    # Edit a ban
+    editBan(ban_id: String!, reason: String, effects: [BanEffect!], expire_at: String): Ban
 }
 
 input UserEmoteInput {

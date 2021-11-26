@@ -11,7 +11,7 @@ type Ban {
     effects: [BanEffect!]!
     # The date on which the ban expire.
     # If this is zero, the ban is considered permanent
-    expire_at: String
+    expire_at: String!
 }
 
 enum BanEffect {
