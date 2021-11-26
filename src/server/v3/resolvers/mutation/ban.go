@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (r *Resolver) CreateBan(ctx context.Context, args struct {
@@ -117,6 +118,14 @@ func (r *Resolver) EditBan(ctx context.Context, args struct {
 			return nil, err
 		}
 		bb.SetExpireAt(t)
+	}
+
+	// Write to DB
+	if err = r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameBans).FindOneAndUpdate(ctx, bson.M{
+		"_id": ban.ID,
+	}, bb.Update, options.FindOneAndUpdate().SetReturnDocument(options.After)).Decode(ban); err != nil {
+		logrus.WithError(err).Error("mongo, failed to write ban update")
+		return nil, err
 	}
 
 	return query.CreateBanResolver(r.Ctx, ctx, ban, &ban.ID, query.GenerateSelectedFieldMap(ctx).Children)
