@@ -36,7 +36,7 @@ func (r *Resolver) SetUserRole(ctx context.Context, args struct {
 	if err != nil {
 		return nil, err
 	}
-	if r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameRoles).FindOne(ctx, bson.M{"_id": roleID}).Decode(role); err != nil {
+	if err = r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameRoles).FindOne(ctx, bson.M{"_id": roleID}).Decode(role); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, helpers.ErrUnknownRole
 		}

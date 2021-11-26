@@ -8,3 +8,4 @@ tmp/
 !example.config.yaml
 !docker-compose.yaml
 !.github/**/*.yaml
+Dockerfile

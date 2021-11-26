@@ -12,12 +12,10 @@ import (
 type Config struct {
 	Level      string `mapstructure:"level" json:"level"`
 	ConfigFile string `mapstructure:"config_file" json:"config_file"`
-
+	NoHeader   bool   `mapstructure:"noheader" json:"noheader"`
 	WebsiteURL string `mapstructure:"website_url" json:"website_url"`
-
-	NodeName string `mapstructure:"node_name" json:"node_name"`
-
-	CdnURL string `mapstructure:"cdn_url" json:"cdn_url"`
+	NodeName   string `mapstructure:"node_name" json:"node_name"`
+	CdnURL     string `mapstructure:"cdn_url" json:"cdn_url"`
 
 	Redis struct {
 		URI string `mapstructure:"uri" json:"uri"`
@@ -91,7 +89,7 @@ func New() *Config {
 	c := &Config{}
 	checkErr(config.Unmarshal(&c))
 
-	InitLogging(c.Level)
+	initLogging(c.Level)
 
 	return c
 }

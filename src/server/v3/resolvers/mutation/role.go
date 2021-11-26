@@ -43,9 +43,13 @@ func (r *Resolver) CreateRole(ctx context.Context, args struct {
 	rm := mutations.RoleMutation{
 		RoleBuilder: rb,
 	}
-	rm.Create(ctx, r.Ctx.Inst().Mongo, mutations.RoleMutationOptions{
+
+	_, err = rm.Create(ctx, r.Ctx.Inst().Mongo, mutations.RoleMutationOptions{
 		Actor: actor,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return query.CreateRoleResolver(r.Ctx, ctx, rm.RoleBuilder.Role, &rm.RoleBuilder.Role.ID, query.GenerateSelectedFieldMap(ctx).Children)
 }

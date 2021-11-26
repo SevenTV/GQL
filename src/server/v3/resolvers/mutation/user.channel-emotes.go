@@ -47,8 +47,14 @@ func (r *Resolver) SetChannelEmote(ctx context.Context, args struct {
 		}
 
 		cur.Next(ctx)
-		cur.Decode(targetUser)
-		cur.Close(ctx)
+		err = cur.Decode(targetUser)
+		if err != nil {
+			return nil, err
+		}
+		err = cur.Close(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Prepare the mutation
