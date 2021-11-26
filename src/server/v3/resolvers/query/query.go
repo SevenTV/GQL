@@ -3,6 +3,7 @@ package query
 import (
 	"context"
 
+	"github.com/SevenTV/Common/structures"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/selection"
@@ -56,4 +57,9 @@ var (
 var sortOrderMap = map[string]int32{
 	string(SortOrderDescending): 1,
 	string(SortOrderAscending):  -1,
+}
+
+// GetDefaultRoles: Get a list of default roles
+func GetDefaultRoles(gCtx global.Context, ctx context.Context) []*structures.Role {
+	return nil
 }

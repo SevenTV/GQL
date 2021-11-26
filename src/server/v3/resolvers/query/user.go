@@ -198,10 +198,13 @@ func (r *UserResolver) Biography() string {
 }
 
 // Role: user's role
-func (r *UserResolver) Roles() ([]*RoleResolver, error) {
-	resolvers := make([]*RoleResolver, len(r.User.Roles))
+func (r *UserResolver) Roles(ctx context.Context) ([]*RoleResolver, error) {
+
+	// Get default roles
+	r.User.AddRoles(structures.FetchDefaultRoles(ctx, r.gCtx.Inst().Mongo)...)
 
 	fields := GenerateSelectedFieldMap(r.ctx)
+	resolvers := make([]*RoleResolver, len(r.User.Roles))
 	for i, role := range r.User.Roles {
 		resolver, err := CreateRoleResolver(r.gCtx, r.ctx, role, &role.ID, fields.Children)
 		if err != nil {
