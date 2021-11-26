@@ -64,7 +64,7 @@ func (r *Resolver) EditEmote(ctx context.Context, args struct {
 	if args.Data.Flags != nil {
 		sum := *args.Data.Flags
 		hasFlag := func(flag structures.EmoteFlag) bool {
-			if utils.BitField.HasBits(int64(sum), int64(flag)) {
+			if !utils.BitField.HasBits(int64(emote.Flags), int64(flag)) && utils.BitField.HasBits(int64(sum), int64(flag)) {
 				return true
 			} else if utils.BitField.HasBits(int64(emote.Flags), int64(flag)) && !utils.BitField.HasBits(int64(sum), int64(flag)) {
 				return true
@@ -72,15 +72,11 @@ func (r *Resolver) EditEmote(ctx context.Context, args struct {
 			return false
 		}
 
-		// Add: Listed
+		// Check permissions for "Listed" privileged flag
 		if hasFlag(structures.EmoteFlagsListed) && !actor.HasPermission(structures.RolePermissionEditAnyEmote) {
 			return nil, helpers.ErrAccessDenied
 		}
-		// Add: Zero-Width
-		if hasFlag(structures.EmoteFlagsZeroWidth) && !actor.HasPermission(structures.RolePermissionFeatureZeroWidthEmoteType) {
-			return nil, helpers.ErrAccessDenied
-		}
-		eb.SetFlags(eb.Emote.Flags | sum)
+		eb.SetFlags(structures.EmoteFlag(sum))
 	}
 	if args.Data.OwnerID != nil {
 		ownerID, err := primitive.ObjectIDFromHex(*args.Data.OwnerID)
@@ -109,8 +105,8 @@ func (r *Resolver) EditEmote(ctx context.Context, args struct {
 }
 
 type EditEmoteInput struct {
-	Name    *string               `json:"name"`
-	Flags   *structures.EmoteFlag `json:"flags"`
-	OwnerID *string               `json:"owner_id"`
-	Tags    *[]string             `json:"tags"`
+	Name    *string   `json:"name"`
+	Flags   *int32    `json:"flags"`
+	OwnerID *string   `json:"owner_id"`
+	Tags    *[]string `json:"tags"`
 }
