@@ -21,7 +21,7 @@ func (r *Resolver) EditEmote(ctx context.Context, args struct {
 	Data    EditEmoteInput
 }) (*query.EmoteResolver, error) {
 	// Get current actor
-	actor := ctx.Value(helpers.UserKey).(*structures.User)
+	actor, _ := ctx.Value(helpers.UserKey).(*structures.User)
 	if actor == nil {
 		return nil, helpers.ErrAccessDenied
 	}

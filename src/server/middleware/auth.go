@@ -15,11 +15,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func Auth(gCtx global.Context) func(c *fiber.Ctx) error {
+func Auth(gCtx global.Context, optional bool) func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		ctx := c.Context()
 		// Parse token from header
 		h := c.Get("Authorization")
+		if len(h) == 0 && optional {
+			return c.Next()
+		}
+
 		s := strings.Split(h, "Bearer ")
 		if len(s) != 2 {
 			return c.Status(401).JSON(&fiber.Map{"error": "Bad Authorization Header"})

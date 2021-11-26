@@ -14,7 +14,7 @@ func API(gCtx global.Context, app fiber.Router) { // Define CORS rules
 		AllowMethods:  "GET,POST",
 	}))
 
-	app.Use(middleware.Auth(gCtx))
+	app.Use(middleware.Auth(gCtx, true))
 
 	GQL(gCtx, app)
 }

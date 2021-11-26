@@ -22,8 +22,8 @@ func (r *Resolver) Reports(ctx context.Context, args struct {
 	BeforeID *string
 }) ([]*ReportResolver, error) {
 	// Get the actor
-	actor, ok := ctx.Value(helpers.UserKey).(*structures.User)
-	if !ok {
+	actor, _ := ctx.Value(helpers.UserKey).(*structures.User)
+	if actor == nil {
 		return nil, helpers.ErrUnauthorized
 	}
 	if !actor.HasPermission(structures.RolePermissionManageReports) {

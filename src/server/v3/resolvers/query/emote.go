@@ -90,8 +90,6 @@ func CreateEmoteResolver(gCtx global.Context, ctx context.Context, emote *struct
 func (r *Resolver) Emote(ctx context.Context, args struct {
 	ID string
 }) (*EmoteResolver, error) {
-	//user, ok := ctx.Value(helpers.UserKey).(*structures.User)
-
 	// Parse ID
 	emoteID, err := primitive.ObjectIDFromHex(args.ID)
 	if err != nil {

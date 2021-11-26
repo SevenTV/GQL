@@ -28,8 +28,8 @@ func (r *Resolver) CreateReport(ctx context.Context, args struct {
 	Data CreateReportInput
 }) (*query.ReportResolver, error) {
 	// Get actor
-	actor, ok := ctx.Value(helpers.UserKey).(*structures.User)
-	if !ok {
+	actor, _ := ctx.Value(helpers.UserKey).(*structures.User)
+	if actor == nil {
 		return nil, helpers.ErrUnauthorized
 	}
 	// Actor must have the permission to create reports
@@ -98,8 +98,8 @@ func (r *Resolver) EditReport(ctx context.Context, args struct {
 	ReportID string
 	Data     EditReportInput
 }) (*query.ReportResolver, error) {
-	actor, ok := ctx.Value(helpers.UserKey).(*structures.User)
-	if !ok {
+	actor, _ := ctx.Value(helpers.UserKey).(*structures.User)
+	if actor == nil {
 		return nil, helpers.ErrUnauthorized
 	}
 	if !actor.HasPermission(structures.RolePermissionManageReports) {

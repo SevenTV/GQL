@@ -133,17 +133,21 @@ func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structur
 func (r *Resolver) User(ctx context.Context, args struct {
 	ID string
 }) (*UserResolver, error) {
-	user, ok := ctx.Value(utils.Key("user")).(*structures.User)
+	user, _ := ctx.Value(helpers.UserKey).(*structures.User)
 
 	var (
 		resolver *UserResolver
 		err      error
 	)
 	fields := GenerateSelectedFieldMap(ctx)
-	if args.ID == "@me" && ok {
-		resolver, err = CreateUserResolver(r.Ctx, ctx, user, &user.ID, fields.Children)
-		if err != nil {
-			return nil, err
+	if args.ID == "@me" {
+		if user != nil {
+			resolver, err = CreateUserResolver(r.Ctx, ctx, user, &user.ID, fields.Children)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, helpers.ErrUnauthorized
 		}
 	} else {
 		id, err := primitive.ObjectIDFromHex(args.ID)

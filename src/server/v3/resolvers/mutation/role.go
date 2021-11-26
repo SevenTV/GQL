@@ -19,7 +19,7 @@ func (r *Resolver) CreateRole(ctx context.Context, args struct {
 	Data CreateRoleInput
 }) (*query.RoleResolver, error) {
 	// Get the actor user
-	actor := ctx.Value(helpers.UserKey).(*structures.User)
+	actor, _ := ctx.Value(helpers.UserKey).(*structures.User)
 	if actor == nil {
 		return nil, helpers.ErrUnauthorized
 	}
@@ -59,7 +59,7 @@ func (r *Resolver) EditRole(ctx context.Context, args struct {
 	Data   EditRoleInput
 }) (*query.RoleResolver, error) {
 	// Get the actor user
-	actor := ctx.Value(helpers.UserKey).(*structures.User)
+	actor, _ := ctx.Value(helpers.UserKey).(*structures.User)
 	if actor == nil {
 		return nil, helpers.ErrUnauthorized
 	}
@@ -132,7 +132,7 @@ func (r *Resolver) DeleteRole(ctx context.Context, args struct {
 	RoleID string
 }) (string, error) {
 	// Get the actor user
-	actor := ctx.Value(helpers.UserKey).(*structures.User)
+	actor, _ := ctx.Value(helpers.UserKey).(*structures.User)
 	if actor == nil {
 		return "", helpers.ErrUnauthorized
 	}

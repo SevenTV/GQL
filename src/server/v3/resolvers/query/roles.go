@@ -13,7 +13,7 @@ import (
 
 func (r *Resolver) Roles(ctx context.Context) ([]*RoleResolver, error) {
 	// Check permissions
-	actor := ctx.Value(helpers.UserKey).(*structures.User)
+	actor, _ := ctx.Value(helpers.UserKey).(*structures.User)
 	if actor == nil {
 		return nil, helpers.ErrUnauthorized
 	}

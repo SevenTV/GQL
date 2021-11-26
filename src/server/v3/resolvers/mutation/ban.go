@@ -21,7 +21,7 @@ func (r *Resolver) CreateBan(ctx context.Context, args struct {
 	ExpireAt *string
 }) (*query.BanResolver, error) {
 	// Get the actor user
-	actor := ctx.Value(helpers.UserKey).(*structures.User)
+	actor, _ := ctx.Value(helpers.UserKey).(*structures.User)
 	if actor == nil {
 		return nil, helpers.ErrUnauthorized
 	}
@@ -85,7 +85,7 @@ func (r *Resolver) EditBan(ctx context.Context, args struct {
 	ExpireAt *string
 }) (*query.BanResolver, error) {
 	// Get the actor user
-	actor := ctx.Value(helpers.UserKey).(*structures.User)
+	actor, _ := ctx.Value(helpers.UserKey).(*structures.User)
 	if actor == nil {
 		return nil, helpers.ErrUnauthorized
 	}
