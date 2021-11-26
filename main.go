@@ -49,7 +49,7 @@ func main() {
 	}
 
 	if !config.NoHeader {
-		logrus.Info("7TV REST API")
+		logrus.Info("7TV GQL API")
 		logrus.Infof("Version: %s", Version)
 		logrus.Infof("build.Time: %s", Time)
 		logrus.Infof("build.User: %s", User)
