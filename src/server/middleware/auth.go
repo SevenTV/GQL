@@ -59,8 +59,14 @@ func Auth(gCtx global.Context) func(c *fiber.Ctx) error {
 			return c.SendStatus(500)
 		}
 		cur.Next(ctx)
-		cur.Decode(user)
-		cur.Close(ctx)
+		err = cur.Decode(user)
+		if err != nil {
+			return err
+		}
+		err = cur.Close(ctx)
+		if err != nil {
+			return err
+		}
 
 		// Check bans
 		for _, ban := range user.Bans {

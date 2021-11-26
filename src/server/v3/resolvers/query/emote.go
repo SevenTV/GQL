@@ -208,7 +208,7 @@ func (r *EmoteResolver) Channels(ctx context.Context, args struct {
 				"_role.position": -1,
 			},
 		}},
-		// {{Key: "$limit", Value: limit}},
+		{{Key: "$limit", Value: limit}},
 	}
 
 	users := []*structures.User{}
