@@ -8,3 +8,5 @@ tmp/
 !example.config.yaml
 !docker-compose.yaml
 !.github/**/*.yaml
+packrd/
+*-packr.go

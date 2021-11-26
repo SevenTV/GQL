@@ -13,6 +13,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.20.1
 	github.com/graph-gophers/graphql-go v1.2.0
 	github.com/sirupsen/logrus v1.8.1
+	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.9.0
 	go.mongodb.org/mongo-driver v1.7.3
 )
@@ -43,7 +44,6 @@ require (
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.29.0 // indirect

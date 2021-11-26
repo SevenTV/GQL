@@ -11,6 +11,7 @@ ENV GQL_BUILDER=${BUILDER}
 ENV GQL_VERSION=${VERSION}
 
 RUN apk add --no-cache make git && \
+    go install github.com/gobuffalo/packr/v2/packr2@latest && \
     make linux
 
 FROM alpine:latest
