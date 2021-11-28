@@ -45,7 +45,8 @@ func GQL(gCtx global.Context, app fiber.Router) {
 	s := strings.Builder{}
 	files := []string{
 		"query.gql", "emotes.gql", "users.gql",
-		"reports.gql", "bans.gql", "mutation.gql",
+		"reports.gql", "bans.gql", "messages.gql",
+		"mutation.gql",
 	}
 	for _, f := range files {
 		sch, err := box.FindString(f)

@@ -1,0 +1,14 @@
+
+type Message {
+    id: String!
+    kind: MessageKind!
+    created_at: String!
+    author: User
+    data: String!
+}
+
+enum MessageKind {
+    EMOTE_COMMENT
+    INBOX
+    NEWS
+}
