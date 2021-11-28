@@ -120,6 +120,8 @@ func CreateUserResolver(gCtx global.Context, ctx context.Context, user *structur
 
 	// Sort roles
 	user.SortRoles()
+	// Set default roles
+	user.AddRoles(structures.FetchDefaultRoles(ctx, gCtx.Inst().Mongo)...)
 
 	ub := structures.NewUserBuilder(user)
 	return &UserResolver{
@@ -203,10 +205,6 @@ func (r *UserResolver) Biography() string {
 
 // Role: user's role
 func (r *UserResolver) Roles(ctx context.Context) ([]*RoleResolver, error) {
-
-	// Get default roles
-	r.User.AddRoles(structures.FetchDefaultRoles(ctx, r.gCtx.Inst().Mongo)...)
-
 	fields := GenerateSelectedFieldMap(r.ctx)
 	resolvers := make([]*RoleResolver, len(r.User.Roles))
 	for i, role := range r.User.Roles {
