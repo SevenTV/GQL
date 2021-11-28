@@ -44,11 +44,9 @@ func (r *Resolver) SendInboxMessage(ctx context.Context, args struct {
 	// Find recipients
 	recipients := []*structures.User{}
 	cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Find(ctx, bson.M{
-		"_id": bson.M{
-			"$and": bson.A{
-				bson.M{"$eq": recipientIDs},
-				bson.M{"$not": bson.M{"$eq": actor.BlockedUserIDs}},
-			},
+		"$and": bson.A{
+			bson.M{"_id": recipientIDs},
+			bson.M{"_id": bson.M{"$not": bson.M{"$eq": actor.BlockedUserIDs}}},
 		},
 	})
 	if err != nil {

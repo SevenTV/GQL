@@ -99,5 +99,5 @@ func (r *MessageResolver) Author(ctx context.Context) (*UserResolver, error) {
 }
 
 func (r *MessageResolver) Data() string {
-	return string(r.Message.Data)
+	return r.Message.Data.String()
 }
