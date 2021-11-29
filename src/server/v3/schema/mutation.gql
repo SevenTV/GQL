@@ -32,6 +32,24 @@ type Mutation {
     createBan(victim_id: String!, reason: String!, effects: [BanEffect!]!, expire_at: String): Ban
     # Edit a ban
     editBan(ban_id: String!, reason: String, effects: [BanEffect!], expire_at: String): Ban
+
+    ### Messaging
+
+    readMessages(message_ids: [String!]!, read: Boolean): Int
+    # Send a message to a user's inbox
+    sendInboxMessage(
+        recipients: [String!]!,
+        subject: String!,
+        content: String!,
+        important: Boolean,
+        anonymous: Boolean
+    ): Message
+}
+
+enum ListItemAction {
+    ADD
+    UPDATE
+    REMOVE
 }
 
 input UserEmoteInput {
@@ -80,10 +98,4 @@ input EditReportNoteInput {
     content: String
     internal: Boolean
     reply: String
-}
-
-enum ListItemAction {
-    ADD
-    UPDATE
-    REMOVE
 }

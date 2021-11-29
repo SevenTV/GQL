@@ -1,6 +1,8 @@
 type Query {
 	user(id: String!): User!
 
+	### Emotes
+
 	emote(id: String!): Emote
 	emotes(
 		query: String!,
@@ -11,8 +13,12 @@ type Query {
 		# providers: [Provider!],
 	): [Emote]!
 
+	### Roles
+
 	roles: [Role]!
 	role(id: String!): Role
+
+	### Reporting
 
 	reports(
 		status: ReportStatus,
@@ -21,6 +27,12 @@ type Query {
 		before_id: String
 	): [Report]!
 	report(id: String!): Report
+
+	### Messaging
+
+	# Get inbox messages
+	inbox(after_id: String): [Message]!
+	# inboxMessage(id: String!): Message
 }
 
 # Sorting cursor, binding a specific order to a value
