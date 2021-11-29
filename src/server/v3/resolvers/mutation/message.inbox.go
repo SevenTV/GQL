@@ -14,6 +14,45 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+func (r *Resolver) ReadMessages(ctx context.Context, args struct {
+	MessageIDs []string
+	Read       *bool
+}) (*int32, error) {
+	// Get the actor user
+	actor, ok := ctx.Value(helpers.UserKey).(*structures.User)
+	if !ok {
+		return nil, helpers.ErrAccessDenied
+	}
+
+	// Parse message IDs
+	messageIDs := []primitive.ObjectID{}
+	for _, s := range args.MessageIDs {
+		if !primitive.IsValidObjectID(s) {
+			continue
+		}
+		id, _ := primitive.ObjectIDFromHex(s)
+		messageIDs = append(messageIDs, id)
+	}
+
+	// Update the readstates
+	value := true
+	if args.Read != nil && !*args.Read {
+		value = false
+	}
+	result, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameMessagesRead).UpdateMany(ctx, bson.M{
+		"recipient_id": actor.ID,
+		"message_id":   bson.M{"$in": messageIDs},
+	}, bson.M{
+		"$set": bson.M{"read": value},
+	})
+	if err != nil {
+		logrus.WithError(err).Error("mongo")
+		return nil, err
+	}
+
+	return utils.Int32Pointer(int32(result.ModifiedCount)), nil
+}
+
 func (r *Resolver) SendInboxMessage(ctx context.Context, args struct {
 	Recipients []string
 	Subject    string
