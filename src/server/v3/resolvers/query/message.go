@@ -30,7 +30,8 @@ func CreateMessageResolver(gCtx global.Context, ctx context.Context, msg *struct
 		return nil, fmt.Errorf("unresolvable")
 	}
 	if msg == nil {
-		mb.Message = &structures.Message{}
+		msg = &structures.Message{}
+		mb.Message = msg
 		pipeline = mongo.Pipeline{
 			{{
 				Key:   "$match",
@@ -44,6 +45,22 @@ func CreateMessageResolver(gCtx global.Context, ctx context.Context, msg *struct
 				Value: bson.M{"newRoot": msg},
 			}},
 		}
+	}
+
+	// Relation: author
+	if _, ok := fields["author"]; ok && msg.Author == nil {
+		pipeline = append(pipeline, []bson.D{
+			{{
+				Key: "$lookup",
+				Value: mongo.Lookup{
+					From:         mongo.CollectionNameUsers,
+					LocalField:   "author_id",
+					ForeignField: "_id",
+					As:           "_author",
+				},
+			}},
+			{{Key: "$set", Value: bson.M{"author": bson.M{"$first": "$_author"}}}}, {{Key: "$unset", Value: bson.A{"_author"}}},
+		}...)
 	}
 
 	if mb.Message.ID.IsZero() || len(pipeline) > 1 {
