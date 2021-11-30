@@ -3,6 +3,7 @@ package query
 import (
 	"context"
 
+	"github.com/SevenTV/Common/aggregations"
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
 	"github.com/SevenTV/GQL/src/server/v3/helpers"
@@ -67,11 +68,22 @@ func (r *Resolver) Inbox(ctx context.Context, args struct {
 		pipeline = append(pipeline, []bson.D{
 			{{
 				Key: "$lookup",
-				Value: mongo.Lookup{
-					From:         mongo.CollectionNameUsers,
-					LocalField:   "author_id",
-					ForeignField: "_id",
-					As:           "_author",
+				Value: mongo.LookupWithPipeline{
+					From: mongo.CollectionNameUsers,
+					Let:  bson.M{"author_id": "$author_id"},
+					Pipeline: func() *mongo.Pipeline {
+						p := mongo.Pipeline{
+							{{
+								Key: "$match",
+								Value: bson.M{
+									"$expr": bson.M{"$eq": bson.A{"$$author_id", "$_id"}},
+								},
+							}},
+						}
+						p = append(p, aggregations.UserRelationRoles...)
+						return &p
+					}(),
+					As: "_author",
 				},
 			}},
 			{{Key: "$set", Value: bson.M{"author": bson.M{"$first": "$_author"}}}}, {{Key: "$unset", Value: bson.A{"_author"}}},

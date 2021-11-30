@@ -5,6 +5,7 @@ type Message {
     created_at: String!
     author: User
     data: String!
+    read: Boolean!
 }
 
 enum MessageKind {

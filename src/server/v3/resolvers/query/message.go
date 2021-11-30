@@ -118,3 +118,7 @@ func (r *MessageResolver) Author(ctx context.Context) (*UserResolver, error) {
 func (r *MessageResolver) Data() string {
 	return r.Message.Data.String()
 }
+
+func (r *MessageResolver) Read() bool {
+	return r.Message.Read
+}
