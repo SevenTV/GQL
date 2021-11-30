@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"sort"
 
 	"github.com/SevenTV/Common/aggregations"
 	"github.com/SevenTV/Common/mongo"
@@ -101,6 +102,11 @@ func (r *Resolver) Inbox(ctx context.Context, args struct {
 		logrus.WithError(err).Error("mongo")
 		return nil, err
 	}
+	sort.Slice(messages, func(i, j int) bool {
+		a := messages[i]
+		b := messages[j]
+		return a.CreatedAt.After(b.CreatedAt)
+	})
 
 	// Generate resolvers
 	resolvers := make([]*MessageResolver, len(messages))
