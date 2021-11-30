@@ -17,6 +17,7 @@ type Emote {
 	owner: User
 	# The channels where this emote is active
 	channels(limit: Int, after_id: String!): [PartialUser]!
+	channel_count: Int!
 
  	# CDN Links to this emote
  	links: [[String!]!]!
