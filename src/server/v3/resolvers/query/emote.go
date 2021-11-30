@@ -233,3 +233,17 @@ func (r *EmoteResolver) Channels(ctx context.Context, args struct {
 
 	return resolvers, nil
 }
+
+func (r *EmoteResolver) ChannelCount(ctx context.Context) (int32, error) {
+	emote := r.Emote
+
+	count, err := r.gCtx.Inst().Mongo.Collection(mongo.CollectionNameUsers).CountDocuments(ctx, bson.M{
+		"channel_emotes.id": emote.ID,
+	})
+	if err != nil {
+		logrus.WithError(err).Error("mongo")
+		return 0, err
+	}
+
+	return int32(count), nil
+}
