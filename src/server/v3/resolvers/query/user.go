@@ -335,6 +335,23 @@ func (r *UserResolver) Connections() ([]*UserConnectionResolvable, error) {
 	return conns, nil
 }
 
+func (r *UserResolver) InboxUnreadCount(ctx context.Context) int32 {
+	actor, ok := ctx.Value(helpers.UserKey).(*structures.User)
+	if !ok || actor.ID != r.User.ID {
+		return 0
+	}
+
+	count, err := r.gCtx.Inst().Mongo.Collection(mongo.CollectionNameMessagesRead).CountDocuments(ctx, bson.M{
+		"recipient_id": r.User.ID,
+		"read":         false,
+	})
+	if err != nil {
+		logrus.WithError(err).Error("mongo")
+	}
+
+	return int32(count)
+}
+
 type UserEditorResolvable struct {
 	User        *UserResolver `json:"user"`
 	Connections []string      `json:"connections"`

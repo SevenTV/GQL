@@ -13,6 +13,8 @@ type User {
     channel_emotes: [UserEmote]!
     owned_emotes: [Emote]!
     connections: [UserConnection]!
+
+    inbox_unread_count: Int!
 }
 
 type UserEditor {
