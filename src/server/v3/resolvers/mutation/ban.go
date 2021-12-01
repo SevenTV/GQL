@@ -6,6 +6,8 @@ import (
 
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
+	"github.com/SevenTV/Common/structures/mutations"
+	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/server/v3/helpers"
 	"github.com/SevenTV/GQL/src/server/v3/resolvers/query"
 	"github.com/sirupsen/logrus"
@@ -15,10 +17,11 @@ import (
 )
 
 func (r *Resolver) CreateBan(ctx context.Context, args struct {
-	VictimID string
-	Reason   string
-	Effects  []structures.BanEffect
-	ExpireAt *string
+	VictimID  string
+	Reason    string
+	Effects   int32
+	ExpireAt  *string
+	Anonymous *bool
 }) (*query.BanResolver, error) {
 	// Get the actor user
 	actor, _ := ctx.Value(helpers.UserKey).(*structures.User)
@@ -60,7 +63,7 @@ func (r *Resolver) CreateBan(ctx context.Context, args struct {
 		SetActorID(actor.ID).
 		SetReason(args.Reason).
 		SetExpireAt(expireAt).
-		SetEffects(args.Effects)
+		SetEffects(structures.BanEffect(args.Effects))
 
 	// Write to DB
 	if _, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameBans).InsertOne(ctx, bb.Ban); err != nil {
@@ -75,13 +78,36 @@ func (r *Resolver) CreateBan(ctx context.Context, args struct {
 		logrus.WithError(err).Error("mongo, failed to remove banned user's bound roles")
 	}
 
+	// Send a message to the victim's inbox
+	anon := utils.Ternary(args.Anonymous != nil && *args.Anonymous, true, false).(bool)
+	mb := structures.NewMessageBuilder(&structures.Message{}).
+		SetKind(structures.MessageKindInbox).
+		SetAuthorID(actor.ID).
+		SetTimestamp(time.Now()).
+		SetAnonymous(anon).
+		AsInbox(structures.MessageDataInbox{
+			Subject:   "inbox.generic.client_banned.subject",
+			Content:   "inbox.generic.client_banned.content",
+			Important: true,
+		})
+	mm := mutations.MessageMutation{
+		MessageBuilder: mb,
+	}
+	if _, err := mm.SendInboxMessage(ctx, r.Ctx.Inst().Mongo, mutations.SendInboxMessageOptions{
+		Actor:                actor,
+		Recipients:           []primitive.ObjectID{victim.ID},
+		ConsiderBlockedUsers: false,
+	}); err != nil {
+		return nil, err
+	}
+
 	return query.CreateBanResolver(r.Ctx, ctx, bb.Ban, &bb.Ban.ID, query.GenerateSelectedFieldMap(ctx).Children)
 }
 
 func (r *Resolver) EditBan(ctx context.Context, args struct {
 	BanID    string
 	Reason   *string
-	Effects  *[]structures.BanEffect
+	Effects  *structures.BanEffect
 	ExpireAt *string
 }) (*query.BanResolver, error) {
 	// Get the actor user

@@ -8,16 +8,8 @@ type Ban {
     # The reason for the ban
     reason: String!
     # The effects this ban has
-    effects: [BanEffect!]!
+    effects: Int!
     # The date on which the ban expire.
     # If this is zero, the ban is considered permanent
     expire_at: String!
-}
-
-enum BanEffect {
-    NO_PERMISSIONS
-    NO_AUTH
-    NO_OWNERSHIP
-    MEMORY_HOLE
-    IP_BLOCKED
 }

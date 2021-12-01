@@ -93,8 +93,8 @@ func (r *BanResolver) Reason() string {
 	return r.Ban.Reason
 }
 
-func (r *BanResolver) Effects() []structures.BanEffect {
-	return r.Ban.Effects
+func (r *BanResolver) Effects() int32 {
+	return int32(r.Ban.Effects)
 }
 
 func (r *BanResolver) ExpireAt() string {

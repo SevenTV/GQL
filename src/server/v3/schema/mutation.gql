@@ -29,9 +29,9 @@ type Mutation {
     ### Ban Mutations
 
     # Create a ban
-    createBan(victim_id: String!, reason: String!, effects: [BanEffect!]!, expire_at: String): Ban
+    createBan(victim_id: String!, reason: String!, effects: Int!, expire_at: String, anonymous: Boolean): Ban
     # Edit a ban
-    editBan(ban_id: String!, reason: String, effects: [BanEffect!], expire_at: String): Ban
+    editBan(ban_id: String!, reason: String, effects: Int, expire_at: String): Ban
 
     ### Messaging
 
