@@ -2,6 +2,8 @@ package mutation
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/SevenTV/Common/mongo"
@@ -89,6 +91,20 @@ func (r *Resolver) CreateBan(ctx context.Context, args struct {
 			Subject:   "inbox.generic.client_banned.subject",
 			Content:   "inbox.generic.client_banned.content",
 			Important: true,
+			Placeholders: func() map[string]string {
+				m := map[string]string{
+					"BAN_REASON":    bb.Ban.Reason,
+					"BAN_EXPIRE_AT": utils.Ternary(bb.Ban.ExpireAt.IsZero(), "never", bb.Ban.ExpireAt.Format(time.RFC822)).(string),
+				}
+				for k, e := range structures.BanEffectMap {
+					if bb.Ban.HasEffect(e) {
+						m[fmt.Sprintf("EFFECT_%s", k)] = fmt.Sprintf(
+							"inbox.generic.client_banned.effect.%s", strings.ToLower(k),
+						)
+					}
+				}
+				return m
+			}(),
 		})
 	mm := mutations.MessageMutation{
 		MessageBuilder: mb,
