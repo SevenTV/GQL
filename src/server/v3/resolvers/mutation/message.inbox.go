@@ -6,6 +6,7 @@ import (
 
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures"
+	"github.com/SevenTV/Common/structures/mutations"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/server/v3/helpers"
 	"github.com/SevenTV/GQL/src/server/v3/resolvers/query"
@@ -80,23 +81,6 @@ func (r *Resolver) SendInboxMessage(ctx context.Context, args struct {
 		recipientIDs = append(recipientIDs, id)
 	}
 
-	// Find recipients
-	recipients := []*structures.User{}
-	cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Find(ctx, bson.M{
-		"$and": bson.A{
-			bson.M{"_id": recipientIDs},
-			bson.M{"_id": bson.M{"$not": bson.M{"$eq": actor.BlockedUserIDs}}},
-		},
-	})
-	if err != nil {
-		logrus.WithError(err).Error("mongo")
-		return nil, err
-	}
-	if err = cur.All(ctx, &recipients); err != nil {
-		logrus.WithError(err).Error("mongo")
-		return nil, err
-	}
-
 	// Create the message
 	anon := utils.Ternary(args.Anonymous != nil && *args.Anonymous, true, false).(bool)
 	important := utils.Ternary(args.Important != nil && *args.Important, true, false).(bool)
@@ -111,28 +95,16 @@ func (r *Resolver) SendInboxMessage(ctx context.Context, args struct {
 			Important: important,
 		})
 
-	// Write message to DB
-	result, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameMessages).InsertOne(ctx, mb.Message)
-	if err != nil {
-		logrus.WithError(err).WithField("actor_id", actor.ID).Error("mongo, failed to create message")
+	mm := mutations.MessageMutation{
+		MessageBuilder: mb,
+	}
+	if _, err := mm.SendInboxMessage(ctx, r.Ctx.Inst().Mongo, mutations.SendInboxMessageOptions{
+		Actor:                actor,
+		Recipients:           recipientIDs,
+		ConsiderBlockedUsers: !actor.HasPermission(structures.RolePermissionManageUsers),
+	}); err != nil {
 		return nil, err
 	}
-	msgID := result.InsertedID.(primitive.ObjectID)
 
-	// Create read states for the recipients
-	w := make([]mongo.WriteModel, len(recipientIDs))
-	for i, id := range recipientIDs {
-		w[i] = &mongo.InsertOneModel{
-			Document: &structures.MessageRead{
-				MessageID:   msgID,
-				RecipientID: id,
-				Read:        false,
-			},
-		}
-	}
-	if _, err = r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameMessagesRead).BulkWrite(ctx, w); err != nil {
-		logrus.WithError(err).WithField("message_id", result.InsertedID).Error("mongo, couldn't create a read state for message")
-	}
-
-	return query.CreateMessageResolver(r.Ctx, ctx, nil, &msgID, query.GenerateSelectedFieldMap(ctx).Children)
+	return query.CreateMessageResolver(r.Ctx, ctx, nil, &mm.MessageBuilder.Message.ID, query.GenerateSelectedFieldMap(ctx).Children)
 }
