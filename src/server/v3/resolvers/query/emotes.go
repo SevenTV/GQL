@@ -2,8 +2,6 @@ package query
 
 import (
 	"context"
-	"fmt"
-	"regexp"
 	"strings"
 
 	"github.com/SevenTV/Common/aggregations"
@@ -17,8 +15,6 @@ import (
 )
 
 const EMOTES_QUERY_LIMIT int32 = 300
-
-var searchRegex = regexp.MustCompile(`[.*+?^${}()|[\\]\\\\]`)
 
 func (r *Resolver) Emotes(ctx context.Context, args struct {
 	Query    string
@@ -38,7 +34,6 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 
 	// Define the query
 	query := strings.Trim(args.Query, " ")
-	lQuery := fmt.Sprintf("(?i)%s", strings.ToLower(searchRegex.ReplaceAllString(query, "\\\\$0")))
 
 	//
 	match := bson.M{
@@ -72,13 +67,23 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 	if len(query) > 0 {
 		match["$or"] = bson.A{
 			bson.M{
-				"name": bson.M{
-					"$regex": lQuery,
+				"$expr": bson.M{
+					"$gt": bson.A{
+						bson.M{"$indexOfCP": bson.A{bson.M{"$toLower": "$name"}, strings.ToLower(query)}},
+						-1,
+					},
 				},
 			},
 			bson.M{
-				"tags": bson.M{
-					"$regex": lQuery,
+				"$expr": bson.M{
+					"$gt": bson.A{
+						bson.M{"$indexOfCP": bson.A{bson.M{"$reduce": bson.M{
+							"input":        "$tags",
+							"initialValue": " ",
+							"in":           bson.M{"$concat": bson.A{"$$value", "$$this"}},
+						}}, strings.ToLower(query)}},
+						-1,
+					},
 				},
 			},
 		}
