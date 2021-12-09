@@ -1,14 +1,16 @@
 type Query {
 	user(id: String!): User!
+	users(
+		query: String!
+	): [User]!
 
 	### Emotes
 
 	emote(id: String!): Emote
 	emotes(
 		query: String!,
+		page: Int,
 		limit: Int,
-		after_id: String,
-		before_id: String,
 		sort: Sort
 		# providers: [Provider!],
 	): [Emote]!

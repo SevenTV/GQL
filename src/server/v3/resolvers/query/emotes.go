@@ -11,17 +11,15 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const EMOTES_QUERY_LIMIT int32 = 300
 
 func (r *Resolver) Emotes(ctx context.Context, args struct {
-	Query    string
-	Limit    *int32
-	AfterID  *string
-	BeforeID *string
-	Sort     *Sort
+	Query string
+	Page  *int32
+	Limit *int32
+	Sort  *Sort
 }) ([]*EmoteResolver, error) {
 	// Define limit (how many emotes can be returned in a single query)
 	limit := int32(20)
@@ -41,26 +39,12 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 	}
 
 	// Retrieve pagination values
-	// AfterID is the ID of the emote to paginate from
-	pagination := bson.M{}
-	if args.AfterID != nil && *args.AfterID != "" {
-		if afterID, err := primitive.ObjectIDFromHex(*args.AfterID); err != nil {
-			return nil, err
-		} else {
-			pagination["$gt"] = afterID
+	page := int32(1)
+	if args.Page != nil {
+		page = *args.Page
+		if page < 1 {
+			page = 1
 		}
-	}
-	// BeforeID is the ID of the emote to paginate until
-	if args.BeforeID != nil && *args.BeforeID != "" {
-		if beforeID, err := primitive.ObjectIDFromHex(*args.BeforeID); err != nil {
-			return nil, err
-		} else {
-			pagination["$lt"] = beforeID
-		}
-	}
-	// Apply pagination if after or before was specified
-	if len(pagination) > 0 {
-		match["_id"] = pagination
 	}
 
 	// Apply name/tag query
@@ -90,10 +74,7 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 	}
 
 	// Define the pipeline
-	pipeline := mongo.Pipeline{
-		// Step 1: match the query
-		bson.D{bson.E{Key: "$match", Value: match}},
-	}
+	pipeline := mongo.Pipeline{}
 
 	// Handle sorting
 	if args.Sort != nil {
@@ -112,12 +93,10 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 	// Create a sub-pipeline for emotes
 	// This is to fetch relational data in advance
 	emoteSubPipeline := mongo.Pipeline{
-		{{
-			Key:   "$limit",
-			Value: limit,
-		}},
+		{{Key: "$match", Value: match}},
 	}
 	// Add owner data?
+
 	{
 		fields := GenerateSelectedFieldMap(ctx).Children
 		if _, ok := fields["owner"]; ok {
@@ -139,17 +118,29 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 
 	// Complete the pipeline
 	pipeline = append(pipeline, []bson.D{
-		// Step 2: a faceted call, which simultaneously gets emotes and returns total query-scoped collection count
-		{bson.E{
+		{{
 			Key: "$facet",
 			Value: bson.M{
-				"_count": []bson.M{{"$count": "value"}},
-				"emotes": emoteSubPipeline,
+				"emotes": append(emoteSubPipeline, []bson.D{
+					{{
+						Key:   "$skip",
+						Value: (page - 1) * limit,
+					}},
+					{{
+						Key:   "$limit",
+						Value: limit,
+					}},
+				}...),
+				"count": []bson.M{
+					{"$match": match},
+					{"$count": "value"},
+				},
 			},
 		}},
-		// Remove the _count array value, replacing it by "count" as int
-		{bson.E{Key: "$addFields", Value: bson.M{"count": bson.M{"$first": "$_count.value"}}}},
-		{bson.E{Key: "$unset", Value: "_count"}},
+		{{
+			Key:   "$set",
+			Value: bson.M{"count": bson.M{"$first": "$count.value"}},
+		}},
 	}...)
 
 	// Begin the pipeline, fetching the emotes
@@ -160,7 +151,7 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 	}
 
 	// Parse emotes to structs
-	var result emotesPipelineResult
+	result := emotesPipelineResult{}
 	cur.Next(ctx)
 	if err := cur.Decode(&result); err != nil {
 		logrus.WithError(err).Error("mongo")
@@ -169,10 +160,14 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 
 	// Create resolvers for the returned emotes
 	emotes := result.Emotes
-	resolvers := make([]*EmoteResolver, len(emotes))
+	resolvers := []*EmoteResolver{}
 	fields := GenerateSelectedFieldMap(ctx)
-	for i, emote := range emotes {
+	for _, emote := range emotes {
+		if emote == nil {
+			continue
+		}
 		if emote.Owner == nil {
+			emote.OwnerID = structures.DeletedUser.ID
 			emote.Owner = structures.DeletedUser
 		}
 
@@ -181,7 +176,7 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 			return nil, err
 		}
 
-		resolvers[i] = r
+		resolvers = append(resolvers, r)
 	}
 
 	// Send extra meta to be returned with the query
@@ -189,7 +184,7 @@ func (r *Resolver) Emotes(ctx context.Context, args struct {
 	req := ctx.Value(utils.Key("request")).(*fiber.Ctx)
 	req.Locals("meta", map[string]interface{}{
 		"emotes": map[string]interface{}{
-			"total": result.Count,
+			"count": result.Count,
 		},
 	})
 
