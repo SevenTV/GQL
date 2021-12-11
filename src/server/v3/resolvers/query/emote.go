@@ -49,7 +49,7 @@ func CreateEmoteResolver(gCtx global.Context, ctx context.Context, emote *struct
 	}
 
 	// Query owner sub-fields
-	if of, ok := fields["owner"]; ok && (!emote.OwnerID.IsZero() && emote.Owner == nil) {
+	if of, ok := fields["owner"]; ok && (emote.Owner == nil) {
 		_, qEditors := of.Children["editors"]
 		_, qRoles := of.Children["roles"]
 		if !qRoles {
