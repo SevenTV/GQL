@@ -54,13 +54,6 @@ func New() *Config {
 	config.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	config.AllowEmptyEnv(true)
 
-	for _, key := range config.AllKeys() {
-		val := config.Get(key)
-		config.Set(key, val)
-	}
-
-	// os.Environ()
-
 	// Print final config
 	c := &Config{}
 	checkErr(config.Unmarshal(&c))
