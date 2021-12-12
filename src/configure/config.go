@@ -3,6 +3,7 @@ package configure
 import (
 	"bytes"
 	"encoding/json"
+	"reflect"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -45,12 +46,20 @@ func New() *Config {
 		checkErr(config.MergeInConfig())
 	}
 
+	BindEnvs(config, Config{})
+
 	// Environment
-	replacer := strings.NewReplacer(".", "_")
-	config.SetEnvKeyReplacer(replacer)
-	config.SetEnvPrefix("7TV")
-	config.AllowEmptyEnv(true)
 	config.AutomaticEnv()
+	config.SetEnvPrefix("GQL")
+	config.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	config.AllowEmptyEnv(true)
+
+	for _, key := range config.AllKeys() {
+		val := config.Get(key)
+		config.Set(key, val)
+	}
+
+	// os.Environ()
 
 	// Print final config
 	c := &Config{}
@@ -59,6 +68,25 @@ func New() *Config {
 	initLogging(c.Level)
 
 	return c
+}
+
+func BindEnvs(config *viper.Viper, iface interface{}, parts ...string) {
+	ifv := reflect.ValueOf(iface)
+	ift := reflect.TypeOf(iface)
+	for i := 0; i < ift.NumField(); i++ {
+		v := ifv.Field(i)
+		t := ift.Field(i)
+		tv, ok := t.Tag.Lookup("mapstructure")
+		if !ok {
+			continue
+		}
+		switch v.Kind() {
+		case reflect.Struct:
+			BindEnvs(config, v.Interface(), append(parts, tv)...)
+		default:
+			config.BindEnv(strings.Join(append(parts, tv), "."))
+		}
+	}
 }
 
 type Config struct {
