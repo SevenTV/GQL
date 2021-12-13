@@ -1,66 +1,78 @@
 type Emote {
-	id: String!
-	name: String!
-	flags: Int!
-	status: Int!	
-	tags: [String!]!
-	animated: Boolean!
-	created_at: Time!
+  id: String!
+  name: String!
+  flags: Int!
+  status: Int!
+  tags: [String!]!
+  animated: Boolean!
+  created_at: Time!
 
-	owner: User! @goField(forceResolver: true)
+  owner: User! @goField(forceResolver: true)
 
-	channels(limit: Int, after_id: String!): [User!]! @goField(forceResolver: true)
-	channel_count: Int! @goField(forceResolver: true)
+  channels(limit: Int, after_id: String!): [User!]!
+    @goField(forceResolver: true)
+  channel_count: Int! @goField(forceResolver: true)
 
- 	links: [[String!]!]!
+  links: [[String!]!]!
 
-	reports: [Report!]!  @goField(forceResolver: true) @hasPermissions(role: [LoggedIn, ManageReports])
+  reports: [Report!]!
+    @goField(forceResolver: true)
+    @hasPermissions(role: [LoggedIn, ManageReports])
 }
 
 extend type Query {
-	emote(id: String!): Emote
-	emotes(
-		query: String!,
-		page: Int,
-		limit: Int,
-		filter: EmoteFilter,
-		sort: EmoteSortOrder,
-	): [Emote]!
+  emote(id: String!): Emote
+  emotes(
+    query: String!
+    page: Int
+    limit: Int
+    filter: EmoteFilter
+    sort: EmoteSortOrder
+  ): [Emote]!
 }
 
 enum EmoteFilter {
-	GLOBAL
-	NORMAL
-	ALL
+  GLOBAL
+  NORMAL
+  ALL
 }
 
 enum EmoteSortOrder {
-	ASCENDING
-	DESCENDING
+  ASCENDING
+  DESCENDING
 }
 
 extend type Mutation {
-	setChannelEmote(user_id: String!, target: UserEmoteInput!, action: ChannelEmoteListItemAction!): User @hasPermissions(role: [LoggedIn])
-    setUserRole(user_id: String!, role_id: String!, action: ChannelEmoteListItemAction!): User @hasPermissions(role: [LoggedIn, ManageUsers])
+  setChannelEmote(
+    user_id: String!
+    target: UserEmoteInput!
+    action: ChannelEmoteListItemAction!
+  ): User @hasPermissions(role: [LoggedIn])
+  setUserRole(
+    user_id: String!
+    role_id: String!
+    action: ChannelEmoteListItemAction!
+  ): User @hasPermissions(role: [LoggedIn, ManageUsers])
 
-    editEmote(emote_id: String!, data: EditEmoteInput!): Emote @hasPermissions(role: [LoggedIn])
+  editEmote(emote_id: String!, data: EditEmoteInput!): Emote
+    @hasPermissions(role: [LoggedIn])
 }
 
 enum ChannelEmoteListItemAction {
-    ADD
-    UPDATE
-    REMOVE
+  ADD
+  UPDATE
+  REMOVE
 }
 
 input UserEmoteInput {
-    id: String!
-    channels: [String!]
-    alias: String
+  id: String!
+  channels: [String!]
+  alias: String
 }
 
 input EditEmoteInput {
-    name: String
-    flags: Int
-    owner_id: String
-    tags: [String!]
+  name: String
+  flags: Int
+  owner_id: String
+  tags: [String!]
 }

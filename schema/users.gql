@@ -1,51 +1,52 @@
 type User {
-    id: String!
-    user_type: String!
-    username: String!
-    display_name: String!
-    created_at: Time!
-    avatar_url: String!
-    biography: String!
-    tag_color: Int!
-    editors: [UserEditor!]!
-    channel_emotes: [UserEmote!]!
+  id: String!
+  user_type: String!
+  username: String!
+  display_name: String!
+  created_at: Time!
+  avatar_url: String!
+  biography: String!
+  tag_color: Int!
+  editors: [UserEditor!]!
+  channel_emotes: [UserEmote!]!
 
-    roles: [Role]! @goField(forceResolver: true)
-    owned_emotes: [Emote!]! @goField(forceResolver: true)
-    connections: [UserConnection]! @goField(forceResolver: true)
+  roles: [Role]! @goField(forceResolver: true)
+  owned_emotes: [Emote!]! @goField(forceResolver: true)
+  connections: [UserConnection]! @goField(forceResolver: true)
 
-    inbox_unread_count: Int! @goField(forceResolver: true) @hasPermissions(role: [LoggedIn])
+  inbox_unread_count: Int!
+    @goField(forceResolver: true)
+    @hasPermissions(role: [LoggedIn])
 
-    reports: [Report!]! @goField(forceResolver: true) @hasPermissions(role: [LoggedIn, ManageReports])
+  reports: [Report!]!
+    @goField(forceResolver: true)
+    @hasPermissions(role: [LoggedIn, ManageReports])
 }
 
 type UserEditor {
-    user: User! @goField(forceResolver: true)
-    connections: [String!]!
-    permissions: Int!
-    visible: Boolean!
-    added_at: Time!
+  user: User! @goField(forceResolver: true)
+  connections: [String!]!
+  permissions: Int!
+  visible: Boolean!
+  added_at: Time!
 }
 
 type UserEmote {
-    emote: Emote! @goField(forceResolver: true)
-    connections: [String!]!
-    alias: String!
-    added_at: Time!
+  emote: Emote! @goField(forceResolver: true)
+  connections: [String!]!
+  alias: String!
+  added_at: Time!
 }
 
 type UserConnection {
-    id: String!
-    display_name: String!
-    platform: String!
-    linked_at: Time!
-    data: String!
+  id: String!
+  display_name: String!
+  platform: String!
+  linked_at: Time!
+  data: String!
 }
 
 extend type Query {
-    user(id: String!): User!
-	users(
-		query: String!
-	): [User]!
-
+  user(id: String!): User!
+  users(query: String!): [User]!
 }

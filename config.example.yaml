@@ -6,33 +6,33 @@ website_url: https://example.com/
 
 # Redis Settings
 redis:
-    uri: redis://username:password@url/db
+  uri: redis://username:password@url/db
 
 # MongoDB Settings
 mongo:
-    uri: mongodb://username:password@url:port/?authSource=db
-    db: db
-    direct: false
+  uri: mongodb://username:password@url:port/?authSource=db
+  db: db
+  direct: false
 
 # HTTP Server Settings
 http:
-    uri: 0.0.0.0:8080
-    type: tcp
+  uri: 0.0.0.0:8080
+  type: tcp
 
-    # The default amount of quota points granted on a new query
-    quota_default_limit: 1000
-    # The maximum amount of queries exceeding quota before a client's IP is temporarily blocked
-    quota_max_bad_queries: 5
+  # The default amount of quota points granted on a new query
+  quota_default_limit: 1000
+  # The maximum amount of queries exceeding quota before a client's IP is temporarily blocked
+  quota_max_bad_queries: 5
 
 # Auth Settings
 auth:
-    secret: ""
+  secret: ""
 
-    platforms:
-        - name: TTV
-          enabled: true
-        - name: YTG
-          enabled: true
+  platforms:
+    - name: TTV
+      enabled: true
+    - name: YTG
+      enabled: true
 
 credentials:
-    jwt_secret: ""
+  jwt_secret: ""
