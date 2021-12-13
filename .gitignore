@@ -10,3 +10,5 @@ tmp/
 !.github/**/*.yaml
 packrd/
 *-packr.go
+*-gqlgen.go
+*_gen.go

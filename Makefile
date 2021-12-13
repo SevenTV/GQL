@@ -1,4 +1,4 @@
-all: linux
+all: gql linux
 
 BUILDER := "unknown"
 VERSION := "unknown"
@@ -30,6 +30,24 @@ deps:
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 	go install github.com/gobuffalo/packr/v2/packr2@latest
+	go install github.com/99designs/gqlgen@latest
+	go install github.com/vektah/dataloaden@latest
+
+gql:
+	gqlgen
+
+	cd graph/loaders && dataloaden UserLoader string "*github.com/SevenTV/GQL/graph/model.User"
+	cd graph/loaders && dataloaden BatchUserLoader string "[]*github.com/SevenTV/GQL/graph/model.User"
+
+	cd graph/loaders && dataloaden EmoteLoader string "*github.com/SevenTV/GQL/graph/model.Emote"
+	cd graph/loaders && dataloaden BatchEmoteLoader string "[]*github.com/SevenTV/GQL/graph/model.Emote"
+
+	cd graph/loaders && dataloaden RoleLoader string "*github.com/SevenTV/GQL/graph/model.Role"
+
+	cd graph/loaders && dataloaden ConnectionLoader string "*github.com/SevenTV/GQL/graph/model.UserConnection"
+
+	cd graph/loaders && dataloaden ReportLoader string "*github.com/SevenTV/GQL/graph/model.Report"
+	cd graph/loaders && dataloaden BatchReportLoader string "[]*github.com/SevenTV/GQL/graph/model.Report"
 
 test:
 	go test -count=1 -cover ./...

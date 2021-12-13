@@ -1,0 +1,28 @@
+directive @hasPermissions(role: [Permission!]!) on FIELD_DEFINITION
+
+enum Permission {
+  LoggedIn
+
+  CreateEmote
+  EditEmote
+  ChannelEmote
+  
+  ReportCreate
+  SendMessages
+  
+  FeatureZeroWidthEmoteType
+  FeatureProfilePictureAnimation
+
+  ManageBans
+  ManageRoles
+  ManageReports
+  ManageUsers
+  EditAnyEmote
+  EditAnyEmoteSet
+  BypassPrivacy
+
+  SuperAdministrator
+  ManageNews
+  ManageStack
+  ManageCosmetics
+}

@@ -1,0 +1,37 @@
+type Role {
+    id: String!
+    name: String!
+    color: Int!
+    allowed: String!
+    denied: String!
+    position: Int!
+    created_at: Time!
+
+    members: [User!]! @goField(forceResolver: true)
+}
+
+extend type Query {
+    roles: [Role]!
+	role(id: String!): Role
+}
+
+extend type Mutation {
+    createRole(data: CreateRoleInput!): Role @hasPermissions(role: [LoggedIn, ManageRoles])
+    editRole(role_id: String!, data: EditRoleInput!): Role @hasPermissions(role: [LoggedIn, ManageRoles])
+    deleteRole(role_id: String!): String! @hasPermissions(role: [LoggedIn, ManageRoles])
+}
+
+input CreateRoleInput {
+    name: String!
+    color: Int!
+    allowed: String!
+    denied: String!
+}
+
+input EditRoleInput {
+    name: String
+    color: Int
+    allowed: String
+    denied: String
+    position: Int
+}
