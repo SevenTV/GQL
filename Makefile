@@ -26,14 +26,18 @@ lint:
 	golangci-lint run
 	yarn prettier --write .
 
-deps:
+deps: go_installs
 	go mod download
-	go install honnef.co/go/tools/cmd/staticcheck@latest
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	yarn
+
+build_deps:
 	go install github.com/gobuffalo/packr/v2/packr2@latest
 	go install github.com/99designs/gqlgen@latest
 	go install github.com/vektah/dataloaden@latest
-	yarn
+
+go_installs: build_deps
+	go install honnef.co/go/tools/cmd/staticcheck@latest
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 gql:
 	gqlgen
