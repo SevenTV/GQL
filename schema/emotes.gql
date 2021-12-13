@@ -17,7 +17,7 @@ type Emote {
 
   reports: [Report!]!
     @goField(forceResolver: true)
-    @hasPermissions(role: [LoggedIn, ManageReports])
+    @hasPermissions(role: [ManageReports])
 }
 
 extend type Query {
@@ -47,15 +47,15 @@ extend type Mutation {
     user_id: String!
     target: UserEmoteInput!
     action: ChannelEmoteListItemAction!
-  ): User @hasPermissions(role: [LoggedIn])
+  ): User @hasPermissions()
   setUserRole(
     user_id: String!
     role_id: String!
     action: ChannelEmoteListItemAction!
-  ): User @hasPermissions(role: [LoggedIn, ManageUsers])
+  ): User @hasPermissions(role: [ManageUsers])
 
   editEmote(emote_id: String!, data: EditEmoteInput!): Emote
-    @hasPermissions(role: [LoggedIn])
+    @hasPermissions()
 }
 
 enum ChannelEmoteListItemAction {

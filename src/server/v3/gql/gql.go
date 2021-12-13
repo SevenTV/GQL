@@ -13,7 +13,9 @@ import (
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/SevenTV/GQL/src/instance"
 	"github.com/SevenTV/GQL/src/server/v3/gql/cache"
+	"github.com/SevenTV/GQL/src/server/v3/gql/complexity"
 	"github.com/SevenTV/GQL/src/server/v3/gql/helpers"
+	"github.com/SevenTV/GQL/src/server/v3/gql/middleware"
 	"github.com/SevenTV/GQL/src/server/v3/gql/resolvers"
 	"github.com/SevenTV/GQL/src/server/v3/gql/types"
 	"github.com/gofiber/fiber/v2"
@@ -31,7 +33,9 @@ type gqlRequest struct {
 
 func GQL(gCtx global.Context, app fiber.Router) {
 	schema := NewServer(generated.NewExecutableSchema(generated.Config{
-		Resolvers: resolvers.New(types.Resolver{Ctx: gCtx}),
+		Resolvers:  resolvers.New(types.Resolver{Ctx: gCtx}),
+		Directives: middleware.New(gCtx),
+		Complexity: complexity.New(gCtx),
 	}))
 
 	schema.Use(extension.FixedComplexityLimit(5))

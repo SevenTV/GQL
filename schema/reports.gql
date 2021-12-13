@@ -30,15 +30,15 @@ extend type Query {
     limit: Int
     after_id: String
     before_id: String
-  ): [Report]! @hasPermissions(role: [LoggedIn, ManageReports])
-  report(id: String!): Report @hasPermissions(role: [LoggedIn, ManageReports])
+  ): [Report]! @hasPermissions(role: [ManageReports])
+  report(id: String!): Report @hasPermissions(role: [ManageReports])
 }
 
 extend type Mutation {
   createReport(data: CreateReportInput!): Report
-    @hasPermissions(role: [LoggedIn, ReportCreate])
+    @hasPermissions(role: [ReportCreate])
   editReport(report_id: String!, data: EditReportInput!): Report
-    @hasPermissions(role: [LoggedIn, ManageReports])
+    @hasPermissions(role: [ManageReports])
 }
 
 input CreateReportInput {

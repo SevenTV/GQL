@@ -16,11 +16,11 @@ type User {
 
   inbox_unread_count: Int!
     @goField(forceResolver: true)
-    @hasPermissions(role: [LoggedIn])
+    @hasPermissions()
 
   reports: [Report!]!
     @goField(forceResolver: true)
-    @hasPermissions(role: [LoggedIn, ManageReports])
+    @hasPermissions(role: [ManageReports])
 }
 
 type UserEditor {

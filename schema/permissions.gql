@@ -1,11 +1,9 @@
-directive @hasPermissions(role: [Permission!]!) on FIELD_DEFINITION
+directive @hasPermissions(role: [Permission!]) on FIELD_DEFINITION
 
 enum Permission {
-  LoggedIn
-
   CreateEmote
   EditEmote
-  ChannelEmote
+  SetChannelEmote
 
   ReportCreate
   SendMessages

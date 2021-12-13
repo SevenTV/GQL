@@ -15,17 +15,17 @@ enum MessageKind {
 }
 
 extend type Query {
-  inbox(after_id: String): [Message]! @hasPermissions(role: [LoggedIn])
+  inbox(after_id: String): [Message]! @hasPermissions()
 }
 
 extend type Mutation {
   readMessages(message_ids: [String!]!, read: Boolean): Int
-    @hasPermissions(role: [LoggedIn])
+    @hasPermissions()
   sendInboxMessage(
     recipients: [String!]!
     subject: String!
     content: String!
     important: Boolean
     anonymous: Boolean
-  ): Message @hasPermissions(role: [LoggedIn, SendMessages])
+  ): Message @hasPermissions(role: [SendMessages])
 }
