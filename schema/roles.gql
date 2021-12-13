@@ -20,6 +20,17 @@ extend type Mutation {
   editRole(role_id: String!, data: EditRoleInput!): Role
     @hasPermissions(role: [ManageRoles])
   deleteRole(role_id: String!): String! @hasPermissions(role: [ManageRoles])
+  setUserRole(
+    user_id: String!
+    role_id: String!
+    action: UserRoleListItemAction!
+  ): User @hasPermissions(role: [ManageUsers])
+}
+
+enum UserRoleListItemAction {
+  ADD
+  UPDATE
+  REMOVE
 }
 
 input CreateRoleInput {

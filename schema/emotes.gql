@@ -48,11 +48,6 @@ extend type Mutation {
     target: UserEmoteInput!
     action: ChannelEmoteListItemAction!
   ): User @hasPermissions
-  setUserRole(
-    user_id: String!
-    role_id: String!
-    action: ChannelEmoteListItemAction!
-  ): User @hasPermissions(role: [ManageUsers])
 
   editEmote(emote_id: String!, data: EditEmoteInput!): Emote @hasPermissions
 }

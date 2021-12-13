@@ -32,7 +32,7 @@ type UserEditor {
 type UserEmote {
   emote: Emote! @goField(forceResolver: true)
   connections: [String!]!
-  alias: String!
+  alias: String
   added_at: Time!
 }
 

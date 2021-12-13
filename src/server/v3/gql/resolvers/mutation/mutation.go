@@ -16,12 +16,7 @@ func New(r types.Resolver) generated.MutationResolver {
 	return &Resolver{r}
 }
 
-func (r *Resolver) SetChannelEmote(ctx context.Context, userID string, target model.UserEmoteInput, action model.ChannelEmoteListItemAction) (*model.User, error) {
-	// TODO
-	return nil, nil
-}
-
-func (r *Resolver) SetUserRole(ctx context.Context, userID string, roleID string, action model.ChannelEmoteListItemAction) (*model.User, error) {
+func (r *Resolver) SetUserRole(ctx context.Context, userID string, roleID string, action model.UserRoleListItemAction) (*model.User, error) {
 	// TODO
 	return nil, nil
 }

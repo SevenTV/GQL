@@ -3,10 +3,14 @@ package emote
 import (
 	"context"
 
+	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/GQL/graph/generated"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/server/v3/gql/loaders"
 	"github.com/SevenTV/GQL/src/server/v3/gql/types"
+	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Resolver struct {
@@ -26,8 +30,20 @@ func (r *Resolver) Channels(ctx context.Context, obj *model.Emote, limit *int, a
 }
 
 func (r *Resolver) ChannelCount(ctx context.Context, obj *model.Emote) (int, error) {
-	// TODO
-	return 0, nil
+	id, err := primitive.ObjectIDFromHex(obj.ID)
+	if err != nil {
+		return 0, nil
+	}
+
+	count, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).CountDocuments(ctx, bson.M{
+		"channel_emotes.id": id,
+	})
+	if err != nil {
+		logrus.WithError(err).Error("failed to count documents for emotes")
+		return 0, err
+	}
+
+	return int(count), nil
 }
 
 func (r *Resolver) Reports(ctx context.Context, obj *model.Emote) ([]*model.Report, error) {
