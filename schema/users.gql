@@ -14,9 +14,7 @@ type User {
   owned_emotes: [Emote!]! @goField(forceResolver: true)
   connections: [UserConnection]! @goField(forceResolver: true)
 
-  inbox_unread_count: Int!
-    @goField(forceResolver: true)
-    @hasPermissions()
+  inbox_unread_count: Int! @goField(forceResolver: true) @hasPermissions
 
   reports: [Report!]!
     @goField(forceResolver: true)

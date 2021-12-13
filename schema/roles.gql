@@ -16,12 +16,10 @@ extend type Query {
 }
 
 extend type Mutation {
-  createRole(data: CreateRoleInput!): Role
-    @hasPermissions(role: [ManageRoles])
+  createRole(data: CreateRoleInput!): Role @hasPermissions(role: [ManageRoles])
   editRole(role_id: String!, data: EditRoleInput!): Role
     @hasPermissions(role: [ManageRoles])
-  deleteRole(role_id: String!): String!
-    @hasPermissions(role: [ManageRoles])
+  deleteRole(role_id: String!): String! @hasPermissions(role: [ManageRoles])
 }
 
 input CreateRoleInput {

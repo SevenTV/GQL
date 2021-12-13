@@ -24,6 +24,7 @@ lint:
 	staticcheck ./...
 	go vet ./...
 	golangci-lint run
+	yarn prettier --write **/*.gql
 
 deps:
 	go mod download
@@ -32,6 +33,7 @@ deps:
 	go install github.com/gobuffalo/packr/v2/packr2@latest
 	go install github.com/99designs/gqlgen@latest
 	go install github.com/vektah/dataloaden@latest
+	yarn
 
 gql:
 	gqlgen

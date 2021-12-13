@@ -12,3 +12,4 @@ packrd/
 *-packr.go
 *-gqlgen.go
 *_gen.go
+node_modules/
