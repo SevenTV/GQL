@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -38,25 +39,61 @@ func GQL(gCtx global.Context, app fiber.Router) {
 		Complexity: complexity.New(gCtx),
 	}))
 
-	schema.Use(extension.FixedComplexityLimit(5))
+	schema.Use(&extension.ComplexityLimit{
+		Func: func(ctx context.Context, rc *graphql.OperationContext) int {
+			// we can define limits here
+			return 5
+		},
+	})
 
 	schema.Use(extension.Introspection{})
 	schema.Use(extension.AutomaticPersistedQuery{
-		Cache: cache.NewRedisCache(gCtx, instance.RedisPrefix, time.Hour*6),
+		Cache: cache.NewRedisCache(gCtx, instance.RedisPrefix+":", time.Hour*6),
 	})
 	// handleRequest: Process a GQL query, from either a GET or POST
 	handleRequest := func(c *fiber.Ctx, req gqlRequest) error {
-		ctx := context.WithValue(context.Background(), helpers.UserKey, c.Locals("user"))
-
-		// Check if the user is allowed to make queries
+		ctx := context.WithValue(c.Context(), helpers.UserKey, c.Locals("user"))
 		clientIP := base64.URLEncoding.EncodeToString(utils.S2B(c.Get("Cf-Connecting-IP", c.IP())))
-		clientIPKey := fmt.Sprintf("%s:banned-ips:client-ip:%s", instance.RedisPrefix, clientIP)
 
-		if badQueries, _ := gCtx.Inst().Redis.RawClient().Exists(ctx, clientIPKey).Result(); badQueries != 0 {
-			return c.Status(fiber.StatusForbidden).JSON(&fiber.Map{
-				"status": fiber.ErrForbidden,
-				"error":  "You are temporarily blocked from using this API",
-			})
+		{
+			key := fmt.Sprintf("%s:rate-limits:client-ip:%s", instance.RedisPrefix, clientIP)
+			bannedKey := fmt.Sprintf("%s:banned-ips:client-ip:%s", instance.RedisPrefix, clientIP)
+
+			pipe := gCtx.Inst().Redis.Pipeline(ctx)
+
+			// Check if the user is allowed to make queries
+			bannedCmd := pipe.Exists(ctx, bannedKey)
+			pipe.SetNX(ctx, key, 0, time.Minute)
+			incrCmd := pipe.Incr(ctx, key)
+			ttlCmd := pipe.TTL(ctx, key)
+			_, err := pipe.Exec(ctx)
+			if err == nil {
+				if bannedCmd.Val() != 0 {
+					return c.Status(fiber.StatusForbidden).JSON(&fiber.Map{
+						"status": fiber.ErrForbidden,
+						"error":  "You are temporarily blocked from using this API",
+					})
+				}
+
+				total := incrCmd.Val()
+				ttl := ttlCmd.Val()
+
+				c.Set("X-GQL-RateLimit-Time", strconv.Itoa(int(ttl/time.Second)))
+				c.Set("X-GQL-RateLimit-Limit", strconv.Itoa(int(gCtx.Config().Http.QuotaDefaultLimit)))
+
+				if total > int64(gCtx.Config().Http.QuotaDefaultLimit) {
+					c.Set("X-GQL-RateLimit-Remaining", strconv.Itoa(0))
+					return c.Status(fiber.StatusTooManyRequests).JSON(&fiber.Map{
+						"status": fiber.ErrTooManyRequests,
+						"error":  "You are being rate limited",
+						"reason": fmt.Sprintf("Quota Exceeded: 0 points left out of %d", gCtx.Config().Http.QuotaDefaultLimit),
+					})
+				} else {
+					c.Set("X-GQL-RateLimit-Remaining", strconv.Itoa(int(int64(gCtx.Config().Http.QuotaDefaultLimit)-total)))
+				}
+			} else {
+				logrus.WithError(err).Warn("failed to check redis for rate-limits/banned, ignoring")
+			}
 		}
 
 		// Execute the query
@@ -65,38 +102,6 @@ func GQL(gCtx global.Context, app fiber.Router) {
 			OperationName: req.OperationName,
 			Variables:     req.Variables,
 		})
-
-		// Set quota headers
-		// c.Set("X-Quota-Limit", strconv.Itoa(int(quota.GetLimit())))
-		// c.Set("X-Quota-Remaining", strconv.Itoa(int(quota.GetPoints())))
-		// {
-		// 	// Set quota info
-		// 	usage := make(map[string]int32)
-		// 	quota.Fields.Range(func(key, value interface{}) bool {
-		// 		usage[key.(string)] = value.(int32)
-		// 		return true
-		// 	})
-		// 	b, _ := json.Marshal(usage)
-
-		// 	c.Set("X-Quota-Usage", utils.B2S(b))
-		// }
-
-		// if !quota.Check() {
-		// 	// Temporarily block this query
-		// 	pipeline := gCtx.Inst().Redis.RawClient().Pipeline()
-		// 	pipeline.SetEX(ctx, redisKey, req.Query, time.Hour)
-		// 	pipeline.LPush(ctx, clientIPKey, qh)
-		// 	pipeline.Expire(ctx, clientIPKey, time.Hour)
-		// 	if _, err := pipeline.Exec(ctx); err != nil {
-		// 		logrus.WithError(err).Error("redis, pipeline.Exec")
-		// 	}
-
-		// 	return c.Status(fiber.StatusTooManyRequests).JSON(&fiber.Map{
-		// 		"status": fiber.ErrTooManyRequests,
-		// 		"error":  "You are being rate limited",
-		// 		"reason": fmt.Sprintf("Quota Exceeded: %d points left out of %d", quota.GetPoints(), quota.GetLimit()),
-		// 	})
-		// }
 
 		return c.Status(result.Status).JSON(result)
 	}
