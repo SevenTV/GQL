@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/SevenTV/Common/structures"
+	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/SevenTV/GQL/src/server/v3/gql/auth"
@@ -24,7 +24,7 @@ func hasPermission(gCtx global.Context) func(ctx context.Context, obj interface{
 			case model.PermissionBypassPrivacy:
 				perms |= structures.RolePermissionBypassPrivacy
 			case model.PermissionSetChannelEmote:
-				perms |= structures.RolePermissionSetChannelEmote
+				perms |= structures.RolePermissionEditEmoteSet
 			case model.PermissionCreateEmote:
 				perms |= structures.RolePermissionCreateEmote
 			case model.PermissionEditAnyEmote:

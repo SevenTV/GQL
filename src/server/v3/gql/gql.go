@@ -42,7 +42,7 @@ func GQL(gCtx global.Context, app fiber.Router) {
 	schema.Use(&extension.ComplexityLimit{
 		Func: func(ctx context.Context, rc *graphql.OperationContext) int {
 			// we can define limits here
-			return 5
+			return 75
 		},
 	})
 

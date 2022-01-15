@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 
-	"github.com/SevenTV/Common/structures"
+	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/GQL/src/server/v3/gql/helpers"
 )
 

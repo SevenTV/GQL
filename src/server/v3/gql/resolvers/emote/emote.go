@@ -3,7 +3,7 @@ package emote
 import (
 	"context"
 
-	"github.com/SevenTV/Common/mongo"
+	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/GQL/graph/generated"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/server/v3/gql/loaders"
@@ -35,7 +35,7 @@ func (r *Resolver) ChannelCount(ctx context.Context, obj *model.Emote) (int, err
 		return 0, nil
 	}
 
-	count, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).CountDocuments(ctx, bson.M{
+	count, err := r.Ctx.Inst().Mongo.Collection(structures.CollectionNameUsers).CountDocuments(ctx, bson.M{
 		"channel_emotes.id": id,
 	})
 	if err != nil {
