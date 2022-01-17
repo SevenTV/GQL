@@ -1,7 +1,7 @@
 type Report {
-  id: String!
+  id: ObjectID!
   target_kind: TargetKind!
-  target_id: String!
+  target_id: ObjectID!
   subject: String!
   body: String!
   priority: Int!
@@ -31,13 +31,13 @@ extend type Query {
     after_id: String
     before_id: String
   ): [Report]! @hasPermissions(role: [ManageReports])
-  report(id: String!): Report @hasPermissions(role: [ManageReports])
+  report(id: ObjectID!): Report @hasPermissions(role: [ManageReports])
 }
 
 extend type Mutation {
   createReport(data: CreateReportInput!): Report
     @hasPermissions(role: [ReportCreate])
-  editReport(report_id: String!, data: EditReportInput!): Report
+  editReport(report_id: ObjectID!, data: EditReportInput!): Report
     @hasPermissions(role: [ManageReports])
 }
 

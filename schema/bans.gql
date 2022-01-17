@@ -1,5 +1,5 @@
 type Ban {
-  id: String!
+  id: ObjectID!
   reason: String!
   effects: Int!
   expire_at: Time!
@@ -11,14 +11,14 @@ type Ban {
 
 extend type Mutation {
   createBan(
-    victim_id: String!
+    victim_id: ObjectID!
     reason: String!
     effects: Int!
     expire_at: String
     anonymous: Boolean
   ): Ban @hasPermissions(role: [ManageBans])
   editBan(
-    ban_id: String!
+    ban_id: ObjectID!
     reason: String
     effects: Int
     expire_at: String

@@ -1,5 +1,5 @@
 type User {
-  id: String!
+  id: ObjectID!
   user_type: String!
   username: String!
   display_name: String!
@@ -45,6 +45,6 @@ type UserConnection {
 }
 
 extend type Query {
-  user(id: String!): User!
+  user(id: ObjectID!): User!
   users(query: String!): [User]!
 }

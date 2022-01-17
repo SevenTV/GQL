@@ -4,9 +4,10 @@ import (
 	"context"
 
 	"github.com/SevenTV/GQL/graph/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (r *Resolver) SetChannelEmote(ctx context.Context, userID string, target model.UserEmoteInput, action model.ChannelEmoteListItemAction) (*model.User, error) {
+func (r *Resolver) SetChannelEmote(ctx context.Context, userID primitive.ObjectID, target model.UserEmoteInput, action model.ChannelEmoteListItemAction) (*model.User, error) {
 	/*
 		user := auth.For(ctx)
 

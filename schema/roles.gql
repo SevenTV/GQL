@@ -1,5 +1,5 @@
 type Role {
-  id: String!
+  id: ObjectID!
   name: String!
   color: Int!
   allowed: String!
@@ -12,17 +12,17 @@ type Role {
 
 extend type Query {
   roles: [Role]!
-  role(id: String!): Role
+  role(id: ObjectID!): Role
 }
 
 extend type Mutation {
   createRole(data: CreateRoleInput!): Role @hasPermissions(role: [ManageRoles])
-  editRole(role_id: String!, data: EditRoleInput!): Role
+  editRole(role_id: ObjectID!, data: EditRoleInput!): Role
     @hasPermissions(role: [ManageRoles])
-  deleteRole(role_id: String!): String! @hasPermissions(role: [ManageRoles])
+  deleteRole(role_id: ObjectID!): String! @hasPermissions(role: [ManageRoles])
   setUserRole(
-    user_id: String!
-    role_id: String!
+    user_id: ObjectID!
+    role_id: ObjectID!
     action: UserRoleListItemAction!
   ): User @hasPermissions(role: [ManageUsers])
 }

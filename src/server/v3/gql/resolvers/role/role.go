@@ -18,5 +18,5 @@ func New(r types.Resolver) generated.RoleResolver {
 }
 
 func (r *Resolver) Members(ctx context.Context, obj *model.Role) ([]*model.User, error) {
-	return loaders.For(ctx).UsersByRoleID.Load(obj.ID)
+	return loaders.For(ctx).UsersByRoleID.Load(obj.ID.Hex())
 }

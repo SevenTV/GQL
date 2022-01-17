@@ -42,18 +42,18 @@ go_installs: build_deps
 gql:
 	gqlgen
 
-	cd graph/loaders && dataloaden UserLoader string "*github.com/SevenTV/GQL/graph/model.User"
+	cd graph/loaders && dataloaden UserLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.User"
 	cd graph/loaders && dataloaden BatchUserLoader string "[]*github.com/SevenTV/GQL/graph/model.User"
 
-	cd graph/loaders && dataloaden EmoteLoader string "*github.com/SevenTV/GQL/graph/model.Emote"
-	cd graph/loaders && dataloaden BatchEmoteLoader string "[]*github.com/SevenTV/GQL/graph/model.Emote"
+	cd graph/loaders && dataloaden EmoteLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.Emote"
+	cd graph/loaders && dataloaden BatchEmoteLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "[]*github.com/SevenTV/GQL/graph/model.Emote"
 
-	cd graph/loaders && dataloaden RoleLoader string "*github.com/SevenTV/GQL/graph/model.Role"
+	cd graph/loaders && dataloaden RoleLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.Role"
 
 	cd graph/loaders && dataloaden ConnectionLoader string "*github.com/SevenTV/GQL/graph/model.UserConnection"
 
-	cd graph/loaders && dataloaden ReportLoader string "*github.com/SevenTV/GQL/graph/model.Report"
-	cd graph/loaders && dataloaden BatchReportLoader string "[]*github.com/SevenTV/GQL/graph/model.Report"
+	cd graph/loaders && dataloaden ReportLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.Report"
+	cd graph/loaders && dataloaden BatchReportLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "[]*github.com/SevenTV/GQL/graph/model.Report"
 
 test:
 	go test -count=1 -cover ./...

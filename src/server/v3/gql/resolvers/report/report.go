@@ -8,6 +8,7 @@ import (
 	"github.com/SevenTV/GQL/src/server/v3/gql/loaders"
 	"github.com/SevenTV/GQL/src/server/v3/gql/types"
 	"github.com/hashicorp/go-multierror"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Resolver struct {
@@ -23,7 +24,7 @@ func (r *Resolver) Reporter(ctx context.Context, obj *model.Report) (*model.User
 }
 
 func (r *Resolver) Assignees(ctx context.Context, obj *model.Report) ([]*model.User, error) {
-	ids := make([]string, len(obj.Assignees))
+	ids := make([]primitive.ObjectID, len(obj.Assignees))
 	for i, v := range obj.Assignees {
 		ids[i] = v.ID
 	}

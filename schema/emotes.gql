@@ -1,5 +1,5 @@
 type Emote {
-  id: String!
+  id: ObjectID!
   name: String!
   flags: Int!
   status: Int!
@@ -21,7 +21,7 @@ type Emote {
 }
 
 extend type Query {
-  emote(id: String!): Emote
+  emote(id: ObjectID!): Emote
   emotes(
     query: String!
     page: Int
@@ -44,12 +44,12 @@ enum EmoteSortOrder {
 
 extend type Mutation {
   setChannelEmote(
-    user_id: String!
+    user_id: ObjectID!
     target: UserEmoteInput!
     action: ChannelEmoteListItemAction!
   ): User @hasPermissions
 
-  editEmote(emote_id: String!, data: EditEmoteInput!): Emote @hasPermissions
+  editEmote(emote_id: ObjectID!, data: EditEmoteInput!): Emote @hasPermissions
 }
 
 enum ChannelEmoteListItemAction {

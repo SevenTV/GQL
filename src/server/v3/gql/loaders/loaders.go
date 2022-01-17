@@ -12,29 +12,31 @@ const LoadersKey = utils.Key("dataloaders")
 
 type Loaders struct {
 	// User Loaders
-	UserByID       loaders.UserLoader
-	UsersByEmoteID loaders.BatchUserLoader
-	UsersByRoleID  loaders.BatchUserLoader
+	UserByID       *loaders.UserLoader
+	UsersByEmoteID *loaders.BatchUserLoader
+	UsersByRoleID  *loaders.BatchUserLoader
 
 	// Emote Loaders
-	EmoteByID         loaders.EmoteLoader
-	EmotesByChannelID loaders.BatchEmoteLoader
+	EmoteByID         *loaders.EmoteLoader
+	EmotesByChannelID *loaders.BatchEmoteLoader
 
 	// Role Loaders
-	RoleByID loaders.RoleLoader
+	RoleByID *loaders.RoleLoader
 
 	// Connection Loaders
-	ConnectionByID loaders.ConnectionLoader
+	ConnectionByID *loaders.ConnectionLoader
 
 	// Report Loaders
-	ReportByID       loaders.ReportLoader
-	ReportsByUserID  loaders.BatchReportLoader
-	ReportsByEmoteID loaders.BatchReportLoader
+	ReportByID       *loaders.ReportLoader
+	ReportsByUserID  *loaders.BatchReportLoader
+	ReportsByEmoteID *loaders.BatchReportLoader
 }
 
 func New(gCtx global.Context) *Loaders {
 	// TODO
-	return &Loaders{}
+	return &Loaders{
+		UserByID: userLoader,
+	}
 }
 
 func For(ctx context.Context) *Loaders {

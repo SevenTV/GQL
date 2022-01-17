@@ -1,5 +1,5 @@
 type Message {
-  id: String!
+  id: ObjectID!
   kind: MessageKind!
   created_at: Time!
   author: User!
@@ -15,11 +15,11 @@ enum MessageKind {
 }
 
 extend type Query {
-  inbox(after_id: String): [Message]! @hasPermissions
+  inbox(after_id: ObjectID): [Message]! @hasPermissions
 }
 
 extend type Mutation {
-  readMessages(message_ids: [String!]!, read: Boolean): Int @hasPermissions
+  readMessages(message_ids: [ObjectID!]!, read: Boolean): Int @hasPermissions
   sendInboxMessage(
     recipients: [String!]!
     subject: String!
