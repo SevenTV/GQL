@@ -41,7 +41,6 @@ type UserConnection {
   display_name: String!
   platform: String!
   linked_at: Time!
-  data: String!
 }
 
 extend type Query {

@@ -35,7 +35,7 @@ type Loaders struct {
 func New(gCtx global.Context) *Loaders {
 	// TODO
 	return &Loaders{
-		UserByID: userLoader,
+		UserByID: userLoader(gCtx),
 	}
 }
 

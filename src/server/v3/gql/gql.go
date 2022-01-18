@@ -107,7 +107,7 @@ func GQL(gCtx global.Context, app fiber.Router) {
 			Variables:     req.Variables,
 		})
 
-		return c.Status(result.Status).JSON(result)
+		return c.Status(result.Status).JSON(result.Response)
 	}
 
 	// Handle query via POST
