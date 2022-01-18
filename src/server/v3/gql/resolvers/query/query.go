@@ -3,8 +3,10 @@ package query
 import (
 	"context"
 
+	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/GQL/graph/generated"
 	"github.com/SevenTV/GQL/graph/model"
+	"github.com/SevenTV/GQL/src/server/v3/gql/auth"
 	"github.com/SevenTV/GQL/src/server/v3/gql/loaders"
 	"github.com/SevenTV/GQL/src/server/v3/gql/types"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -18,8 +20,19 @@ func New(r types.Resolver) generated.QueryResolver {
 	return &Resolver{r}
 }
 
-func (r *Resolver) User(ctx context.Context, id primitive.ObjectID) (*model.User, error) {
-	return loaders.For(ctx).UserByID.Load(id)
+func (r *Resolver) User(ctx context.Context, id *primitive.ObjectID) (*model.User, error) {
+	if id == nil {
+		id = &primitive.NilObjectID
+	}
+	if id.IsZero() {
+		actor := auth.For(ctx)
+		if actor == nil {
+			return nil, errors.ErrUnknownUser
+		}
+		id = &actor.ID
+	}
+
+	return loaders.For(ctx).UserByID.Load(*id)
 }
 
 func (r *Resolver) Users(ctx context.Context, query string) ([]*model.User, error) {

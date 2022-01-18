@@ -16,6 +16,7 @@ import (
 	"github.com/SevenTV/GQL/src/server/v3/gql/cache"
 	"github.com/SevenTV/GQL/src/server/v3/gql/complexity"
 	"github.com/SevenTV/GQL/src/server/v3/gql/helpers"
+	"github.com/SevenTV/GQL/src/server/v3/gql/loaders"
 	"github.com/SevenTV/GQL/src/server/v3/gql/middleware"
 	"github.com/SevenTV/GQL/src/server/v3/gql/resolvers"
 	"github.com/SevenTV/GQL/src/server/v3/gql/types"
@@ -50,6 +51,9 @@ func GQL(gCtx global.Context, app fiber.Router) {
 	schema.Use(extension.AutomaticPersistedQuery{
 		Cache: cache.NewRedisCache(gCtx, instance.RedisPrefix+":", time.Hour*6),
 	})
+
+	loader := loaders.New(gCtx)
+
 	// handleRequest: Process a GQL query, from either a GET or POST
 	handleRequest := func(c *fiber.Ctx, req gqlRequest) error {
 		ctx := context.WithValue(c.Context(), helpers.UserKey, c.Locals("user"))
@@ -97,7 +101,7 @@ func GQL(gCtx global.Context, app fiber.Router) {
 		}
 
 		// Execute the query
-		result := schema.Process(ctx, graphql.RawParams{
+		result := schema.Process(context.WithValue(ctx, loaders.LoadersKey, loader), graphql.RawParams{
 			Query:         req.Query,
 			OperationName: req.OperationName,
 			Variables:     req.Variables,

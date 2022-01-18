@@ -11,6 +11,12 @@ import (
 var userLoader = loaders.NewUserLoader(loaders.UserLoaderConfig{
 	Wait: time.Millisecond * 50,
 	Fetch: func(keys []primitive.ObjectID) ([]*model.User, []error) {
-		return nil, nil
+		return []*model.User{{
+			ID:          [12]byte{},
+			UserType:    "",
+			Username:    "foobar",
+			DisplayName: "foobar",
+			CreatedAt:   time.Now(),
+		}}, nil
 	},
 })
