@@ -5,13 +5,12 @@ import (
 	"io"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/SevenTV/Common/structures/v3"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func MarshalObjectID(id structures.ObjectID) graphql.Marshaler {
+func MarshalObjectID(id primitive.ObjectID) graphql.Marshaler {
 	return graphql.WriterFunc(func(w io.Writer) {
-		_, _ = w.Write([]byte(id.Hex()))
+		_, _ = w.Write([]byte(fmt.Sprintf(`"%s"`, id.Hex())))
 	})
 }
 
