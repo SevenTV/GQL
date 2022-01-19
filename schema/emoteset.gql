@@ -1,0 +1,16 @@
+type EmoteSet {
+  id: ObjectID!
+  name: String!
+  tags: [String!]!
+  emotes: [ActiveEmote!]!
+  emote_slots: Boolean!
+  owner: User
+}
+
+type ActiveEmote {
+  id: ObjectID!
+  name: String!
+  flags: Int!
+  timestamp: Time!
+  emote: Emote
+}

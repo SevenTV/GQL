@@ -23,9 +23,6 @@ type Loaders struct {
 	// Role Loaders
 	RoleByID *loaders.RoleLoader
 
-	// Connection Loaders
-	ConnectionByID *loaders.ConnectionLoader
-
 	// Report Loaders
 	ReportByID       *loaders.ReportLoader
 	ReportsByUserID  *loaders.BatchReportLoader

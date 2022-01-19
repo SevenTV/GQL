@@ -25,6 +25,11 @@ func UserStructureToModel(s *structures.User) *model.User {
 		connections[i] = UserConnectionStructureToModel(v)
 	}
 
+	editors := make([]*model.UserEditor, len(s.Editors))
+	for i, v := range s.Editors {
+		editors[i] = UserEditorStructureToModel(v)
+	}
+
 	return &model.User{
 		ID:               s.ID,
 		UserType:         string(s.UserType),
@@ -34,13 +39,31 @@ func UserStructureToModel(s *structures.User) *model.User {
 		AvatarURL:        "",
 		Biography:        s.Biography,
 		TagColor:         tagColor,
-		Editors:          []*model.UserEditor{},
-		ChannelEmotes:    []*model.UserEmote{},
+		Editors:          editors,
 		Roles:            roles,
 		OwnedEmotes:      []*model.Emote{},
 		Connections:      connections,
 		InboxUnreadCount: 0,
 		Reports:          []*model.Report{},
+	}
+}
+
+// UserEditorStructureToModel: Transform a user editor structure to a GQL model
+func UserEditorStructureToModel(s *structures.UserEditor) *model.UserEditor {
+	if s.User == nil {
+		s.User = structures.DeletedUser
+	}
+	connIDs := make([]string, len(s.Connections))
+	for i, connID := range s.Connections {
+		connIDs[i] = connID.Hex()
+	}
+
+	return &model.UserEditor{
+		Connections: connIDs,
+		Permissions: int(s.Permissions),
+		Visible:     s.Visible,
+		AddedAt:     s.AddedAt,
+		User:        UserStructureToModel(s.User),
 	}
 }
 
@@ -74,7 +97,7 @@ func UserConnectionStructureToModel(s *structures.UserConnection) *model.UserCon
 	}
 }
 
-//RoleStructureToModel: Transform a role structure to a GQL model
+// RoleStructureToModel: Transform a role structure to a GQL model
 func RoleStructureToModel(s *structures.Role) *model.Role {
 	return &model.Role{
 		ID:        s.ID,

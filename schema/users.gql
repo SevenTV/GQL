@@ -8,7 +8,6 @@ type User {
   biography: String!
   tag_color: Int!
   editors: [UserEditor!]!
-  channel_emotes: [UserEmote!]!
 
   roles: [Role]! @goField(forceResolver: true)
   owned_emotes: [Emote!]! @goField(forceResolver: true)
