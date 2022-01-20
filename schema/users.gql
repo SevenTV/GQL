@@ -9,9 +9,9 @@ type User {
   tag_color: Int!
   editors: [UserEditor!]!
 
-  roles: [Role]! @goField(forceResolver: true)
+  roles: [Role]!
   owned_emotes: [Emote!]! @goField(forceResolver: true)
-  connections: [UserConnection]! @goField(forceResolver: true)
+  connections: [UserConnection]!
 
   inbox_unread_count: Int! @goField(forceResolver: true) @hasPermissions
 
