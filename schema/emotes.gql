@@ -26,20 +26,26 @@ extend type Query {
     query: String!
     page: Int
     limit: Int
-    filter: EmoteFilter
-    sort: EmoteSortOrder
-  ): [Emote]!
+    filter: EmoteSearchFilter
+    sort: Sort
+  ): EmoteSearchResult!
 }
 
-enum EmoteFilter {
-  GLOBAL
-  NORMAL
+input EmoteSearchFilter {
+  category: EmoteSearchCategory
+  case_sensitive: Boolean
+  exact_match: Boolean
+}
+
+enum EmoteSearchCategory {
   ALL
+  GLOBAL
+  TRENDING
 }
 
-enum EmoteSortOrder {
-  ASCENDING
-  DESCENDING
+type EmoteSearchResult {
+  count: Int!
+  items: [Emote]!
 }
 
 extend type Mutation {

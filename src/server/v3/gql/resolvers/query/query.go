@@ -44,11 +44,6 @@ func (r *Resolver) Emote(ctx context.Context, id primitive.ObjectID) (*model.Emo
 	return loaders.For(ctx).EmoteByID.Load(id)
 }
 
-func (r *Resolver) Emotes(ctx context.Context, query string, page *int, limit *int, filter *model.EmoteFilter, sort *model.EmoteSortOrder) ([]*model.Emote, error) {
-	// TODO
-	return nil, nil
-}
-
 func (r *Resolver) Roles(ctx context.Context) ([]*model.Role, error) {
 	// TODO
 	return nil, nil
@@ -71,4 +66,21 @@ func (r *Resolver) Report(ctx context.Context, id primitive.ObjectID) (*model.Re
 func (r *Resolver) Inbox(ctx context.Context, afterID *primitive.ObjectID) ([]*model.Message, error) {
 	// TODO
 	return nil, nil
+}
+
+type Sort struct {
+	Value string    `json:"value"`
+	Order SortOrder `json:"order"`
+}
+
+type SortOrder string
+
+var (
+	SortOrderAscending  SortOrder = "ASCENDING"
+	SortOrderDescending SortOrder = "DESCENDING"
+)
+
+var sortOrderMap = map[string]int32{
+	string(SortOrderDescending): 1,
+	string(SortOrderAscending):  -1,
 }

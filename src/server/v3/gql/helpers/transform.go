@@ -11,6 +11,9 @@ import (
 
 // UserStructureToModel: Transform a user structure to a GQL mdoel
 func UserStructureToModel(s *structures.User) *model.User {
+	if s == nil {
+		return UserStructureToModel(structures.DeletedUser)
+	}
 	tagColor := 0
 	if role := s.GetHighestRole(); role != nil {
 		tagColor = int(role.Color)
@@ -108,5 +111,22 @@ func RoleStructureToModel(s *structures.Role) *model.Role {
 		Position:  int(s.Position),
 		CreatedAt: s.ID.Timestamp(),
 		Members:   []*model.User{},
+	}
+}
+
+func EmoteStructureToModel(s *structures.Emote) *model.Emote {
+	return &model.Emote{
+		ID:           s.ID,
+		Name:         s.Name,
+		Flags:        int(s.Flags),
+		Status:       int(s.Status),
+		Tags:         s.Tags,
+		Animated:     s.FrameCount > 1,
+		CreatedAt:    s.ID.Timestamp(),
+		Owner:        UserStructureToModel(s.Owner),
+		Channels:     []*model.User{},
+		ChannelCount: 0,
+		Links:        [][]string{},
+		Reports:      []*model.Report{},
 	}
 }
