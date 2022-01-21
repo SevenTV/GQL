@@ -10,12 +10,18 @@ import (
 	"github.com/SevenTV/Common/structures/v3/aggregations"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/server/v3/gql/helpers"
+	"github.com/SevenTV/GQL/src/server/v3/gql/loaders"
 	"github.com/hashicorp/go-multierror"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const EMOTES_QUERY_LIMIT = 300
+
+func (r *Resolver) Emote(ctx context.Context, id primitive.ObjectID) (*model.Emote, error) {
+	return loaders.For(ctx).EmoteByID.Load(id)
+}
 
 func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limitArg *int, filter *model.EmoteSearchFilter, sortArg *model.Sort) (*model.EmoteSearchResult, error) {
 	// Define limit (how many emotes can be returned in a single query)

@@ -40,10 +40,6 @@ func (r *Resolver) Users(ctx context.Context, query string) ([]*model.User, erro
 	return nil, nil
 }
 
-func (r *Resolver) Emote(ctx context.Context, id primitive.ObjectID) (*model.Emote, error) {
-	return loaders.For(ctx).EmoteByID.Load(id)
-}
-
 func (r *Resolver) Roles(ctx context.Context) ([]*model.Role, error) {
 	// TODO
 	return nil, nil

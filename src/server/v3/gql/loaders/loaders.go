@@ -30,9 +30,9 @@ type Loaders struct {
 }
 
 func New(gCtx global.Context) *Loaders {
-	// TODO
 	return &Loaders{
-		UserByID: userLoader(gCtx),
+		UserByID:  userLoader(gCtx),
+		EmoteByID: emoteLoader(gCtx),
 	}
 }
 

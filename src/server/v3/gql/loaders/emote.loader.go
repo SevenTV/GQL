@@ -17,39 +17,36 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func userLoader(gCtx global.Context) *loaders.UserLoader {
-	return loaders.NewUserLoader(loaders.UserLoaderConfig{
-		Wait: time.Millisecond * 5,
-		Fetch: func(keys []primitive.ObjectID) ([]*model.User, []error) {
+func emoteLoader(gCtx global.Context) *loaders.EmoteLoader {
+	return loaders.NewEmoteLoader(loaders.EmoteLoaderConfig{
+		Fetch: func(keys []primitive.ObjectID) ([]*model.Emote, []error) {
 			ctx, cancel := context.WithTimeout(gCtx, time.Second*10)
 			defer cancel()
 
-			// Fetch user data from the database
-			models := make([]*model.User, len(keys))
+			// Fetch emote data from the database
+			models := make([]*model.Emote, len(keys))
 			errs := make([]error, len(keys))
-			cur, err := gCtx.Inst().Mongo.Collection(structures.CollectionNameUsers).Aggregate(ctx, aggregations.Combine(
+			cur, err := gCtx.Inst().Mongo.Collection(structures.CollectionNameEmotes).Aggregate(ctx, aggregations.Combine(
 				mongo.Pipeline{{{Key: "$match", Value: bson.M{"_id": bson.M{"$in": keys}}}}},
-				aggregations.UserRelationRoles,
-				aggregations.UserRelationEditors,
-				aggregations.UserRelationOwnedEmotes,
+				aggregations.GetEmoteRelationshipOwner(aggregations.UserRelationshipOptions{Roles: true}),
 			))
 			if err != nil {
-				logrus.WithError(err).Error("mongo, failed to spawn aggregation")
+				logrus.New().WithError(err).Error("mongo, failed to spawn aggregation")
 			}
 
-			// Initially fill the response with "deleted user" models in case some cannot be found
-			deletedModel := helpers.UserStructureToModel(structures.DeletedUser)
+			// Initially fill the response with unknown emotes in case some cannot be found
+			unknownModel := helpers.EmoteStructureToModel(structures.DeletedEmote, gCtx.Config().CdnURL)
 			for i := 0; i < len(models); i++ {
-				models[i] = deletedModel
+				models[i] = unknownModel
 			}
 			// Iterate over cursor
-			// Transform user structures into models
+			// Transform emote structures into models
 			for i := 0; cur.TryNext(ctx); i++ {
-				v := &structures.User{}
+				v := &structures.Emote{}
 				if err = cur.Decode(v); err != nil {
 					errs[i] = err
 				}
-				models[i] = helpers.UserStructureToModel(v)
+				models[i] = helpers.EmoteStructureToModel(v, gCtx.Config().CdnURL)
 			}
 			if err = multierror.Append(err, cur.Close(ctx)).ErrorOrNil(); err != nil {
 				logrus.WithError(err).Error("mongo, failed to close the cursor")
@@ -57,5 +54,6 @@ func userLoader(gCtx global.Context) *loaders.UserLoader {
 
 			return models, errs
 		},
+		Wait: time.Millisecond * 5,
 	})
 }
