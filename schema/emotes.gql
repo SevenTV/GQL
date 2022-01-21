@@ -13,7 +13,7 @@ type Emote {
     @goField(forceResolver: true)
   channel_count: Int! @goField(forceResolver: true)
 
-  links: [[String!]!]!
+  urls: [String!]!
 
   reports: [Report!]!
     @goField(forceResolver: true)

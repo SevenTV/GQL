@@ -13,12 +13,12 @@ directive @goField(
 
 # Sorting cursor, binding a specific order to a value
 input Sort {
-	value: String!
-	order: SortOrder!
+  value: String!
+  order: SortOrder!
 }
 
 # The order with which sorting should occur, either ASCENDING or DESCENDING
 enum SortOrder {
-	ASCENDING
-	DESCENDING
+  ASCENDING
+  DESCENDING
 }

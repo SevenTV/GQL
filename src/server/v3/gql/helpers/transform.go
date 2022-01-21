@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/SevenTV/Common/structures/v3"
@@ -114,7 +115,13 @@ func RoleStructureToModel(s *structures.Role) *model.Role {
 	}
 }
 
-func EmoteStructureToModel(s *structures.Emote) *model.Emote {
+func EmoteStructureToModel(s *structures.Emote, cdnBase string) *model.Emote {
+	urls := make([]string, 4)
+	for i := range urls {
+		size := strconv.Itoa(i + 1)
+		urls[i] = fmt.Sprintf("//%s/emote/%s/%sx", cdnBase, s.ID.Hex(), size)
+	}
+
 	return &model.Emote{
 		ID:           s.ID,
 		Name:         s.Name,
@@ -126,7 +133,7 @@ func EmoteStructureToModel(s *structures.Emote) *model.Emote {
 		Owner:        UserStructureToModel(s.Owner),
 		Channels:     []*model.User{},
 		ChannelCount: 0,
-		Links:        [][]string{},
+		Urls:         urls,
 		Reports:      []*model.Report{},
 	}
 }
