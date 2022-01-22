@@ -1,9 +1,12 @@
 package gql
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -20,6 +23,7 @@ import (
 	"github.com/SevenTV/GQL/src/server/v3/gql/middleware"
 	"github.com/SevenTV/GQL/src/server/v3/gql/resolvers"
 	"github.com/SevenTV/GQL/src/server/v3/gql/types"
+	"github.com/dyninc/qstring"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
 )
@@ -112,10 +116,12 @@ func GQL(gCtx global.Context, app fiber.Router) {
 
 	// Handle query via POST
 	app.Post("/", func(c *fiber.Ctx) error {
+		ctx := c.Context()
 		req := gqlRequest{}
-		err := c.BodyParser(&req)
-		if err != nil {
-			logrus.WithError(err).Error("gql.v3, post(BodyParser)")
+		decoder := json.NewDecoder(bytes.NewReader(ctx.Request.Body()))
+		decoder.UseNumber()
+		if err := decoder.Decode(&req); err != nil {
+			logrus.WithError(err).Error("gql.v3, post(Decode)")
 		}
 
 		return handleRequest(c, req)
@@ -123,10 +129,11 @@ func GQL(gCtx global.Context, app fiber.Router) {
 
 	// Handle query via GET
 	app.Get("/", func(c *fiber.Ctx) error {
+		ctx := c.Context()
 		req := gqlRequest{}
-		err := c.QueryParser(&req)
-		if err != nil {
-			logrus.WithError(err).Error("gql.v3, get(QueryParser)")
+		query, _ := url.ParseQuery(ctx.QueryArgs().String())
+		if err := qstring.Unmarshal(query, &req); err != nil {
+			logrus.WithError(err).Error("gql.v3, get(ParseQuery)")
 		}
 
 		return handleRequest(c, req)

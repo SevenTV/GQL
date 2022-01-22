@@ -55,6 +55,7 @@ require (
 require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
+	github.com/dyninc/qstring v0.0.0-20160719172318-ab5840a88e81
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/golang-jwt/jwt/v4 v4.2.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1
