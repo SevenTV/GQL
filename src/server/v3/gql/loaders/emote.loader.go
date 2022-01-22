@@ -35,7 +35,7 @@ func emoteLoader(gCtx global.Context) *loaders.EmoteLoader {
 			}
 
 			// Initially fill the response with unknown emotes in case some cannot be found
-			unknownModel := helpers.EmoteStructureToModel(structures.DeletedEmote, gCtx.Config().CdnURL)
+			unknownModel := helpers.EmoteStructureToModel(gCtx, structures.DeletedEmote)
 			for i := 0; i < len(models); i++ {
 				models[i] = unknownModel
 			}
@@ -46,7 +46,7 @@ func emoteLoader(gCtx global.Context) *loaders.EmoteLoader {
 				if err = cur.Decode(v); err != nil {
 					errs[i] = err
 				}
-				models[i] = helpers.EmoteStructureToModel(v, gCtx.Config().CdnURL)
+				models[i] = helpers.EmoteStructureToModel(gCtx, v)
 			}
 			if err = multierror.Append(err, cur.Close(ctx)).ErrorOrNil(); err != nil {
 				logrus.WithError(err).Error("mongo, failed to close the cursor")

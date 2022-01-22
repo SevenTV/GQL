@@ -7,13 +7,14 @@ import (
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/graph/model"
+	"github.com/SevenTV/GQL/src/global"
 	"github.com/sirupsen/logrus"
 )
 
 // UserStructureToModel: Transform a user structure to a GQL mdoel
-func UserStructureToModel(s *structures.User) *model.User {
+func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 	if s == nil {
-		return UserStructureToModel(structures.DeletedUser)
+		return UserStructureToModel(ctx, structures.DeletedUser)
 	}
 	tagColor := 0
 	if role := s.GetHighestRole(); role != nil {
@@ -21,17 +22,31 @@ func UserStructureToModel(s *structures.User) *model.User {
 	}
 	roles := make([]*model.Role, len(s.Roles))
 	for i, v := range s.Roles {
-		roles[i] = RoleStructureToModel(v)
+		roles[i] = RoleStructureToModel(ctx, v)
 	}
 
 	connections := make([]*model.UserConnection, len(s.Connections))
 	for i, v := range s.Connections {
-		connections[i] = UserConnectionStructureToModel(v)
+		connections[i] = UserConnectionStructureToModel(ctx, v)
 	}
 
 	editors := make([]*model.UserEditor, len(s.Editors))
 	for i, v := range s.Editors {
-		editors[i] = UserEditorStructureToModel(v)
+		editors[i] = UserEditorStructureToModel(ctx, v)
+	}
+
+	avatarURL := ""
+	if s.AvatarID != "" {
+		avatarURL = fmt.Sprintf("//%s/pp/%s/%s", ctx.Config().CdnURL, s.ID.Hex(), s.AvatarID)
+	} else {
+		for _, con := range s.Connections {
+			switch con.Platform {
+			case structures.UserConnectionPlatformTwitch:
+				if d, err := con.DecodeTwitch(); err == nil {
+					avatarURL = d.ProfileImageURL[6:]
+				}
+			}
+		}
 	}
 
 	return &model.User{
@@ -40,7 +55,7 @@ func UserStructureToModel(s *structures.User) *model.User {
 		Username:         s.Username,
 		DisplayName:      utils.Ternary(len(s.DisplayName) > 0, s.DisplayName, s.Username).(string),
 		CreatedAt:        s.ID.Timestamp(),
-		AvatarURL:        "",
+		AvatarURL:        avatarURL,
 		Biography:        s.Biography,
 		TagColor:         tagColor,
 		Editors:          editors,
@@ -53,7 +68,7 @@ func UserStructureToModel(s *structures.User) *model.User {
 }
 
 // UserEditorStructureToModel: Transform a user editor structure to a GQL model
-func UserEditorStructureToModel(s *structures.UserEditor) *model.UserEditor {
+func UserEditorStructureToModel(ctx global.Context, s *structures.UserEditor) *model.UserEditor {
 	if s.User == nil {
 		s.User = structures.DeletedUser
 	}
@@ -67,12 +82,12 @@ func UserEditorStructureToModel(s *structures.UserEditor) *model.UserEditor {
 		Permissions: int(s.Permissions),
 		Visible:     s.Visible,
 		AddedAt:     s.AddedAt,
-		User:        UserStructureToModel(s.User),
+		User:        UserStructureToModel(ctx, s.User),
 	}
 }
 
 // UserConnectionStructureToModel: Transform a user connection structure to a GQL model
-func UserConnectionStructureToModel(s *structures.UserConnection) *model.UserConnection {
+func UserConnectionStructureToModel(ctx global.Context, s *structures.UserConnection) *model.UserConnection {
 	var (
 		err         error
 		d           interface{}
@@ -102,7 +117,7 @@ func UserConnectionStructureToModel(s *structures.UserConnection) *model.UserCon
 }
 
 // RoleStructureToModel: Transform a role structure to a GQL model
-func RoleStructureToModel(s *structures.Role) *model.Role {
+func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
 	return &model.Role{
 		ID:        s.ID,
 		Name:      s.Name,
@@ -115,11 +130,11 @@ func RoleStructureToModel(s *structures.Role) *model.Role {
 	}
 }
 
-func EmoteStructureToModel(s *structures.Emote, cdnBase string) *model.Emote {
+func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote {
 	urls := make([]string, 4)
 	for i := range urls {
 		size := strconv.Itoa(i + 1)
-		urls[i] = fmt.Sprintf("//%s/emote/%s/%sx", cdnBase, s.ID.Hex(), size)
+		urls[i] = fmt.Sprintf("//%s/emote/%s/%sx", ctx.Config().CdnURL, s.ID.Hex(), size)
 	}
 
 	return &model.Emote{
@@ -130,7 +145,7 @@ func EmoteStructureToModel(s *structures.Emote, cdnBase string) *model.Emote {
 		Tags:         s.Tags,
 		Animated:     s.FrameCount > 1,
 		CreatedAt:    s.ID.Timestamp(),
-		Owner:        UserStructureToModel(s.Owner),
+		Owner:        UserStructureToModel(ctx, s.Owner),
 		Channels:     []*model.User{},
 		ChannelCount: 0,
 		Urls:         urls,

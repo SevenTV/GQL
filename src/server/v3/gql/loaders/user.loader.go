@@ -38,7 +38,7 @@ func userLoader(gCtx global.Context) *loaders.UserLoader {
 			}
 
 			// Initially fill the response with "deleted user" models in case some cannot be found
-			deletedModel := helpers.UserStructureToModel(structures.DeletedUser)
+			deletedModel := helpers.UserStructureToModel(gCtx, structures.DeletedUser)
 			for i := 0; i < len(models); i++ {
 				models[i] = deletedModel
 			}
@@ -49,7 +49,7 @@ func userLoader(gCtx global.Context) *loaders.UserLoader {
 				if err = cur.Decode(v); err != nil {
 					errs[i] = err
 				}
-				models[i] = helpers.UserStructureToModel(v)
+				models[i] = helpers.UserStructureToModel(gCtx, v)
 			}
 			if err = multierror.Append(err, cur.Close(ctx)).ErrorOrNil(); err != nil {
 				logrus.WithError(err).Error("mongo, failed to close the cursor")

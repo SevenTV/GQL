@@ -132,7 +132,7 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 
 	models := make([]*model.Emote, len(result))
 	for i, e := range result {
-		models[i] = helpers.EmoteStructureToModel(e, r.Ctx.Config().CdnURL)
+		models[i] = helpers.EmoteStructureToModel(r.Ctx, e)
 	}
 
 	return &model.EmoteSearchResult{
