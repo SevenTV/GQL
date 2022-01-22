@@ -27,7 +27,7 @@ func userLoader(gCtx global.Context) *loaders.UserLoader {
 			// Fetch user data from the database
 			models := make([]*model.User, len(keys))
 			errs := make([]error, len(keys))
-			cur, err := gCtx.Inst().Mongo.Collection(structures.CollectionNameUsers).Aggregate(ctx, aggregations.Combine(
+			cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, aggregations.Combine(
 				mongo.Pipeline{{{Key: "$match", Value: bson.M{"_id": bson.M{"$in": keys}}}}},
 				aggregations.UserRelationRoles,
 				aggregations.UserRelationEditors,

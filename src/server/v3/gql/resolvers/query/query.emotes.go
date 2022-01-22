@@ -97,7 +97,7 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 	totalCount := 0
 	go func() { // Run a separate pipeline to return the total count that could be paginated
 		defer wg.Done()
-		cur, err := r.Ctx.Inst().Mongo.Collection(structures.CollectionNameEmotes).Aggregate(ctx, aggregations.Combine(
+		cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, aggregations.Combine(
 			pipeline,
 			mongo.Pipeline{
 				{{Key: "$count", Value: "count"}},
@@ -115,7 +115,7 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 
 	// Paginate and fetch the relevant emotes
 	result := []*structures.Emote{}
-	cur, err := r.Ctx.Inst().Mongo.Collection(structures.CollectionNameEmotes).Aggregate(ctx, aggregations.Combine(
+	cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, aggregations.Combine(
 		pipeline,
 		mongo.Pipeline{
 			{{Key: "$skip", Value: (page - 1) * limit}},

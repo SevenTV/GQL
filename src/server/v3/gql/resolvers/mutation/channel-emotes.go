@@ -40,7 +40,7 @@ func (r *Resolver) SetChannelEmote(ctx context.Context, userID primitive.ObjectI
 		}
 
 		if targetUserID != user.ID {
-			cur, err := r.Ctx.Inst().Mongo.Collection(structures.CollectionNameUsers).Aggregate(ctx, append(mongo.Pipeline{
+			cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, append(mongo.Pipeline{
 				{{Key: "$match", Value: bson.M{"_id": targetUserID}}},
 			}, aggregations.UserRelationRoles...))
 			if err != nil {
@@ -118,7 +118,7 @@ func (r *Resolver) SetChannelEmote(ctx context.Context, userID primitive.ObjectI
 			}
 		}
 
-		cur, err := r.Ctx.Inst().Mongo.Collection(structures.CollectionNameEmotes).Aggregate(ctx, append(mongo.Pipeline{
+		cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, append(mongo.Pipeline{
 			{{Key: "$match", Value: bson.M{"_id": targetEmoteID}}},
 		}, aggregations.GetEmoteRelationshipOwner(opts)...))
 		if err != nil {
@@ -167,7 +167,7 @@ func (r *Resolver) SetChannelEmote(ctx context.Context, userID primitive.ObjectI
 		var res *mongoRaw.SingleResult
 		switch action {
 		case model.ChannelEmoteListItemActionAdd:
-			res = r.Ctx.Inst().Mongo.Collection(structures.CollectionNameUsers).FindOneAndUpdate(ctx, bson.M{"_id": targetUserID}, bson.M{
+			res = r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).FindOneAndUpdate(ctx, bson.M{"_id": targetUserID}, bson.M{
 				"$addToSet": bson.M{
 					"channel_emotes": structures.UserEmote{
 						ID:          targetEmoteID,
@@ -177,7 +177,7 @@ func (r *Resolver) SetChannelEmote(ctx context.Context, userID primitive.ObjectI
 				},
 			})
 		case model.ChannelEmoteListItemActionRemove:
-			res = r.Ctx.Inst().Mongo.Collection(structures.CollectionNameUsers).FindOneAndUpdate(ctx, bson.M{"_id": targetUserID}, bson.M{
+			res = r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).FindOneAndUpdate(ctx, bson.M{"_id": targetUserID}, bson.M{
 				"$pull": bson.M{
 					"channel_emotes": bson.M{
 						"id": targetEmoteID,
@@ -185,7 +185,7 @@ func (r *Resolver) SetChannelEmote(ctx context.Context, userID primitive.ObjectI
 				},
 			})
 		case model.ChannelEmoteListItemActionUpdate:
-			res = r.Ctx.Inst().Mongo.Collection(structures.CollectionNameUsers).FindOneAndUpdate(ctx, bson.M{"_id": targetUserID, "channel_emotes": bson.M{"id": targetEmoteID}}, bson.M{
+			res = r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).FindOneAndUpdate(ctx, bson.M{"_id": targetUserID, "channel_emotes": bson.M{"id": targetEmoteID}}, bson.M{
 				"channel_emotes.$": structures.UserEmote{
 					ID:          targetEmoteID,
 					Alias:       target.Alias,

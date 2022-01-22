@@ -26,7 +26,7 @@ func emoteLoader(gCtx global.Context) *loaders.EmoteLoader {
 			// Fetch emote data from the database
 			models := make([]*model.Emote, len(keys))
 			errs := make([]error, len(keys))
-			cur, err := gCtx.Inst().Mongo.Collection(structures.CollectionNameEmotes).Aggregate(ctx, aggregations.Combine(
+			cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, aggregations.Combine(
 				mongo.Pipeline{{{Key: "$match", Value: bson.M{"_id": bson.M{"$in": keys}}}}},
 				aggregations.GetEmoteRelationshipOwner(aggregations.UserRelationshipOptions{Roles: true}),
 			))
