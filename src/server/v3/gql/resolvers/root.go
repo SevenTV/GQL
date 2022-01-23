@@ -5,6 +5,7 @@ import (
 
 	"github.com/SevenTV/GQL/src/server/v3/gql/resolvers/ban"
 	"github.com/SevenTV/GQL/src/server/v3/gql/resolvers/emote"
+	"github.com/SevenTV/GQL/src/server/v3/gql/resolvers/emoteset"
 	"github.com/SevenTV/GQL/src/server/v3/gql/resolvers/mutation"
 	"github.com/SevenTV/GQL/src/server/v3/gql/resolvers/query"
 	"github.com/SevenTV/GQL/src/server/v3/gql/resolvers/report"
@@ -60,4 +61,8 @@ func (r *Resolver) UserEditor() generated.UserEditorResolver {
 
 func (r *Resolver) UserEmote() generated.UserEmoteResolver {
 	return user_emote.New(r.Resolver)
+}
+
+func (r *Resolver) EmoteSetOps() generated.EmoteSetOpsResolver {
+	return emoteset.NewOps(r.Resolver)
 }

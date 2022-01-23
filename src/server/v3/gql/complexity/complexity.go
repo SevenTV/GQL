@@ -8,3 +8,7 @@ import (
 func New(ctx global.Context) generated.ComplexityRoot {
 	return generated.ComplexityRoot{}
 }
+
+func NewOps(ctx global.Context) generated.ComplexityRoot {
+	return generated.ComplexityRoot{}
+}

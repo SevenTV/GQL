@@ -155,11 +155,11 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 
 func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model.EmoteSet {
 	emotes := make([]*model.ActiveEmote, len(s.Emotes))
-	for i, e := range emotes {
+	for i, e := range s.Emotes {
 		emotes[i] = &model.ActiveEmote{
 			ID:        e.ID,
 			Name:      e.Name,
-			Flags:     e.Flags,
+			Flags:     int(e.Flags),
 			Timestamp: e.Timestamp,
 		}
 	}

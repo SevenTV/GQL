@@ -23,14 +23,8 @@ extend type Mutation {
   setUserRole(
     user_id: ObjectID!
     role_id: ObjectID!
-    action: UserRoleListItemAction!
+    action: ListItemAction!
   ): User @hasPermissions(role: [MANAGE_USERS])
-}
-
-enum UserRoleListItemAction {
-  ADD
-  UPDATE
-  REMOVE
 }
 
 input CreateRoleInput {

@@ -17,7 +17,7 @@ func New(r types.Resolver) generated.MutationResolver {
 	return &Resolver{r}
 }
 
-func (r *Resolver) SetUserRole(ctx context.Context, userID primitive.ObjectID, roleID primitive.ObjectID, action model.UserRoleListItemAction) (*model.User, error) {
+func (r *Resolver) SetUserRole(ctx context.Context, userID primitive.ObjectID, roleID primitive.ObjectID, action model.ListItemAction) (*model.User, error) {
 	// TODO
 	return nil, nil
 }

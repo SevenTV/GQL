@@ -11,6 +11,8 @@ directive @goField(
   name: String
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
+directive @internal on FIELD_DEFINITION
+
 # Sorting cursor, binding a specific order to a value
 input Sort {
   value: String!
@@ -21,4 +23,10 @@ input Sort {
 enum SortOrder {
   ASCENDING
   DESCENDING
+}
+
+enum ListItemAction {
+  ADD
+  UPDATE
+  REMOVE
 }

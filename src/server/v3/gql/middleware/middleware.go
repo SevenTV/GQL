@@ -8,5 +8,6 @@ import (
 func New(ctx global.Context) generated.DirectiveRoot {
 	return generated.DirectiveRoot{
 		HasPermissions: hasPermission(ctx),
+		Internal:       internal(ctx),
 	}
 }

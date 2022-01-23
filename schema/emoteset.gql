@@ -27,9 +27,11 @@ input CreateEmoteSetInput {
 }
 
 type EmoteSetOps {
-  addEmote(id: ObjectID!, name: String): Emote
+  target: EmoteSet @internal
+  emotes(id: ObjectID!, action: ListItemAction!, name: String): EmoteSet
+    @goField(forceResolver: true)
 }
 
 extend type Query {
-  emoteSet(id: ObjectID!): EmoteSet @goField(forceResolver: true)
+  emoteSet(id: ObjectID!): EmoteSet
 }
