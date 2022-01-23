@@ -69,9 +69,8 @@ func main() {
 		// Set up Mongo
 		ctx, cancel := context.WithTimeout(gCtx, time.Second*15)
 		mongoInst, err := mongo.Setup(ctx, mongo.SetupOptions{
-			URI:     gCtx.Config().Mongo.URI,
-			DB:      gCtx.Config().Mongo.DB,
-			Indexes: configure.Indexes,
+			URI: gCtx.Config().Mongo.URI,
+			DB:  gCtx.Config().Mongo.DB,
 		})
 		cancel()
 		if err != nil {

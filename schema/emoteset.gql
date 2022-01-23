@@ -3,7 +3,7 @@ type EmoteSet {
   name: String!
   tags: [String!]!
   emotes: [ActiveEmote!]!
-  emote_slots: Boolean!
+  emote_slots: Int!
   owner: User
 }
 
@@ -13,4 +13,14 @@ type ActiveEmote {
   flags: Int!
   timestamp: Time!
   emote: Emote
+}
+
+extend type Mutation {
+  createEmoteSet(data: CreateEmoteSetInput!): EmoteSet
+    @hasPermissions(role: [EMOTESET_CREATE])
+}
+
+input CreateEmoteSetInput {
+  name: String!
+  privileged: Boolean @hasPermissions(role: [SUPER_ADMINISTRATOR])
 }

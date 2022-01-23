@@ -20,6 +20,9 @@ type Loaders struct {
 	EmoteByID         *loaders.EmoteLoader
 	EmotesByChannelID *loaders.BatchEmoteLoader
 
+	// Emote Set Loaders
+	EmoteSetByID *loaders.EmoteSetLoader
+
 	// Role Loaders
 	RoleByID *loaders.RoleLoader
 
@@ -31,8 +34,9 @@ type Loaders struct {
 
 func New(gCtx global.Context) *Loaders {
 	return &Loaders{
-		UserByID:  userLoader(gCtx),
-		EmoteByID: emoteLoader(gCtx),
+		UserByID:     userLoader(gCtx),
+		EmoteByID:    emoteLoader(gCtx),
+		EmoteSetByID: emoteSetLoader(gCtx),
 	}
 }
 

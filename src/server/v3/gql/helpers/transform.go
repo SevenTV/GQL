@@ -152,3 +152,24 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		Reports:      []*model.Report{},
 	}
 }
+
+func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model.EmoteSet {
+	emotes := make([]*model.ActiveEmote, len(s.Emotes))
+	for i, e := range emotes {
+		emotes[i] = &model.ActiveEmote{
+			ID:        e.ID,
+			Name:      e.Name,
+			Flags:     e.Flags,
+			Timestamp: e.Timestamp,
+		}
+	}
+
+	return &model.EmoteSet{
+		ID:         s.ID,
+		Name:       s.Name,
+		Tags:       s.Tags,
+		Emotes:     emotes,
+		EmoteSlots: int(s.EmoteSlots),
+		Owner:      UserStructureToModel(ctx, s.Owner),
+	}
+}

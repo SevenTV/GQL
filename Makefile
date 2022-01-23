@@ -48,6 +48,8 @@ gql:
 	cd graph/loaders && dataloaden EmoteLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.Emote"
 	cd graph/loaders && dataloaden BatchEmoteLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "[]*github.com/SevenTV/GQL/graph/model.Emote"
 
+	cd graph/loaders && dataloaden EmoteSetLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.EmoteSet"
+
 	cd graph/loaders && dataloaden RoleLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.Role"
 
 	cd graph/loaders && dataloaden ConnectionLoader string "*github.com/SevenTV/GQL/graph/model.UserConnection"
