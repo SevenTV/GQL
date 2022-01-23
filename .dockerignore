@@ -9,3 +9,7 @@ tmp/
 !docker-compose.yaml
 !.github/**/*.yaml
 Dockerfile
+*-gqlgen.go
+*-packr.go
+_gen.go
+node_modules/

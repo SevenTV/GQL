@@ -1,4 +1,4 @@
-FROM golang:1.17.3-alpine as builder
+FROM golang:1.17.3 as builder
 
 WORKDIR /tmp/gql
 
@@ -10,9 +10,9 @@ ARG VERSION
 ENV GQL_BUILDER=${BUILDER}
 ENV GQL_VERSION=${VERSION}
 
-RUN apk add --no-cache make git && \
-    go install github.com/gobuffalo/packr/v2/packr2@latest && \
-    make linux
+RUN apt-get install make git gcc && \
+    make build_deps && \
+    make
 
 FROM alpine:latest
 

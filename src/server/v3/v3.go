@@ -3,6 +3,7 @@ package v3
 import (
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/SevenTV/GQL/src/server/middleware"
+	"github.com/SevenTV/GQL/src/server/v3/gql"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
@@ -15,6 +16,5 @@ func API(gCtx global.Context, app fiber.Router) { // Define CORS rules
 	}))
 
 	app.Use(middleware.Auth(gCtx, true))
-
-	GQL(gCtx, app)
+	gql.GQL(gCtx, app)
 }

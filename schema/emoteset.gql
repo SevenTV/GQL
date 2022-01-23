@@ -1,0 +1,37 @@
+type EmoteSet {
+  id: ObjectID!
+  name: String!
+  tags: [String!]!
+  emotes: [ActiveEmote!]!
+  emote_slots: Int!
+  owner: User
+}
+
+type ActiveEmote {
+  id: ObjectID!
+  name: String!
+  flags: Int!
+  timestamp: Time!
+  emote: Emote
+}
+
+extend type Mutation {
+  emoteSet(id: ObjectID!): EmoteSetOps
+  createEmoteSet(data: CreateEmoteSetInput!): EmoteSet
+    @hasPermissions(role: [EMOTESET_CREATE])
+}
+
+input CreateEmoteSetInput {
+  name: String!
+  privileged: Boolean @hasPermissions(role: [SUPER_ADMINISTRATOR])
+}
+
+type EmoteSetOps {
+  target: EmoteSet @internal
+  emotes(id: ObjectID!, action: ListItemAction!, name: String): EmoteSet
+    @goField(forceResolver: true)
+}
+
+extend type Query {
+  emoteSet(id: ObjectID!): EmoteSet
+}

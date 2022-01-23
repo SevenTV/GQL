@@ -14,6 +14,7 @@ import (
 	"github.com/SevenTV/Common/redis"
 	"github.com/SevenTV/GQL/src/configure"
 	"github.com/SevenTV/GQL/src/global"
+	"github.com/SevenTV/GQL/src/instance"
 	"github.com/SevenTV/GQL/src/server"
 	"github.com/bugsnag/panicwrap"
 	"github.com/sirupsen/logrus"
@@ -68,9 +69,8 @@ func main() {
 		// Set up Mongo
 		ctx, cancel := context.WithTimeout(gCtx, time.Second*15)
 		mongoInst, err := mongo.Setup(ctx, mongo.SetupOptions{
-			URI:     gCtx.Config().Mongo.URI,
-			DB:      gCtx.Config().Mongo.DB,
-			Indexes: configure.Indexes,
+			URI: gCtx.Config().Mongo.URI,
+			DB:  gCtx.Config().Mongo.DB,
 		})
 		cancel()
 		if err != nil {
@@ -79,15 +79,15 @@ func main() {
 
 		ctx, cancel = context.WithTimeout(gCtx, time.Second*15)
 		redisInst, err := redis.Setup(ctx, redis.SetupOptions{
-			URI: gCtx.Config().Redis.URI,
+			Addresses: []string{gCtx.Config().Redis.URI},
 		})
 		cancel()
 		if err != nil {
 			logrus.WithError(err).Fatal("failed to connect to redis")
 		}
 
-		gCtx.Inst().Mongo = mongoInst
-		gCtx.Inst().Redis = redisInst
+		gCtx.Inst().Mongo = instance.WrapMongo(mongoInst)
+		gCtx.Inst().Redis = instance.WrapRedis(redisInst)
 	}
 
 	serverDone := server.New(gCtx)

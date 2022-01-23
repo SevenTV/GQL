@@ -4,10 +4,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SevenTV/Common/aggregations"
 	"github.com/SevenTV/Common/auth"
 	"github.com/SevenTV/Common/mongo"
-	"github.com/SevenTV/Common/structures"
+	"github.com/SevenTV/Common/structures/v3"
+	"github.com/SevenTV/Common/structures/v3/aggregations"
+	"github.com/SevenTV/Common/structures/v3/query"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/gofiber/fiber/v2"
 	"github.com/sirupsen/logrus"
@@ -90,7 +91,7 @@ func Auth(gCtx global.Context, optional bool) func(c *fiber.Ctx) error {
 
 			}
 		}
-		defaultRoles := structures.FetchDefaultRoles(ctx, gCtx.Inst().Mongo)
+		defaultRoles := query.DefaultRoles.Fetch(ctx, gCtx.Inst().Mongo, gCtx.Inst().Redis)
 		user.AddRoles(defaultRoles...)
 
 		if user.TokenVersion != v {

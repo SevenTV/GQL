@@ -1,0 +1,78 @@
+type Emote {
+  id: ObjectID!
+  name: String!
+  flags: Int!
+  status: Int!
+  tags: [String!]!
+  animated: Boolean!
+  created_at: Time!
+
+  owner: User! @goField(forceResolver: true)
+
+  channels(limit: Int, after_id: String!): [User!]!
+    @goField(forceResolver: true)
+  channel_count: Int! @goField(forceResolver: true)
+
+  urls: [String!]!
+
+  reports: [Report!]!
+    @goField(forceResolver: true)
+    @hasPermissions(role: [MANAGE_REPORTS])
+}
+
+extend type Query {
+  emote(id: ObjectID!): Emote
+  emotes(
+    query: String!
+    page: Int
+    limit: Int
+    filter: EmoteSearchFilter
+    sort: Sort
+  ): EmoteSearchResult!
+}
+
+input EmoteSearchFilter {
+  category: EmoteSearchCategory
+  case_sensitive: Boolean
+  exact_match: Boolean
+}
+
+enum EmoteSearchCategory {
+  ALL
+  GLOBAL
+  TRENDING
+}
+
+type EmoteSearchResult {
+  count: Int!
+  items: [Emote]!
+}
+
+extend type Mutation {
+  setChannelEmote(
+    user_id: ObjectID!
+    target: UserEmoteInput!
+    action: ChannelEmoteListItemAction!
+  ): User @hasPermissions
+
+  editEmote(emote_id: ObjectID!, data: EditEmoteInput!): Emote @hasPermissions
+}
+
+enum ChannelEmoteListItemAction {
+  ADD
+  UPDATE
+  REMOVE
+}
+
+input UserEmoteInput {
+  id: String!
+  channels: [String!]
+  alias: String
+}
+
+input EditEmoteInput {
+  name: String
+  flags: Int
+  owner_id: String
+  tags: [String!]
+}
