@@ -16,6 +16,7 @@ type ActiveEmote {
 }
 
 extend type Mutation {
+  emoteSet(id: ObjectID!): EmoteSetOps
   createEmoteSet(data: CreateEmoteSetInput!): EmoteSet
     @hasPermissions(role: [EMOTESET_CREATE])
 }
@@ -23,4 +24,12 @@ extend type Mutation {
 input CreateEmoteSetInput {
   name: String!
   privileged: Boolean @hasPermissions(role: [SUPER_ADMINISTRATOR])
+}
+
+type EmoteSetOps {
+  addEmote(id: ObjectID!, name: String): Emote
+}
+
+extend type Query {
+  emoteSet(id: ObjectID!): EmoteSet @goField(forceResolver: true)
 }

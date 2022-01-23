@@ -9,11 +9,18 @@ import (
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/server/v3/gql/auth"
 	"github.com/SevenTV/GQL/src/server/v3/gql/loaders"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+func (r *Resolver) EmoteSet(ctx context.Context, id primitive.ObjectID) (*model.EmoteSetOps, error) {
+	return nil, nil
+}
+
+// CreateEmoteSet: create a new emote set
 func (r *Resolver) CreateEmoteSet(ctx context.Context, input model.CreateEmoteSetInput) (*model.EmoteSet, error) {
 	actor := auth.For(ctx)
 
+	// Set up emote set builder
 	isPrivileged := utils.Ternary(input.Privileged != nil, input.Privileged, false).(bool)
 	b := structures.NewEmoteSetBuilder(nil).
 		SetName(input.Name).
@@ -25,6 +32,7 @@ func (r *Resolver) CreateEmoteSet(ctx context.Context, input model.CreateEmoteSe
 		EmoteSetBuilder: b,
 	}
 
+	// Execute mutation
 	if _, err := m.Create(ctx, r.Ctx.Inst().Mongo, mutations.EmoteSetMutationOptions{
 		Actor: actor,
 	}); err != nil {
