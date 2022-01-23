@@ -26,5 +26,5 @@ extend type Mutation {
     content: String!
     important: Boolean
     anonymous: Boolean
-  ): Message @hasPermissions(role: [SendMessages])
+  ): Message @hasPermissions(role: [SEND_MESSAGES])
 }

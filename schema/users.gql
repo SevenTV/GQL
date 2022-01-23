@@ -17,7 +17,7 @@ type User {
 
   reports: [Report!]!
     @goField(forceResolver: true)
-    @hasPermissions(role: [ManageReports])
+    @hasPermissions(role: [MANAGE_REPORTS])
 }
 
 type UserEditor {

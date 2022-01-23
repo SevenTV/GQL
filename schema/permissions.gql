@@ -1,26 +1,27 @@
-directive @hasPermissions(role: [Permission!]) on FIELD_DEFINITION
+directive @hasPermissions(role: [Permission!]) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
 enum Permission {
-  CreateEmote
-  EditEmote
-  SetChannelEmote
+  EMOTE_CREATE
+  EMOTE_EDIT
+  EMOTESET_CREATE
+  EMOTESET_EDIT
 
-  ReportCreate
-  SendMessages
+  REPORT_CREATE
+  SEND_MESSAGES
 
-  FeatureZeroWidthEmoteType
-  FeatureProfilePictureAnimation
+  FEATURE_ZEROWIDTH_EMOTE_TYPE
+  FEATURE_PROFILE_PICTURE_ANIMATION
 
-  ManageBans
-  ManageRoles
-  ManageReports
-  ManageUsers
-  EditAnyEmote
-  EditAnyEmoteSet
-  BypassPrivacy
+  MANAGE_BANS
+  MANAGE_ROLES
+  MANAGE_REPORTS
+  MANAGE_USERS
+  EMOTE_EDIT_ANY
+  EMOTESET_EDIT_ANY
+  BYPASS_PRIVACY
 
-  SuperAdministrator
-  ManageNews
-  ManageStack
-  ManageCosmetics
+  SUPER_ADMINISTRATOR
+  MANAGE_NEWS
+  MANAGE_STACK
+  MANAGE_COSMETICS
 }

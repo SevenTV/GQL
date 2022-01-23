@@ -17,7 +17,7 @@ type Emote {
 
   reports: [Report!]!
     @goField(forceResolver: true)
-    @hasPermissions(role: [ManageReports])
+    @hasPermissions(role: [MANAGE_REPORTS])
 }
 
 extend type Query {

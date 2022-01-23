@@ -16,15 +16,15 @@ extend type Query {
 }
 
 extend type Mutation {
-  createRole(data: CreateRoleInput!): Role @hasPermissions(role: [ManageRoles])
+  createRole(data: CreateRoleInput!): Role @hasPermissions(role: [MANAGE_ROLES])
   editRole(role_id: ObjectID!, data: EditRoleInput!): Role
-    @hasPermissions(role: [ManageRoles])
-  deleteRole(role_id: ObjectID!): String! @hasPermissions(role: [ManageRoles])
+    @hasPermissions(role: [MANAGE_ROLES])
+  deleteRole(role_id: ObjectID!): String! @hasPermissions(role: [MANAGE_ROLES])
   setUserRole(
     user_id: ObjectID!
     role_id: ObjectID!
     action: UserRoleListItemAction!
-  ): User @hasPermissions(role: [ManageUsers])
+  ): User @hasPermissions(role: [MANAGE_USERS])
 }
 
 enum UserRoleListItemAction {

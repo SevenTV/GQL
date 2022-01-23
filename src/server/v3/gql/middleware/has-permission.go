@@ -4,18 +4,18 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/SevenTV/GQL/src/server/v3/gql/auth"
-	"github.com/SevenTV/GQL/src/server/v3/gql/errors"
 )
 
 func hasPermission(gCtx global.Context) func(ctx context.Context, obj interface{}, next graphql.Resolver, role []model.Permission) (res interface{}, err error) {
 	return func(ctx context.Context, obj interface{}, next graphql.Resolver, role []model.Permission) (res interface{}, err error) {
 		user := auth.For(ctx)
 		if user == nil {
-			return nil, errors.ErrLoginRequired
+			return nil, errors.ErrUnauthorized
 		}
 
 		var perms structures.RolePermission
@@ -23,19 +23,21 @@ func hasPermission(gCtx global.Context) func(ctx context.Context, obj interface{
 			switch v {
 			case model.PermissionBypassPrivacy:
 				perms |= structures.RolePermissionBypassPrivacy
-			case model.PermissionSetChannelEmote:
+			case model.PermissionEmotesetCreate:
+				perms |= structures.RolePermissionCreateEmoteSet
+			case model.PermissionEmotesetEdit:
 				perms |= structures.RolePermissionEditEmoteSet
-			case model.PermissionCreateEmote:
+			case model.PermissionEmoteCreate:
 				perms |= structures.RolePermissionCreateEmote
-			case model.PermissionEditAnyEmote:
+			case model.PermissionEmoteEditAny:
 				perms |= structures.RolePermissionEditAnyEmote
-			case model.PermissionEditAnyEmoteSet:
+			case model.PermissionEmotesetEditAny:
 				perms |= structures.RolePermissionEditAnyEmoteSet
-			case model.PermissionEditEmote:
+			case model.PermissionEmoteEdit:
 				perms |= structures.RolePermissionEditEmote
 			case model.PermissionFeatureProfilePictureAnimation:
 				perms |= structures.RolePermissionFeatureProfilePictureAnimation
-			case model.PermissionFeatureZeroWidthEmoteType:
+			case model.PermissionFeatureZerowidthEmoteType:
 				perms |= structures.RolePermissionFeatureZeroWidthEmoteType
 			case model.PermissionManageBans:
 				perms |= structures.RolePermissionManageBans
@@ -61,7 +63,7 @@ func hasPermission(gCtx global.Context) func(ctx context.Context, obj interface{
 		}
 
 		if !user.HasPermission(perms) {
-			return nil, errors.ErrAccessDenied
+			return nil, errors.ErrUnauthorized
 		}
 
 		return next(ctx)

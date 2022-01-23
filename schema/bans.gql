@@ -16,11 +16,11 @@ extend type Mutation {
     effects: Int!
     expire_at: String
     anonymous: Boolean
-  ): Ban @hasPermissions(role: [ManageBans])
+  ): Ban @hasPermissions(role: [MANAGE_BANS])
   editBan(
     ban_id: ObjectID!
     reason: String
     effects: Int
     expire_at: String
-  ): Ban @hasPermissions(role: [ManageBans])
+  ): Ban @hasPermissions(role: [MANAGE_BANS])
 }
