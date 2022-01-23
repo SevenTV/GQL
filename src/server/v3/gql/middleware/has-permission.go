@@ -15,7 +15,7 @@ func hasPermission(gCtx global.Context) func(ctx context.Context, obj interface{
 	return func(ctx context.Context, obj interface{}, next graphql.Resolver, role []model.Permission) (res interface{}, err error) {
 		user := auth.For(ctx)
 		if user == nil {
-			return nil, errors.ErrUnauthorized
+			return nil, errors.ErrUnauthorized()
 		}
 
 		var perms structures.RolePermission
@@ -63,7 +63,7 @@ func hasPermission(gCtx global.Context) func(ctx context.Context, obj interface{
 		}
 
 		if !user.HasPermission(perms) {
-			return nil, errors.ErrUnauthorized
+			return nil, errors.ErrUnauthorized()
 		}
 
 		return next(ctx)

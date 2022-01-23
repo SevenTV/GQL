@@ -27,7 +27,7 @@ func (r *Resolver) User(ctx context.Context, id *primitive.ObjectID) (*model.Use
 	if id.IsZero() {
 		actor := auth.For(ctx)
 		if actor == nil {
-			return nil, errors.ErrUnknownUser
+			return nil, errors.ErrUnknownUser()
 		}
 		id = &actor.ID
 	}

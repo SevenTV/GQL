@@ -42,7 +42,7 @@ func (r *Resolver) Emotes(ctx context.Context, obj *model.EmoteSetOps, id primit
 		"_id": obj.Target.ID,
 	}).Decode(b.EmoteSet); err != nil {
 		logF.WithError(err).Error("mongo, couldn't find emote to add to set")
-		return nil, errors.ErrInternalServerError.SetDetail(err.Error())
+		return nil, errors.ErrInternalServerError().SetDetail(err.Error())
 	}
 
 	// Mutate the thing
