@@ -12,6 +12,7 @@ import (
 	"github.com/SevenTV/GQL/src/server/v3/gql/auth"
 	"github.com/SevenTV/GQL/src/server/v3/gql/loaders"
 	"github.com/SevenTV/GQL/src/server/v3/gql/types"
+	"github.com/hashicorp/go-multierror"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -25,10 +26,10 @@ func NewOps(r types.Resolver) generated.EmoteSetOpsResolver {
 	return &Resolver{r}
 }
 
-func (r *Resolver) Emotes(ctx context.Context, obj *model.EmoteSetOps, id primitive.ObjectID, action model.ListItemAction, nameArg *string) (*model.EmoteSet, error) {
+func (r *Resolver) Emotes(ctx context.Context, obj *model.EmoteSetOps, id primitive.ObjectID, action model.ListItemAction, nameArg *string) ([]*model.Emote, error) {
 	actor := auth.For(ctx)
 	logF := logrus.WithFields(logrus.Fields{
-		"emote_set_id": obj.Target.ID,
+		"emote_set_id": obj.ID,
 		"emote_id":     id,
 	})
 
@@ -39,7 +40,7 @@ func (r *Resolver) Emotes(ctx context.Context, obj *model.EmoteSetOps, id primit
 	}
 	b := structures.NewEmoteSetBuilder(nil)
 	if err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameEmoteSets).FindOne(ctx, bson.M{
-		"_id": obj.Target.ID,
+		"_id": obj.ID,
 	}).Decode(b.EmoteSet); err != nil {
 		logF.WithError(err).Error("mongo, couldn't find emote to add to set")
 		return nil, errors.ErrInternalServerError().SetDetail(err.Error())
@@ -60,5 +61,10 @@ func (r *Resolver) Emotes(ctx context.Context, obj *model.EmoteSetOps, id primit
 		return nil, err
 	}
 
-	return loaders.For(ctx).EmoteSetByID.Load(obj.Target.ID)
+	emoteIDs := make([]primitive.ObjectID, len(b.EmoteSet.Emotes))
+	for i, e := range b.EmoteSet.Emotes {
+		emoteIDs[i] = e.ID
+	}
+	emotes, errs := loaders.For(ctx).EmoteByID.LoadAll(emoteIDs)
+	return emotes, multierror.Append(nil, errs...).ErrorOrNil()
 }

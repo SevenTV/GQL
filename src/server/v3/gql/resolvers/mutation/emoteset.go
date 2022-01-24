@@ -13,13 +13,8 @@ import (
 )
 
 func (r *Resolver) EmoteSet(ctx context.Context, id primitive.ObjectID) (*model.EmoteSetOps, error) {
-	set, err := loaders.For(ctx).EmoteSetByID.Load(id)
-	if err != nil {
-		return nil, err
-	}
-
 	return &model.EmoteSetOps{
-		Target: set,
+		ID: id,
 	}, nil
 }
 

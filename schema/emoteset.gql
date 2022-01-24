@@ -27,8 +27,8 @@ input CreateEmoteSetInput {
 }
 
 type EmoteSetOps {
-  target: EmoteSet @internal
-  emotes(id: ObjectID!, action: ListItemAction!, name: String): EmoteSet
+  id: ObjectID!
+  emotes(id: ObjectID!, action: ListItemAction!, name: String): [Emote]!
     @goField(forceResolver: true)
 }
 
