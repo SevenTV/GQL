@@ -7,7 +7,7 @@ type Emote {
   animated: Boolean!
   created_at: Time!
 
-  owner: User! @goField(forceResolver: true)
+  owner: User!
 
   channels(limit: Int, after_id: String!): [User!]!
     @goField(forceResolver: true)

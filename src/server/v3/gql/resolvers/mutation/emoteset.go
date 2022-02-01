@@ -28,8 +28,7 @@ func (r *Resolver) CreateEmoteSet(ctx context.Context, input model.CreateEmoteSe
 		SetName(input.Name).
 		SetPrivileged(isPrivileged).
 		SetOwnerID(actor.ID).
-		SetEmoteSlots(250).
-		SetActive(true)
+		SetEmoteSlots(250)
 	m := mutations.EmoteSetMutation{
 		EmoteSetBuilder: b,
 	}

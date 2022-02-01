@@ -13,9 +13,6 @@ import (
 
 // UserStructureToModel: Transform a user structure to a GQL mdoel
 func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
-	if s == nil {
-		return UserStructureToModel(ctx, structures.DeletedUser)
-	}
 	tagColor := 0
 	if role := s.GetHighestRole(); role != nil {
 		tagColor = int(role.Color)
@@ -137,6 +134,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		urls[i] = fmt.Sprintf("//%s/emote/%s/%sx", ctx.Config().CdnURL, s.ID.Hex(), size)
 	}
 
+	owner := utils.Ternary(s.Owner != nil, s.Owner, structures.DeletedUser).(*structures.User)
 	return &model.Emote{
 		ID:           s.ID,
 		Name:         s.Name,
@@ -145,7 +143,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		Tags:         s.Tags,
 		Animated:     s.FrameCount > 1,
 		CreatedAt:    s.ID.Timestamp(),
-		Owner:        UserStructureToModel(ctx, s.Owner),
+		Owner:        UserStructureToModel(ctx, owner),
 		Channels:     []*model.User{},
 		ChannelCount: 0,
 		Urls:         urls,
