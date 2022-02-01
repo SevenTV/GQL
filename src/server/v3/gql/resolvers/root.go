@@ -55,6 +55,10 @@ func (r *Resolver) User() generated.UserResolver {
 	return user.New(r.Resolver)
 }
 
+func (r *Resolver) UserOps() generated.UserOpsResolver {
+	return user.NewOps(r.Resolver)
+}
+
 func (r *Resolver) UserEditor() generated.UserEditorResolver {
 	return user_editor.New(r.Resolver)
 }

@@ -49,12 +49,6 @@ type EmoteSearchResult {
 }
 
 extend type Mutation {
-  setChannelEmote(
-    user_id: ObjectID!
-    target: UserEmoteInput!
-    action: ChannelEmoteListItemAction!
-  ): User @hasPermissions
-
   editEmote(emote_id: ObjectID!, data: EditEmoteInput!): Emote @hasPermissions
 }
 

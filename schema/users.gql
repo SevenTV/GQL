@@ -40,6 +40,21 @@ type UserConnection {
   display_name: String!
   platform: String!
   linked_at: Time!
+  emote_set_id: ObjectID
+}
+
+extend type Mutation {
+  user(id: ObjectID!): UserOps
+}
+
+type UserOps {
+  id: ObjectID!
+  connections(id: String!, data: UserConnectionUpdate!): [UserConnection]
+    @goField(forceResolver: true)
+}
+
+input UserConnectionUpdate {
+  emote_set_id: ObjectID
 }
 
 extend type Query {
