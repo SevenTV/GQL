@@ -17,9 +17,25 @@ func New(r types.Resolver) generated.UserResolver {
 	return &Resolver{r}
 }
 
-func (r *Resolver) OwnedEmotes(ctx context.Context, obj *model.User) ([]*model.Emote, error) {
-	// TODO
-	return nil, nil
+func (r *Resolver) Connections(ctx context.Context, obj *model.User, platforms []model.ConnectionPlatform) ([]*model.UserConnection, error) {
+	result := []*model.UserConnection{}
+	for _, conn := range obj.Connections {
+		ok := false
+		if len(platforms) > 0 {
+			for _, p := range platforms {
+				if conn.Platform == p {
+					ok = true
+					break
+				}
+			}
+		} else {
+			ok = true
+		}
+		if ok {
+			result = append(result, conn)
+		}
+	}
+	return result, nil
 }
 
 func (r *Resolver) InboxUnreadCount(ctx context.Context, obj *model.User) (int, error) {

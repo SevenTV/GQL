@@ -64,18 +64,28 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 	}
 }
 
+func UserStructureToPartialModel(ctx global.Context, s *structures.User) *model.PartialUser {
+	m := UserStructureToModel(ctx, s)
+	return &model.PartialUser{
+		ID:          m.ID,
+		UserType:    m.UserType,
+		Username:    m.Username,
+		DisplayName: m.DisplayName,
+		CreatedAt:   m.ID.Timestamp(),
+		AvatarURL:   m.AvatarURL,
+		Biography:   m.Biography,
+		TagColor:    m.TagColor,
+		Roles:       m.Roles,
+	}
+}
+
 // UserEditorStructureToModel: Transform a user editor structure to a GQL model
 func UserEditorStructureToModel(ctx global.Context, s *structures.UserEditor) *model.UserEditor {
 	if s.User == nil {
 		s.User = structures.DeletedUser
 	}
-	connIDs := make([]string, len(s.Connections))
-	for i, connID := range s.Connections {
-		connIDs[i] = connID.Hex()
-	}
 
 	return &model.UserEditor{
-		Connections: connIDs,
 		Permissions: int(s.Permissions),
 		Visible:     s.Visible,
 		AddedAt:     s.AddedAt,
@@ -105,12 +115,18 @@ func UserConnectionStructureToModel(ctx global.Context, s *structures.UserConnec
 		logrus.WithError(err).Errorf("couldn't decode %s user connection", s.Platform)
 	}
 
+	// Has an emote set?
+	var set *model.EmoteSet
+	if s.EmoteSet != nil {
+		set = EmoteSetStructureToModel(ctx, s.EmoteSet)
+	}
+
 	return &model.UserConnection{
 		ID:          s.ID,
 		DisplayName: displayName,
-		Platform:    string(s.Platform),
+		Platform:    model.ConnectionPlatform(s.Platform),
 		LinkedAt:    s.LinkedAt,
-		EmoteSetID:  &s.EmoteSetID,
+		EmoteSet:    set,
 	}
 }
 
@@ -144,7 +160,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		Tags:         s.Tags,
 		Animated:     s.FrameCount > 1,
 		CreatedAt:    s.ID.Timestamp(),
-		Owner:        UserStructureToModel(ctx, owner),
+		Owner:        UserStructureToPartialModel(ctx, owner),
 		Channels:     []*model.User{},
 		ChannelCount: 0,
 		Urls:         urls,
@@ -155,12 +171,21 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model.EmoteSet {
 	emotes := make([]*model.ActiveEmote, len(s.Emotes))
 	for i, e := range s.Emotes {
+		var em *model.Emote
+		if e.Emote != nil {
+			em = EmoteStructureToModel(ctx, e.Emote)
+		}
 		emotes[i] = &model.ActiveEmote{
 			ID:        e.ID,
 			Name:      e.Name,
 			Flags:     int(e.Flags),
 			Timestamp: e.Timestamp,
+			Emote:     em,
 		}
+	}
+	var owner *model.User
+	if s.Owner != nil {
+		owner = UserStructureToModel(ctx, s.Owner)
 	}
 
 	return &model.EmoteSet{
@@ -169,6 +194,6 @@ func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model
 		Tags:       s.Tags,
 		Emotes:     emotes,
 		EmoteSlots: int(s.EmoteSlots),
-		Owner:      UserStructureToModel(ctx, s.Owner),
+		Owner:      owner,
 	}
 }

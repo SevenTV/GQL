@@ -32,6 +32,7 @@ func userLoader(gCtx global.Context) *loaders.UserLoader {
 				aggregations.UserRelationRoles,
 				aggregations.UserRelationEditors,
 				aggregations.UserRelationOwnedEmotes,
+				aggregations.UserConnectionEmoteSetRelation(),
 			))
 			if err != nil {
 				logrus.WithError(err).Error("mongo, failed to spawn aggregation")

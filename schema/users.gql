@@ -10,8 +10,9 @@ type User {
   editors: [UserEditor!]!
 
   roles: [Role]!
-  owned_emotes: [Emote!]! @goField(forceResolver: true)
-  connections: [UserConnection]!
+  owned_emotes: [Emote!]!
+  connections(type: [ConnectionPlatform!]): [UserConnection]!
+    @goField(forceResolver: true)
 
   inbox_unread_count: Int! @goField(forceResolver: true) @hasPermissions
 
@@ -20,9 +21,20 @@ type User {
     @hasPermissions(role: [MANAGE_REPORTS])
 }
 
+type PartialUser {
+  id: ObjectID!
+  user_type: String!
+  username: String!
+  display_name: String!
+  created_at: Time!
+  avatar_url: String!
+  biography: String!
+  tag_color: Int!
+  roles: [Role]!
+}
+
 type UserEditor {
   user: User! @goField(forceResolver: true)
-  connections: [String!]!
   permissions: Int!
   visible: Boolean!
   added_at: Time!
@@ -38,9 +50,9 @@ type UserEmote {
 type UserConnection {
   id: String!
   display_name: String!
-  platform: String!
+  platform: ConnectionPlatform!
   linked_at: Time!
-  emote_set_id: ObjectID
+  emote_set: EmoteSet
 }
 
 extend type Mutation {
@@ -60,4 +72,9 @@ input UserConnectionUpdate {
 extend type Query {
   user(id: ObjectID): User!
   users(query: String!): [User]!
+}
+
+enum ConnectionPlatform {
+  TWITCH
+  YOUTUBE
 }
