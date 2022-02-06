@@ -20,6 +20,28 @@ func New(r types.Resolver) generated.EmoteResolver {
 	return &Resolver{r}
 }
 
+func (r *Resolver) Urls(ctx context.Context, obj *model.Emote, format *model.ImageFormat) ([]string, error) {
+	result := make([]string, len(obj.Urls))
+	for i, u := range obj.Urls {
+		ext := ""
+		if format != nil {
+			switch *format {
+			case model.ImageFormatWebp:
+				ext = ".webp"
+			case model.ImageFormatAvif:
+				ext = ".avif"
+			case model.ImageFormatGif:
+				ext = ".gif"
+			case model.ImageFormatPng:
+				ext = ".png"
+			}
+		}
+		result[i] = u + ext
+	}
+
+	return result, nil
+}
+
 func (r *Resolver) Owner(ctx context.Context, obj *model.Emote) (*model.User, error) {
 	return loaders.For(ctx).UserByID.Load(obj.Owner.ID)
 }
