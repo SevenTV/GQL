@@ -7,10 +7,10 @@ type User {
   avatar_url: String!
   biography: String!
   tag_color: Int!
-  editors: [UserEditor!]!
+  editors: [UserEditor!]! @goField(forceResolver: true)
 
   roles: [Role]!
-  owned_emotes: [Emote!]!
+  owned_emotes: [Emote!]! @goField(forceResolver: true)
   connections(type: [ConnectionPlatform!]): [UserConnection]!
     @goField(forceResolver: true)
 
@@ -34,6 +34,7 @@ type PartialUser {
 }
 
 type UserEditor {
+  id: ObjectID!
   user: User! @goField(forceResolver: true)
   permissions: Int!
   visible: Boolean!
@@ -52,7 +53,7 @@ type UserConnection {
   display_name: String!
   platform: ConnectionPlatform!
   linked_at: Time!
-  emote_set: EmoteSet
+  emote_set: EmoteSet @goField(forceResolver: true)
 }
 
 extend type Mutation {

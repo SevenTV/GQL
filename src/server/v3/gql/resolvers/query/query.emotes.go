@@ -37,7 +37,7 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 	query = strings.Trim(query, " ")
 
 	// Set up db query
-	match := bson.M{"status": structures.EmoteStatusLive}
+	match := bson.M{"status": structures.EmoteLifecycleLive}
 
 	// Retrieve pagination values
 	page := 1

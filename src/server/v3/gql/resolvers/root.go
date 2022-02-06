@@ -11,6 +11,7 @@ import (
 	"github.com/SevenTV/GQL/src/server/v3/gql/resolvers/report"
 	"github.com/SevenTV/GQL/src/server/v3/gql/resolvers/role"
 	"github.com/SevenTV/GQL/src/server/v3/gql/resolvers/user"
+	user_connections "github.com/SevenTV/GQL/src/server/v3/gql/resolvers/user-connections"
 	user_editor "github.com/SevenTV/GQL/src/server/v3/gql/resolvers/user-editor"
 	user_emote "github.com/SevenTV/GQL/src/server/v3/gql/resolvers/user-emote"
 
@@ -57,6 +58,10 @@ func (r *Resolver) User() generated.UserResolver {
 
 func (r *Resolver) UserOps() generated.UserOpsResolver {
 	return user.NewOps(r.Resolver)
+}
+
+func (r *Resolver) UserConnection() generated.UserConnectionResolver {
+	return user_connections.New(r.Resolver)
 }
 
 func (r *Resolver) UserEditor() generated.UserEditorResolver {

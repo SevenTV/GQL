@@ -86,6 +86,7 @@ func UserEditorStructureToModel(ctx global.Context, s *structures.UserEditor) *m
 	}
 
 	return &model.UserEditor{
+		ID:          s.ID,
 		Permissions: int(s.Permissions),
 		Visible:     s.Visible,
 		AddedAt:     s.AddedAt,
@@ -116,7 +117,7 @@ func UserConnectionStructureToModel(ctx global.Context, s *structures.UserConnec
 	}
 
 	// Has an emote set?
-	var set *model.EmoteSet
+	set := &model.EmoteSet{ID: s.EmoteSetID}
 	if s.EmoteSet != nil {
 		set = EmoteSetStructureToModel(ctx, s.EmoteSet)
 	}
@@ -151,16 +152,19 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		urls[i] = fmt.Sprintf("//%s/emote/%s/%sx", ctx.Config().CdnURL, s.ID.Hex(), size)
 	}
 
-	owner := utils.Ternary(s.Owner != nil, s.Owner, structures.DeletedUser).(*structures.User)
+	owner := s.Owner
+	if owner == nil {
+		owner = &structures.User{ID: s.OwnerID}
+	}
 	return &model.Emote{
 		ID:           s.ID,
 		Name:         s.Name,
 		Flags:        int(s.Flags),
-		Status:       int(s.Status),
+		Status:       int(s.State.Lifecycle),
 		Tags:         s.Tags,
 		Animated:     s.FrameCount > 1,
 		CreatedAt:    s.ID.Timestamp(),
-		Owner:        UserStructureToPartialModel(ctx, owner),
+		Owner:        UserStructureToModel(ctx, owner),
 		Channels:     []*model.User{},
 		ChannelCount: 0,
 		Urls:         urls,

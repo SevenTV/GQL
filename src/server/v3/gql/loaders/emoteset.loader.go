@@ -28,7 +28,32 @@ func emoteSetLoader(gCtx global.Context) *loaders.EmoteSetLoader {
 			models := make([]*model.EmoteSet, len(keys))
 			errs := make([]error, len(keys))
 			cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameEmoteSets).Aggregate(ctx, aggregations.Combine(
-				mongo.Pipeline{{{Key: "$match", Value: bson.M{"_id": bson.M{"$in": keys}}}}},
+				mongo.Pipeline{
+					{{Key: "$match", Value: bson.M{"_id": bson.M{"$in": keys}}}},
+					{{
+						Key: "$lookup",
+						Value: mongo.Lookup{
+							From:         mongo.CollectionNameEmotes,
+							LocalField:   "emotes.id",
+							ForeignField: "_id",
+							As:           "_emotes",
+						},
+					}},
+					{{
+						Key: "$set",
+						Value: bson.M{
+							"emotes": bson.M{"$map": bson.M{
+								"input": "$emotes",
+								"in": bson.M{"$mergeObjects": bson.A{
+									"$$this",
+									bson.M{"emote": bson.M{
+										"$arrayElemAt": bson.A{"$_emotes", bson.M{"$indexOfArray": bson.A{"$_emotes._id", "$$this.id"}}},
+									}},
+								}},
+							}},
+						},
+					}},
+				},
 				aggregations.GetEmoteRelationshipOwner(aggregations.UserRelationshipOptions{Roles: true}),
 			))
 			if err != nil {

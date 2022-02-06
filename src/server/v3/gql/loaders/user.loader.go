@@ -30,9 +30,6 @@ func userLoader(gCtx global.Context) *loaders.UserLoader {
 			cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, aggregations.Combine(
 				mongo.Pipeline{{{Key: "$match", Value: bson.M{"_id": bson.M{"$in": keys}}}}},
 				aggregations.UserRelationRoles,
-				aggregations.UserRelationEditors,
-				aggregations.UserRelationOwnedEmotes,
-				aggregations.UserConnectionEmoteSetRelation(),
 			))
 			if err != nil {
 				logrus.WithError(err).Error("mongo, failed to spawn aggregation")

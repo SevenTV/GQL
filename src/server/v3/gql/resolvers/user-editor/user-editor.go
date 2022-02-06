@@ -3,6 +3,7 @@ package user_editor
 import (
 	"context"
 
+	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/GQL/graph/generated"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/server/v3/gql/loaders"
@@ -18,5 +19,8 @@ func New(r types.Resolver) generated.UserEditorResolver {
 }
 
 func (r *Resolver) User(ctx context.Context, obj *model.UserEditor) (*model.User, error) {
-	return loaders.For(ctx).UserByID.Load(obj.User.ID)
+	if obj.User != nil && obj.User.ID != structures.DeletedEmote.ID {
+		return obj.User, nil
+	}
+	return loaders.For(ctx).UserByID.Load(obj.ID)
 }
