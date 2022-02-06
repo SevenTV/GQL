@@ -42,10 +42,6 @@ func (r *Resolver) Urls(ctx context.Context, obj *model.Emote, format *model.Ima
 	return result, nil
 }
 
-func (r *Resolver) Owner(ctx context.Context, obj *model.Emote) (*model.User, error) {
-	return loaders.For(ctx).UserByID.Load(obj.Owner.ID)
-}
-
 func (r *Resolver) Channels(ctx context.Context, obj *model.Emote, limit *int, afterID string) ([]*model.User, error) {
 	return loaders.For(ctx).UsersByEmoteID.Load(obj.ID.Hex())
 }

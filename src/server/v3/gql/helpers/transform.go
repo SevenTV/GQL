@@ -152,9 +152,9 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		urls[i] = fmt.Sprintf("//%s/emote/%s/%sx", ctx.Config().CdnURL, s.ID.Hex(), size)
 	}
 
-	owner := s.Owner
-	if owner == nil {
-		owner = &structures.User{ID: s.OwnerID}
+	owner := structures.DeletedUser
+	if s.Owner != nil {
+		owner = s.Owner
 	}
 	return &model.Emote{
 		ID:           s.ID,
@@ -164,6 +164,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		Tags:         s.Tags,
 		Animated:     s.FrameCount > 1,
 		CreatedAt:    s.ID.Timestamp(),
+		OwnerID:      s.OwnerID,
 		Owner:        UserStructureToModel(ctx, owner),
 		Channels:     []*model.User{},
 		ChannelCount: 0,
