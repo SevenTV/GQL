@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/SevenTV/Common/redis"
 	"github.com/SevenTV/GQL/src/global"
-	"github.com/go-redis/redis/v8"
 	"github.com/sirupsen/logrus"
 )
 
@@ -25,7 +25,7 @@ func NewRedisCache(ctx global.Context, prefix string, ttl time.Duration) graphql
 }
 
 func (c *redisCache) Get(ctx context.Context, key string) (value interface{}, ok bool) {
-	v, err := c.gCtx.Inst().Redis.Get(ctx, c.prefix+key)
+	v, err := c.gCtx.Inst().Redis.Get(ctx, redis.Key(c.prefix+key))
 	if err == nil {
 		return v, true
 	}
@@ -38,7 +38,7 @@ func (c *redisCache) Get(ctx context.Context, key string) (value interface{}, ok
 }
 
 func (c *redisCache) Add(ctx context.Context, key string, value interface{}) {
-	err := c.gCtx.Inst().Redis.SetEX(ctx, c.prefix+key, value, c.ttl)
+	err := c.gCtx.Inst().Redis.SetEX(ctx, redis.Key(c.prefix+key), value, c.ttl)
 	if err != nil {
 		logrus.WithError(err).Error("failed to query redis")
 	}

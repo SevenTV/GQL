@@ -2,12 +2,17 @@ package query
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/structures/v3/aggregations"
+	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/server/v3/gql/helpers"
 	"github.com/SevenTV/GQL/src/server/v3/gql/loaders"
@@ -37,7 +42,7 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 	query = strings.Trim(query, " ")
 
 	// Set up db query
-	match := bson.M{"status": structures.EmoteLifecycleLive}
+	match := bson.M{"state.lifecycle": structures.EmoteLifecycleLive}
 
 	// Retrieve pagination values
 	page := 1
@@ -49,6 +54,9 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 	}
 
 	// Apply name/tag query
+	h := sha256.New()
+	h.Write(utils.S2B(query))
+	queryKey := r.Ctx.Inst().Redis.ComposeKey("gql-v3", hex.EncodeToString((h.Sum(nil))))
 	if len(query) > 0 {
 		match["$or"] = bson.A{
 			bson.M{
@@ -97,6 +105,13 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 	totalCount := 0
 	go func() { // Run a separate pipeline to return the total count that could be paginated
 		defer wg.Done()
+
+		val, _ := r.Ctx.Inst().Redis.Get(ctx, queryKey)
+		if val != "" {
+			totalCount, _ = strconv.Atoi(val)
+			return
+		}
+
 		cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, aggregations.Combine(
 			pipeline,
 			mongo.Pipeline{
@@ -110,7 +125,15 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 				logrus.WithError(err).Error("mongo, couldn't count")
 			}
 		}
+
+		// Return total count & cache
 		totalCount = result["count"]
+		if err = r.Ctx.Inst().Redis.SetEX(ctx, queryKey, totalCount, time.Minute*2); err != nil {
+			logrus.WithError(err).WithFields(logrus.Fields{
+				"key":   queryKey,
+				"count": totalCount,
+			}).Error("redis, failed to save total list count of emotes() gql query")
+		}
 	}()
 
 	// Paginate and fetch the relevant emotes
