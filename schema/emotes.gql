@@ -8,7 +8,7 @@ type Emote {
   created_at: Time!
 
   owner_id: ObjectID!
-  owner: User!
+  owner: User! @goField(forceResolver: true)
 
   channels(limit: Int, after_id: String!): [User!]!
     @goField(forceResolver: true)

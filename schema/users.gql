@@ -53,6 +53,7 @@ type UserConnection {
   display_name: String!
   platform: ConnectionPlatform!
   linked_at: Time!
+  emote_slots: Int!
   emote_set: EmoteSet @goField(forceResolver: true)
 }
 
@@ -72,7 +73,7 @@ input UserConnectionUpdate {
 
 extend type Query {
   user(id: ObjectID): User!
-  users(query: String!): [User]!
+  users(query: String!): [User!]!
 }
 
 enum ConnectionPlatform {

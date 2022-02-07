@@ -127,6 +127,7 @@ func UserConnectionStructureToModel(ctx global.Context, s *structures.UserConnec
 		DisplayName: displayName,
 		Platform:    model.ConnectionPlatform(s.Platform),
 		LinkedAt:    s.LinkedAt,
+		EmoteSlots:  int(s.EmoteSlots),
 		EmoteSet:    set,
 	}
 }
