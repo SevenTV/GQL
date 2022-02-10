@@ -158,19 +158,18 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		owner = s.Owner
 	}
 	return &model.Emote{
-		ID:           s.ID,
-		Name:         s.Name,
-		Flags:        int(s.Flags),
-		Status:       int(s.State.Lifecycle),
-		Tags:         s.Tags,
-		Animated:     s.FrameCount > 1,
-		CreatedAt:    s.ID.Timestamp(),
-		OwnerID:      s.OwnerID,
-		Owner:        UserStructureToModel(ctx, owner),
-		Channels:     []*model.User{},
-		ChannelCount: 0,
-		Urls:         urls,
-		Reports:      []*model.Report{},
+		ID:        s.ID,
+		Name:      s.Name,
+		Flags:     int(s.Flags),
+		Status:    int(s.State.Lifecycle),
+		Tags:      s.Tags,
+		Animated:  s.FrameCount > 1,
+		CreatedAt: s.ID.Timestamp(),
+		OwnerID:   s.OwnerID,
+		Owner:     UserStructureToModel(ctx, owner),
+		Channels:  &model.UserSearchResult{},
+		Urls:      urls,
+		Reports:   []*model.Report{},
 	}
 }
 

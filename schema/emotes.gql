@@ -10,9 +10,8 @@ type Emote {
   owner_id: ObjectID!
   owner: User! @goField(forceResolver: true)
 
-  channels(limit: Int, after_id: String!): [User!]!
+  channels(page: Int, limit: Int): UserSearchResult!
     @goField(forceResolver: true)
-  channel_count: Int! @goField(forceResolver: true)
 
   urls(format: ImageFormat): [String!]! @goField(forceResolver: true)
 
