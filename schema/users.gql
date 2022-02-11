@@ -72,7 +72,7 @@ input UserConnectionUpdate {
 }
 
 type UserSearchResult {
-  count: Int!
+  total: Int!
   items: [User!]!
 }
 

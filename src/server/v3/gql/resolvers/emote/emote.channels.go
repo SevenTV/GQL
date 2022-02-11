@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/SevenTV/Common/errors"
@@ -14,6 +15,7 @@ import (
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/server/v3/gql/helpers"
+	"github.com/go-redis/redis/v8"
 	"github.com/hashicorp/go-multierror"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -77,6 +79,24 @@ func (r *Resolver) Channels(ctx context.Context, obj *model.Emote, pageArg *int,
 	}
 
 	// Fetch users with this set active
+	q := bson.M{
+		"connections.emote_set_id": bson.M{
+			"$in": setIDs,
+		},
+	}
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	count := int64(0)
+	go func() { // Get the total channel count
+		defer wg.Done()
+		k := r.Ctx.Inst().Redis.ComposeKey("gql-v3", fmt.Sprintf("emote:%s:channel_count", obj.ID.Hex()))
+
+		count, err = r.Ctx.Inst().Redis.RawClient().Get(ctx, k.String()).Int64()
+		if err == redis.Nil { // query if not cached
+			count, _ = r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).CountDocuments(ctx, q)
+			_ = r.Ctx.Inst().Redis.SetEX(ctx, k, count, time.Hour*6)
+		}
+	}()
 	cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, aggregations.Combine(
 		mongo.Pipeline{
 			{{
@@ -84,12 +104,8 @@ func (r *Resolver) Channels(ctx context.Context, obj *model.Emote, pageArg *int,
 				Value: bson.M{"metadata.role_position": -1},
 			}},
 			{{
-				Key: "$match",
-				Value: bson.M{
-					"connections.emote_set_id": bson.M{
-						"$in": setIDs,
-					},
-				},
+				Key:   "$match",
+				Value: q,
 			}},
 			{{Key: "$skip", Value: (page - 1) * limit}},
 			{{
@@ -114,8 +130,10 @@ func (r *Resolver) Channels(ctx context.Context, obj *model.Emote, pageArg *int,
 		}
 		models[i] = helpers.UserStructureToModel(r.Ctx, u)
 	}
+
+	wg.Wait()
 	results := model.UserSearchResult{
-		Count: 0,
+		Total: int(count),
 		Items: models,
 	}
 	return &results, nil
