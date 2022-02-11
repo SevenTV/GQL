@@ -23,8 +23,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const EMOTE_CHANNEL_QUERY_SIZE_MOST = 25
-const EMOTE_CHANNEL_QUERY_PAGE_CAP = 50
+const EMOTE_CHANNEL_QUERY_SIZE_MOST = 50
+const EMOTE_CHANNEL_QUERY_PAGE_CAP = 500
 
 func (r *Resolver) Channels(ctx context.Context, obj *model.Emote, pageArg *int, limitArg *int) (*model.UserSearchResult, error) {
 	limit := EMOTE_CHANNEL_QUERY_SIZE_MOST
@@ -33,6 +33,8 @@ func (r *Resolver) Channels(ctx context.Context, obj *model.Emote, pageArg *int,
 	}
 	if limit > EMOTE_CHANNEL_QUERY_SIZE_MOST {
 		limit = EMOTE_CHANNEL_QUERY_SIZE_MOST
+	} else if limit < 1 {
+		return nil, errors.ErrInvalidRequest().SetDetail("limit cannot be less than 1")
 	}
 	page := 1
 	if pageArg != nil {
