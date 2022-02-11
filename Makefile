@@ -16,9 +16,7 @@ else
 endif
 
 linux:
-	packr2
 	GOOS=linux GOARCH=amd64 go build -v -ldflags "-X 'main.Version=${VERSION}' -X 'main.Unix=$(shell date +%s)' -X 'main.User=${BUILDER}'" -o bin/gql .
-	packr2 clean
 
 lint:
 	staticcheck ./...
@@ -31,9 +29,8 @@ deps: go_installs
 	yarn
 
 build_deps:
-	go install github.com/gobuffalo/packr/v2/packr2@latest
-	go install github.com/99designs/gqlgen@latest
-	go install github.com/vektah/dataloaden@latest
+	go install github.com/99designs/gqlgen@v0.15.1
+	go install github.com/seventv/dataloaden@cc5ac4900
 
 go_installs: build_deps
 	go install honnef.co/go/tools/cmd/staticcheck@latest
