@@ -71,6 +71,11 @@ input UserConnectionUpdate {
   emote_set_id: ObjectID
 }
 
+type UserSearchResult {
+  total: Int!
+  items: [User!]!
+}
+
 extend type Query {
   user(id: ObjectID): User!
   users(query: String!): [User!]!

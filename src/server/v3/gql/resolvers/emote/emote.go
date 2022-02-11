@@ -50,10 +50,6 @@ func (r *Resolver) Owner(ctx context.Context, obj *model.Emote) (*model.User, er
 	return loaders.For(ctx).UserByID.Load(obj.OwnerID)
 }
 
-func (r *Resolver) Channels(ctx context.Context, obj *model.Emote, limit *int, afterID string) ([]*model.User, error) {
-	return loaders.For(ctx).UsersByEmoteID.Load(obj.ID.Hex())
-}
-
 func (r *Resolver) ChannelCount(ctx context.Context, obj *model.Emote) (int, error) {
 	count, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).CountDocuments(ctx, bson.M{
 		"channel_emotes.id": obj.ID,
