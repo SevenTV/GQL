@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -53,10 +54,19 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 		page = 1
 	}
 
+	// Retrieve sorting options
+	sortopt := &model.Sort{
+		Value: "popularity",
+		Order: model.SortOrderAscending,
+	}
+	if sortArg != nil {
+		sortopt = sortArg
+	}
+
 	// Apply name/tag query
 	h := sha256.New()
 	h.Write(utils.S2B(query))
-	queryKey := r.Ctx.Inst().Redis.ComposeKey("gql-v3", hex.EncodeToString((h.Sum(nil))))
+	queryKey := r.Ctx.Inst().Redis.ComposeKey("gql-v3", fmt.Sprintf("emote-search:%s", hex.EncodeToString((h.Sum(nil)))))
 	if len(query) > 0 {
 		match["$or"] = bson.A{
 			bson.M{
@@ -86,17 +96,14 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 	pipeline := mongo.Pipeline{{{Key: "$match", Value: match}}}
 
 	// Handle sorting
-	if sortArg != nil {
-		sort := *sortArg
-		order, validOrder := sortOrderMap[string(sort.Order)]
-		field, validField := sortFieldMap[sort.Value]
+	order, validOrder := sortOrderMap[string(sortopt.Order)]
+	field, validField := sortFieldMap[sortopt.Value]
 
-		if validOrder && validField {
-			pipeline = append(pipeline, bson.D{{
-				Key:   "$sort",
-				Value: bson.D{{Key: field, Value: order}},
-			}})
-		}
+	if validOrder && validField {
+		pipeline = append(pipeline, bson.D{{
+			Key:   "$sort",
+			Value: bson.D{{Key: field, Value: order}},
+		}})
 	}
 
 	// Complete the pipeline
@@ -128,7 +135,8 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 
 		// Return total count & cache
 		totalCount = result["count"]
-		if err = r.Ctx.Inst().Redis.SetEX(ctx, queryKey, totalCount, time.Minute*2); err != nil {
+		dur := utils.Ternary(query == "", time.Minute*10, time.Hour*1).(time.Duration)
+		if err = r.Ctx.Inst().Redis.SetEX(ctx, queryKey, totalCount, dur); err != nil {
 			logrus.WithError(err).WithFields(logrus.Fields{
 				"key":   queryKey,
 				"count": totalCount,
@@ -166,5 +174,5 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 
 var sortFieldMap = map[string]string{
 	"age":        "_id",
-	"popularity": "channel_count",
+	"popularity": "state.channel_count",
 }
