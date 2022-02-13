@@ -42,15 +42,22 @@ func userLoader(gCtx global.Context) *loaders.UserLoader {
 			}
 			// Iterate over cursor
 			// Transform user structures into models
-			for i := 0; cur.TryNext(ctx); i++ {
+			m := make(map[primitive.ObjectID]*structures.User)
+			for i := 0; cur.Next(ctx); i++ {
 				v := &structures.User{}
 				if err = cur.Decode(v); err != nil {
 					errs[i] = err
 				}
-				models[i] = helpers.UserStructureToModel(gCtx, v)
+				m[v.ID] = v
 			}
 			if err = multierror.Append(err, cur.Close(ctx)).ErrorOrNil(); err != nil {
 				logrus.WithError(err).Error("mongo, failed to close the cursor")
+			}
+
+			for i, v := range keys {
+				if x, ok := m[v]; ok {
+					models[i] = helpers.UserStructureToModel(gCtx, x)
+				}
 			}
 
 			return models, errs
