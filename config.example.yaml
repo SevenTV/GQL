@@ -7,6 +7,9 @@ website_url: https://example.com/
 # Redis Settings
 redis:
   uri: redis://username:password@url/db
+  username: ""
+  password: ""
+  database: 0
 
 # MongoDB Settings
 mongo:

@@ -91,7 +91,10 @@ type Config struct {
 	CdnURL     string `mapstructure:"cdn_url" json:"cdn_url"`
 
 	Redis struct {
-		URI string `mapstructure:"uri" json:"uri"`
+		URI      string `mapstructure:"uri" json:"uri"`
+		Username string `mapstructure:"username" json:"username"`
+		Password string `mapstructure:"password" json:"password"`
+		Database int    `mapstructure:"db" json:"db"`
 	} `mapstructure:"redis" json:"redis"`
 
 	Mongo struct {
