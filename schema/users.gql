@@ -7,7 +7,9 @@ type User {
   avatar_url: String!
   biography: String!
   tag_color: Int!
+
   editors: [UserEditor!]! @goField(forceResolver: true)
+  editor_of: [User!]! @goField(forceResolver: true)
 
   roles: [Role]!
   owned_emotes: [Emote!]! @goField(forceResolver: true)
@@ -77,7 +79,8 @@ type UserSearchResult {
 }
 
 extend type Query {
-  user(id: ObjectID): User!
+  currentUser: User
+  user(id: ObjectID!): User!
   users(query: String!): [User!]!
 }
 

@@ -76,6 +76,10 @@ func (r *Resolver) Editors(ctx context.Context, obj *model.User) ([]*model.UserE
 	return result, multierror.Append(nil, errs...).ErrorOrNil()
 }
 
+func (r *Resolver) EditorOf(ctx context.Context, obj *model.User) ([]*model.User, error) {
+	return nil, nil
+}
+
 func (r *Resolver) OwnedEmotes(ctx context.Context, obj *model.User) ([]*model.Emote, error) {
 	emotes := []*structures.Emote{}
 	errs := []error{}
