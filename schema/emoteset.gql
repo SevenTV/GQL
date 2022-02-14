@@ -33,5 +33,10 @@ type EmoteSetOps {
 }
 
 extend type Query {
-  emoteSet(id: ObjectID!): EmoteSet
+  emoteSet(id: ObjectID!): EmoteSet!
+  namedEmoteSet(name: EmoteSetName!): EmoteSet!
+}
+
+enum EmoteSetName {
+  GLOBAL
 }
