@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 
 	"github.com/SevenTV/Common/structures/v3"
@@ -10,6 +11,8 @@ import (
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/sirupsen/logrus"
 )
+
+var twitchPictureSizeRegExp = regexp.MustCompile("([0-9]{2,3})x([0-9]{2,3})")
 
 // UserStructureToModel: Transform a user structure to a GQL mdoel
 func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
@@ -40,7 +43,7 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 			switch con.Platform {
 			case structures.UserConnectionPlatformTwitch:
 				if d, err := con.DecodeTwitch(); err == nil {
-					avatarURL = d.ProfileImageURL[6:]
+					avatarURL = twitchPictureSizeRegExp.ReplaceAllString(d.ProfileImageURL[6:], "70x70")
 				}
 			}
 		}
