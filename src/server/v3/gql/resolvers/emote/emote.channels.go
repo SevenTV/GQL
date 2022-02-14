@@ -102,17 +102,21 @@ func (r *Resolver) Channels(ctx context.Context, obj *model.Emote, pageArg *int,
 	cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, aggregations.Combine(
 		mongo.Pipeline{
 			{{
-				Key:   "$sort",
-				Value: bson.M{"metadata.role_position": -1},
-			}},
-			{{
 				Key:   "$match",
 				Value: q,
+			}},
+			{{
+				Key:   "$sort",
+				Value: bson.D{{Key: "metadata.role_position", Value: -1}},
 			}},
 			{{Key: "$skip", Value: (page - 1) * limit}},
 			{{
 				Key:   "$limit",
 				Value: limit,
+			}},
+			{{
+				Key:   "$sort",
+				Value: bson.D{{Key: "metadata.role_position", Value: -1}, {Key: "username", Value: 1}},
 			}},
 		},
 		aggregations.UserRelationRoles,

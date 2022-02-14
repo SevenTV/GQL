@@ -34,7 +34,7 @@ func Auth(gCtx global.Context, optional bool) func(c *fiber.Ctx) error {
 		// Verify the token
 		_, claims, err := auth.VerifyJWT(gCtx.Config().Credentials.JWTSecret, strings.Split(t, "."))
 		if err != nil {
-			return c.Status(401).JSON(&fiber.Map{"error": err.Error()})
+			return c.Next()
 		}
 
 		// User ID from parsed token
