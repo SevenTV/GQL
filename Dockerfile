@@ -14,7 +14,7 @@ RUN apt-get install make git gcc && \
     make build_deps && \
     make
 
-FROM alpine:latest
+FROM ubuntu:latest
 
 WORKDIR /app
 

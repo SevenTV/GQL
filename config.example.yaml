@@ -28,11 +28,5 @@ http:
 auth:
   secret: ""
 
-  platforms:
-    - name: TTV
-      enabled: true
-    - name: YTG
-      enabled: true
-
 credentials:
   jwt_secret: ""
