@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -17,6 +16,7 @@ import (
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/server/v3/gql/helpers"
 	"github.com/SevenTV/GQL/src/server/v3/gql/loaders"
+	"github.com/go-redis/redis/v8"
 	"github.com/hashicorp/go-multierror"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -93,8 +93,7 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 	}
 
 	// Define the pipeline
-	pipeline := mongo.Pipeline{{{Key: "$match", Value: match}}}
-
+	pipeline := mongo.Pipeline{}
 	// Handle sorting
 	order, validOrder := sortOrderMap[string(sortopt.Order)]
 	field, validField := sortFieldMap[sortopt.Value]
@@ -102,47 +101,45 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 	if validOrder && validField {
 		pipeline = append(pipeline, bson.D{{
 			Key:   "$sort",
-			Value: bson.D{{Key: field, Value: order}},
+			Value: bson.M{field: order},
 		}})
 	}
+	pipeline = append(pipeline, bson.D{{Key: "$match", Value: match}})
 
 	// Complete the pipeline
+	totalCount, countErr := r.Ctx.Inst().Redis.RawClient().Get(ctx, string(queryKey)).Int()
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	totalCount := 0
-	go func() { // Run a separate pipeline to return the total count that could be paginated
-		defer wg.Done()
-
-		val, _ := r.Ctx.Inst().Redis.Get(ctx, queryKey)
-		if val != "" {
-			totalCount, _ = strconv.Atoi(val)
-			return
-		}
-
-		cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, aggregations.Combine(
-			pipeline,
-			mongo.Pipeline{
-				{{Key: "$count", Value: "count"}},
-			}),
-		)
-		result := make(map[string]int, 1)
-		if err == nil {
-			cur.Next(ctx)
-			if err = multierror.Append(cur.Decode(&result), cur.Close(ctx)).ErrorOrNil(); err != nil {
-				logrus.WithError(err).Error("mongo, couldn't count")
+	if countErr == redis.Nil {
+		go func() { // Run a separate pipeline to return the total count that could be paginated
+			defer wg.Done()
+			cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, aggregations.Combine(
+				pipeline,
+				mongo.Pipeline{
+					{{Key: "$count", Value: "count"}},
+				}),
+			)
+			result := make(map[string]int, 1)
+			if err == nil {
+				cur.Next(ctx)
+				if err = multierror.Append(cur.Decode(&result), cur.Close(ctx)).ErrorOrNil(); err != nil {
+					logrus.WithError(err).Error("mongo, couldn't count")
+				}
 			}
-		}
 
-		// Return total count & cache
-		totalCount = result["count"]
-		dur := utils.Ternary(query == "", time.Minute*10, time.Hour*1).(time.Duration)
-		if err = r.Ctx.Inst().Redis.SetEX(ctx, queryKey, totalCount, dur); err != nil {
-			logrus.WithError(err).WithFields(logrus.Fields{
-				"key":   queryKey,
-				"count": totalCount,
-			}).Error("redis, failed to save total list count of emotes() gql query")
-		}
-	}()
+			// Return total count & cache
+			totalCount = result["count"]
+			dur := utils.Ternary(query == "", time.Minute*10, time.Hour*1).(time.Duration)
+			if err = r.Ctx.Inst().Redis.SetEX(ctx, queryKey, totalCount, dur); err != nil {
+				logrus.WithError(err).WithFields(logrus.Fields{
+					"key":   queryKey,
+					"count": totalCount,
+				}).Error("redis, failed to save total list count of emotes() gql query")
+			}
+		}()
+	} else {
+		wg.Done()
+	}
 
 	// Paginate and fetch the relevant emotes
 	result := []*structures.Emote{}
