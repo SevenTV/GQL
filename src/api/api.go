@@ -20,7 +20,7 @@ func New(gCtx global.Context) <-chan struct{} {
 
 	router := router.New()
 
-	g := router.Group("/{v}")
+	router.RedirectTrailingSlash = true
 	mid := func(ctx *fasthttp.RequestCtx) {
 		if err := middleware.Auth(gCtx)(ctx); err != nil {
 			ctx.Response.Header.Add("X-Auth-Failure", err.Error())
@@ -30,20 +30,10 @@ func New(gCtx global.Context) <-chan struct{} {
 	handler:
 		gql(ctx)
 	}
-	g.GET("", mid)
-	g.POST("", mid)
+	router.GET("/{v}", mid)
+	router.POST("/{v}", mid)
 
 	router.HandleOPTIONS = true
-	router.GlobalOPTIONS = func(ctx *fasthttp.RequestCtx) {
-		ctx.Response.Header.Set("Vary", "Origin")
-		ctx.Response.Header.Set("Access-Control-Allow-Headers", "Content-Type,Authorization")
-		ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
-		ctx.Response.Header.Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
-
-		ctx.SetStatusCode(fasthttp.StatusNoContent)
-	}
-
 	server := fasthttp.Server{
 		Handler: func(ctx *fasthttp.RequestCtx) {
 			start := time.Now()
@@ -66,6 +56,15 @@ func New(gCtx global.Context) <-chan struct{} {
 					l.Info("")
 				}
 			}()
+			// CORS
+			ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
+			ctx.Response.Header.Set("Access-Control-Allow-Headers", "*")
+			ctx.Response.Header.Set("Access-Control-Allow-Methods", "*")
+			ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
+			if ctx.IsOptions() {
+				ctx.SetStatusCode(fasthttp.StatusNoContent)
+				return
+			}
 
 			router.Handler(ctx)
 		},

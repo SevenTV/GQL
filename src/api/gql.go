@@ -9,7 +9,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/graph/generated"
 	"github.com/SevenTV/GQL/src/api/v3/gql/cache"
 	"github.com/SevenTV/GQL/src/api/v3/gql/complexity"
@@ -53,18 +52,6 @@ func GqlHandler(gCtx global.Context, loader *loaders.Loaders) func(ctx *fasthttp
 	})
 
 	return func(ctx *fasthttp.RequestCtx) {
-		origin := utils.B2S(ctx.Request.Header.Peek("origin"))
-		if origin == "" {
-			origin = "*"
-		}
-
-		ctx.Response.Header.Set("Access-Control-Allow-Origin", origin)
-		ctx.Response.Header.Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		ctx.Response.Header.Set("Access-Control-Allow-Headers", "Content-Type")
-		ctx.Response.Header.Set("Access-Control-Max-Age", "86400")
-		ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
-		ctx.Response.Header.Set("Vary", "Origin")
-
 		lCtx := context.WithValue(context.WithValue(gCtx, loaders.LoadersKey, loader), helpers.UserKey, ctx.UserValue("user"))
 
 		fasthttpadaptor.NewFastHTTPHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
