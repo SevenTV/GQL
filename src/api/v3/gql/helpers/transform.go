@@ -150,10 +150,31 @@ func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
 }
 
 func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote {
-	urls := make([]string, 4)
-	for i := range urls {
-		size := strconv.Itoa(i + 1)
-		urls[i] = fmt.Sprintf("//%s/emote/%s/%sx", ctx.Config().CdnURL, s.ID.Hex(), size)
+	images := []*model.Image{}
+	for _, f := range s.Formats {
+		for i, im := range f.Files {
+			format := model.ImageFormatWebp
+			switch f.Name {
+			case structures.EmoteFormatNameAVIF:
+				format = model.ImageFormatAvif
+			case structures.EmoteFormatNameGIF:
+				format = model.ImageFormatGif
+			case structures.EmoteFormatNamePNG:
+				format = model.ImageFormatPng
+			}
+
+			size := strconv.Itoa(i + 1)
+			images = append(images, &model.Image{
+				Name:     im.Name,
+				Format:   format,
+				URL:      fmt.Sprintf("//%s/emote/%s/%sx", ctx.Config().CdnURL, s.ID.Hex(), size),
+				Width:    int(im.Width),
+				Height:   int(im.Height),
+				Animated: im.Animated,
+				Time:     int(im.ProcessingTime),
+				Length:   int(im.Length),
+			})
+		}
 	}
 
 	owner := structures.DeletedUser
@@ -171,7 +192,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		OwnerID:   s.OwnerID,
 		Owner:     UserStructureToModel(ctx, owner),
 		Channels:  &model.UserSearchResult{},
-		Urls:      urls,
+		Images:    images,
 		Reports:   []*model.Report{},
 	}
 }

@@ -21,23 +21,20 @@ func New(r types.Resolver) generated.EmoteResolver {
 	return &Resolver{r}
 }
 
-func (r *Resolver) Urls(ctx context.Context, obj *model.Emote, format *model.ImageFormat) ([]string, error) {
-	result := make([]string, len(obj.Urls))
-	for i, u := range obj.Urls {
-		ext := ""
-		if format != nil {
-			switch *format {
-			case model.ImageFormatWebp:
-				ext = ".webp"
-			case model.ImageFormatAvif:
-				ext = ".avif"
-			case model.ImageFormatGif:
-				ext = ".gif"
-			case model.ImageFormatPng:
-				ext = ".png"
+func (r *Resolver) Images(ctx context.Context, obj *model.Emote, format []model.ImageFormat) ([]*model.Image, error) {
+	result := []*model.Image{}
+	for _, im := range obj.Images {
+		ok := len(format) == 0
+		if !ok {
+			for _, f := range format {
+				if im.Format == f {
+					result = append(result, im)
+				}
 			}
+			continue
 		}
-		result[i] = u + ext
+
+		result = append(result, im)
 	}
 
 	return result, nil

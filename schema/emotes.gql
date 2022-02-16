@@ -13,7 +13,7 @@ type Emote {
   channels(page: Int, limit: Int): UserSearchResult!
     @goField(forceResolver: true)
 
-  urls(format: ImageFormat): [String!]! @goField(forceResolver: true)
+  images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
 
   reports: [Report!]!
     @goField(forceResolver: true)
@@ -41,13 +41,6 @@ enum EmoteSearchCategory {
   ALL
   GLOBAL
   TRENDING
-}
-
-enum ImageFormat {
-  WEBP
-  AVIF
-  GIF
-  PNG
 }
 
 type EmoteSearchResult {
