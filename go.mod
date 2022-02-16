@@ -10,6 +10,7 @@ require (
 	github.com/99designs/gqlgen v0.15.1
 	github.com/SevenTV/Common v0.0.0-20220116095702-01d8c2b41521
 	github.com/bugsnag/panicwrap v1.3.4
+	github.com/dyninc/qstring v0.0.0-20160719172318-ab5840a88e81
 	github.com/gofiber/fiber/v2 v2.24.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/pflag v1.0.5
@@ -56,7 +57,6 @@ require (
 require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
-	github.com/dyninc/qstring v0.0.0-20160719172318-ab5840a88e81
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/golang-jwt/jwt/v4 v4.2.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1
