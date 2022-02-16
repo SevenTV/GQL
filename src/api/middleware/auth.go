@@ -32,73 +32,82 @@ func Auth(gCtx global.Context) Middleware {
 		}
 		t := s[1]
 
-		// Verify the token
-		_, claims, err := auth.VerifyJWT(gCtx.Config().Credentials.JWTSecret, strings.Split(t, "."))
+		user, err := DoAuth(gCtx, t)
 		if err != nil {
-			return nil
-		}
-
-		// User ID from parsed token
-		u := claims["u"]
-		if u == nil {
-			return errors.ErrUnauthorized().SetDetail("Bad Token")
-		}
-		userID, err := primitive.ObjectIDFromHex(u.(string))
-		if err != nil {
-			return errors.ErrUnauthorized().SetDetail(err.Error())
-		}
-
-		// Version of parsed token
-		user := &structures.User{}
-		v := claims["v"].(float64)
-
-		pipeline := mongo.Pipeline{{{Key: "$match", Value: bson.M{"_id": userID}}}}
-		pipeline = append(pipeline, aggregations.UserRelationRoles...)
-		pipeline = append(pipeline, aggregations.UserRelationBans...)
-		cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, pipeline)
-		if err != nil {
-			if err == mongo.ErrNoDocuments {
-				return errors.ErrUnauthorized().SetDetail("Token has Unknown Bound User")
-			}
-
-			logrus.WithError(err).Error("mongo")
-			return errors.ErrInternalServerError()
-		}
-		cur.Next(ctx)
-		err = cur.Decode(user)
-		if err != nil {
-			return errors.ErrInternalServerError().SetDetail(err.Error())
-		}
-		err = cur.Close(ctx)
-		if err != nil {
-			return errors.ErrInternalServerError().SetDetail(err.Error())
-		}
-
-		// Check bans
-		for _, ban := range user.Bans {
-			// Check for No Auth effect
-			if ban.HasEffect(structures.BanEffectNoAuth) {
-				return errors.ErrInsufficientPrivilege().SetDetail("You are banned!").SetFields(errors.Fields{
-					"ban": map[string]string{
-						"reason":    ban.Reason,
-						"expire_at": ban.ExpireAt.Format(time.RFC3339),
-					},
-				})
-			}
-			// Check for No Permissions effect
-			if ban.HasEffect(structures.BanEffectNoPermissions) {
-				user.Roles = []*structures.Role{structures.RevocationRole}
-
-			}
-		}
-		defaultRoles := query.DefaultRoles.Fetch(ctx, gCtx.Inst().Mongo, gCtx.Inst().Redis)
-		user.AddRoles(defaultRoles...)
-
-		if user.TokenVersion != v {
-			return errors.ErrUnauthorized().SetDetail("Token Version Mismatch")
+			return err
 		}
 
 		ctx.SetUserValue("user", user)
 		return nil
 	}
+}
+
+func DoAuth(ctx global.Context, t string) (*structures.User, errors.APIError) {
+	// Verify the token
+	_, claims, err := auth.VerifyJWT(ctx.Config().Credentials.JWTSecret, strings.Split(t, "."))
+	if err != nil {
+		return nil, errors.ErrUnauthorized().SetDetail(err.Error())
+	}
+
+	// User ID from parsed token
+	u := claims["u"]
+	if u == nil {
+		return nil, errors.ErrUnauthorized().SetDetail("Bad Token")
+	}
+	userID, err := primitive.ObjectIDFromHex(u.(string))
+	if err != nil {
+		return nil, errors.ErrUnauthorized().SetDetail(err.Error())
+	}
+
+	// Version of parsed token
+	user := &structures.User{}
+	v := claims["v"].(float64)
+
+	pipeline := mongo.Pipeline{{{Key: "$match", Value: bson.M{"_id": userID}}}}
+	pipeline = append(pipeline, aggregations.UserRelationRoles...)
+	pipeline = append(pipeline, aggregations.UserRelationBans...)
+	cur, err := ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, pipeline)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.ErrUnauthorized().SetDetail("Token has Unknown Bound User")
+		}
+
+		logrus.WithError(err).Error("mongo")
+		return nil, errors.ErrInternalServerError()
+	}
+	cur.Next(ctx)
+	err = cur.Decode(user)
+	if err != nil {
+		return nil, errors.ErrInternalServerError().SetDetail(err.Error())
+	}
+	err = cur.Close(ctx)
+	if err != nil {
+		return nil, errors.ErrInternalServerError().SetDetail(err.Error())
+	}
+
+	// Check bans
+	for _, ban := range user.Bans {
+		// Check for No Auth effect
+		if ban.HasEffect(structures.BanEffectNoAuth) {
+			return nil, errors.ErrInsufficientPrivilege().SetDetail("You are banned!").SetFields(errors.Fields{
+				"ban": map[string]string{
+					"reason":    ban.Reason,
+					"expire_at": ban.ExpireAt.Format(time.RFC3339),
+				},
+			})
+		}
+		// Check for No Permissions effect
+		if ban.HasEffect(structures.BanEffectNoPermissions) {
+			user.Roles = []*structures.Role{structures.RevocationRole}
+
+		}
+	}
+	defaultRoles := query.DefaultRoles.Fetch(ctx, ctx.Inst().Mongo, ctx.Inst().Redis)
+	user.AddRoles(defaultRoles...)
+
+	if user.TokenVersion != v {
+		return nil, errors.ErrUnauthorized().SetDetail("Token Version Mismatch")
+	}
+
+	return user, nil
 }
