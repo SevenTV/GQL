@@ -5,25 +5,13 @@ import (
 
 	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/Common/mongo"
-	"github.com/SevenTV/GQL/graph/generated"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/api/v3/gql/auth"
 	"github.com/SevenTV/GQL/src/api/v3/gql/loaders"
-	"github.com/SevenTV/GQL/src/api/v3/gql/types"
 	"github.com/sirupsen/logrus"
 )
 
 // var json = jsoniter.ConfigCompatibleWithStandardLibrary
-
-type Resolver struct {
-	types.Resolver
-}
-
-func New(r types.Resolver) generated.SubscriptionResolver {
-	return &Resolver{
-		Resolver: r,
-	}
-}
 
 func (r *Resolver) CurrentUser(ctx context.Context) (<-chan *model.User, error) {
 	actor := auth.For(ctx)

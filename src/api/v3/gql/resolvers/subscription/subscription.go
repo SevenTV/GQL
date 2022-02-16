@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/SevenTV/GQL/graph/generated"
+	"github.com/SevenTV/GQL/src/api/v3/gql/types"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
@@ -11,6 +13,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+type Resolver struct {
+	types.Resolver
+}
+
+func New(r types.Resolver) generated.SubscriptionResolver {
+	return &Resolver{
+		Resolver: r,
+	}
+}
 
 func ChangeStream(ctx global.Context) error {
 	str, err := ctx.Inst().Mongo.RawDatabase().Watch(

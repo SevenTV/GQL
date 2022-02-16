@@ -31,6 +31,10 @@ extend type Query {
   ): EmoteSearchResult!
 }
 
+extend type Subscription {
+  emote(id: ObjectID!): Emote
+}
+
 input EmoteSearchFilter {
   category: EmoteSearchCategory
   case_sensitive: Boolean
