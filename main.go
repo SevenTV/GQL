@@ -90,7 +90,7 @@ func main() {
 		}
 
 		gCtx.Inst().Mongo = instance.WrapMongo(mongoInst)
-		gCtx.Inst().Redis = instance.WrapRedis(redisInst)
+		gCtx.Inst().Redis = redisInst
 	}
 
 	serverDone := api.New(gCtx)

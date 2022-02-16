@@ -10,6 +10,7 @@ import (
 	"github.com/SevenTV/GQL/src/api/v3/gql/resolvers/query"
 	"github.com/SevenTV/GQL/src/api/v3/gql/resolvers/report"
 	"github.com/SevenTV/GQL/src/api/v3/gql/resolvers/role"
+	"github.com/SevenTV/GQL/src/api/v3/gql/resolvers/subscription"
 	"github.com/SevenTV/GQL/src/api/v3/gql/resolvers/user"
 	user_connections "github.com/SevenTV/GQL/src/api/v3/gql/resolvers/user-connections"
 	user_editor "github.com/SevenTV/GQL/src/api/v3/gql/resolvers/user-editor"
@@ -42,6 +43,10 @@ func (r *Resolver) Mutation() generated.MutationResolver {
 
 func (r *Resolver) Query() generated.QueryResolver {
 	return query.New(r.Resolver)
+}
+
+func (r *Resolver) Subscription() generated.SubscriptionResolver {
+	return subscription.New(r.Resolver)
 }
 
 func (r *Resolver) Report() generated.ReportResolver {

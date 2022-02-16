@@ -59,6 +59,11 @@ type UserConnection {
   emote_set: EmoteSet @goField(forceResolver: true)
 }
 
+enum ConnectionPlatform {
+  TWITCH
+  YOUTUBE
+}
+
 extend type Mutation {
   user(id: ObjectID!): UserOps
 }
@@ -84,7 +89,6 @@ extend type Query {
   users(query: String!): [User!]!
 }
 
-enum ConnectionPlatform {
-  TWITCH
-  YOUTUBE
+extend type Subscription {
+  currentUser: User
 }
