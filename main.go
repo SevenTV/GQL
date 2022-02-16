@@ -12,10 +12,10 @@ import (
 
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/redis"
+	"github.com/SevenTV/GQL/src/api"
 	"github.com/SevenTV/GQL/src/configure"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/SevenTV/GQL/src/instance"
-	"github.com/SevenTV/GQL/src/server"
 	"github.com/bugsnag/panicwrap"
 	"github.com/sirupsen/logrus"
 )
@@ -93,7 +93,7 @@ func main() {
 		gCtx.Inst().Redis = instance.WrapRedis(redisInst)
 	}
 
-	serverDone := server.New(gCtx)
+	serverDone := api.New(gCtx)
 
 	logrus.Info("running")
 

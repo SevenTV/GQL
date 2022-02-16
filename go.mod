@@ -10,8 +10,7 @@ require (
 	github.com/99designs/gqlgen v0.15.1
 	github.com/SevenTV/Common v0.0.0-20220116095702-01d8c2b41521
 	github.com/bugsnag/panicwrap v1.3.4
-	github.com/dyninc/qstring v0.0.0-20160719172318-ab5840a88e81
-	github.com/gofiber/fiber/v2 v2.24.0
+	github.com/fasthttp/router v1.4.6
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1
@@ -37,12 +36,12 @@ require (
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/savsgio/gotils v0.0.0-20211223103454-d0aaa54c5899 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/urfave/cli/v2 v2.3.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/tcplisten v1.0.0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/stringprep v1.0.2 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
@@ -64,7 +63,7 @@ require (
 	github.com/klauspost/compress v1.14.1 // indirect
 	github.com/matryer/moq v0.2.5 // indirect
 	github.com/spf13/afero v1.8.0 // indirect
-	github.com/valyala/fasthttp v1.32.0 // indirect
+	github.com/valyala/fasthttp v1.33.0
 	github.com/xdg-go/scram v1.1.0 // indirect
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce // indirect
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
