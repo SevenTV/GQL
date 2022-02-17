@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build GQL (Stage PR at ${{ github.event.pull_request }})
+    name: "Stage Pull Request: ${{ github.event.pull_request.title }} (Build)"
     runs-on: self-hosted
     if: ${{ contains(github.event.pull_request.labels.*.name, 'staged') }}
 
@@ -47,7 +47,7 @@ jobs:
             harbor.disembark.dev/7tv-stage/gql:latest
 
   deploy:
-    name: Build GQL (Stage PR at ${{ github.event.pull_request }})
+    name: "Stage Pull Request: ${{ github.event.pull_request.title }} (Deploy)"
     runs-on: self-hosted
     needs: # Run this after build
       - build

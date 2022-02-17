@@ -11,7 +11,7 @@ type User {
   editors: [UserEditor!]! @goField(forceResolver: true)
   editor_of: [User!]! @goField(forceResolver: true)
 
-  roles: [Role]!
+  roles: [Role]! @goField(forceResolver: true)
   owned_emotes: [Emote!]! @goField(forceResolver: true)
   connections(type: [ConnectionPlatform!]): [UserConnection]!
     @goField(forceResolver: true)

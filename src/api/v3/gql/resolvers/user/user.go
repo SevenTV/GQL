@@ -7,6 +7,7 @@ import (
 	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures/v3"
+	"github.com/SevenTV/Common/structures/v3/query"
 	"github.com/SevenTV/GQL/graph/generated"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/api/v3/gql/helpers"
@@ -24,6 +25,18 @@ type Resolver struct {
 
 func New(r types.Resolver) generated.UserResolver {
 	return &Resolver{r}
+}
+
+func (r *Resolver) Roles(ctx context.Context, obj *model.User) ([]*model.Role, error) {
+	defaults := query.DefaultRoles.Fetch(ctx, r.Ctx.Inst().Mongo, r.Ctx.Inst().Redis)
+	result := make([]*model.Role, len(obj.Roles)+len(defaults))
+
+	result = append(result, obj.Roles...)
+	for _, rol := range defaults {
+		result = append(obj.Roles, helpers.RoleStructureToModel(r.Ctx, rol))
+	}
+
+	return result, nil
 }
 
 // Connections lists the users' connections
