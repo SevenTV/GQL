@@ -6,7 +6,6 @@ import (
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/api/middleware"
 	"github.com/SevenTV/GQL/src/api/v3/gql/loaders"
-	"github.com/SevenTV/GQL/src/api/v3/gql/resolvers/subscription"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/fasthttp/router"
 	"github.com/sirupsen/logrus"
@@ -33,9 +32,6 @@ func New(gCtx global.Context) <-chan struct{} {
 	}
 	router.GET("/{v}", mid)
 	router.POST("/{v}", mid)
-	if err := subscription.ChangeStream(gCtx); err != nil {
-		logrus.WithError(err).Error("mongo, failed to initiate changestream")
-	}
 
 	router.HandleOPTIONS = true
 	server := fasthttp.Server{
