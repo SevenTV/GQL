@@ -43,7 +43,7 @@ jobs:
             "VERSION=${{ github.sha }}"
           push: true
           tags: |
-            harbor.disembark.dev/7tv-stage/gql:${{ github.sha }}
+            harbor.disembark.dev/7tv-stage/gql-pull-${{ github.event.pull_request.number }}:${{ github.sha }}
             harbor.disembark.dev/7tv-stage/gql:latest
 
   deploy:
@@ -73,7 +73,7 @@ jobs:
           KUBE_RESOURCE: deploy
           KUBE_IMAGE_PATCH: >-
             [
-              { "op": "replace", "path": "/spec/template/spec/containers/0/image", "value": "harbor.disembark.dev/7tv-stage/gql:${{ github.sha }}" }
+              { "op": "replace", "path": "/spec/template/spec/containers/0/image", "value": "harbor.disembark.dev/7tv-stage/gql-pull-${{ github.event.pull_request.number }}:${{ github.sha }}" }
             ]
         run: |
           mkdir -p ~/.kube
