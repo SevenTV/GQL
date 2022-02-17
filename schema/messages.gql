@@ -1,3 +1,18 @@
+extend type Query {
+  inbox(after_id: ObjectID): [Message]! @hasPermissions
+}
+
+extend type Mutation {
+  readMessages(message_ids: [ObjectID!]!, read: Boolean): Int @hasPermissions
+  sendInboxMessage(
+    recipients: [String!]!
+    subject: String!
+    content: String!
+    important: Boolean
+    anonymous: Boolean
+  ): Message @hasPermissions(role: [SEND_MESSAGES])
+}
+
 type Message {
   id: ObjectID!
   kind: MessageKind!
@@ -12,19 +27,4 @@ enum MessageKind {
   EMOTE_COMMENT
   INBOX
   NEWS
-}
-
-extend type Query {
-  inbox(after_id: ObjectID): [Message]! @hasPermissions
-}
-
-extend type Mutation {
-  readMessages(message_ids: [ObjectID!]!, read: Boolean): Int @hasPermissions
-  sendInboxMessage(
-    recipients: [String!]!
-    subject: String!
-    content: String!
-    important: Boolean
-    anonymous: Boolean
-  ): Message @hasPermissions(role: [SEND_MESSAGES])
 }

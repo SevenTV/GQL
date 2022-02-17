@@ -1,15 +1,3 @@
-type Role {
-  id: ObjectID!
-  name: String!
-  color: Int!
-  allowed: String!
-  denied: String!
-  position: Int!
-  created_at: Time!
-
-  members: [User!]! @goField(forceResolver: true)
-}
-
 extend type Query {
   roles: [Role]!
   role(id: ObjectID!): Role
@@ -25,6 +13,18 @@ extend type Mutation {
     role_id: ObjectID!
     action: ListItemAction!
   ): User @hasPermissions(role: [MANAGE_USERS])
+}
+
+type Role {
+  id: ObjectID!
+  name: String!
+  color: Int!
+  allowed: String!
+  denied: String!
+  position: Int!
+  created_at: Time!
+
+  members: [User!]! @goField(forceResolver: true)
 }
 
 input CreateRoleInput {

@@ -1,3 +1,24 @@
+extend type Query {
+  currentUser: User
+  user(id: ObjectID!): User!
+  users(query: String!): [User!]!
+}
+
+extend type Subscription {
+  currentUser: User
+  user(id: ObjectID!): User
+}
+
+extend type Mutation {
+  user(id: ObjectID!): UserOps
+}
+
+type UserOps {
+  id: ObjectID!
+  connections(id: String!, data: UserConnectionUpdate!): [UserConnection]
+    @goField(forceResolver: true)
+}
+
 type User {
   id: ObjectID!
   user_type: String!
@@ -64,16 +85,6 @@ enum ConnectionPlatform {
   YOUTUBE
 }
 
-extend type Mutation {
-  user(id: ObjectID!): UserOps
-}
-
-type UserOps {
-  id: ObjectID!
-  connections(id: String!, data: UserConnectionUpdate!): [UserConnection]
-    @goField(forceResolver: true)
-}
-
 input UserConnectionUpdate {
   emote_set_id: ObjectID
 }
@@ -81,15 +92,4 @@ input UserConnectionUpdate {
 type UserSearchResult {
   total: Int!
   items: [User!]!
-}
-
-extend type Query {
-  currentUser: User
-  user(id: ObjectID!): User!
-  users(query: String!): [User!]!
-}
-
-extend type Subscription {
-  currentUser: User
-  user(id: ObjectID!): User
 }

@@ -1,3 +1,22 @@
+extend type Query {
+  emote(id: ObjectID!): Emote
+  emotes(
+    query: String!
+    page: Int
+    limit: Int
+    filter: EmoteSearchFilter
+    sort: Sort
+  ): EmoteSearchResult!
+}
+
+extend type Subscription {
+  emote(id: ObjectID!): Emote
+}
+
+extend type Mutation {
+  editEmote(emote_id: ObjectID!, data: EditEmoteInput!): Emote @hasPermissions
+}
+
 type Emote {
   id: ObjectID!
   name: String!
@@ -20,21 +39,6 @@ type Emote {
     @hasPermissions(role: [MANAGE_REPORTS])
 }
 
-extend type Query {
-  emote(id: ObjectID!): Emote
-  emotes(
-    query: String!
-    page: Int
-    limit: Int
-    filter: EmoteSearchFilter
-    sort: Sort
-  ): EmoteSearchResult!
-}
-
-extend type Subscription {
-  emote(id: ObjectID!): Emote
-}
-
 input EmoteSearchFilter {
   category: EmoteSearchCategory
   case_sensitive: Boolean
@@ -50,10 +54,6 @@ enum EmoteSearchCategory {
 type EmoteSearchResult {
   count: Int!
   items: [Emote]!
-}
-
-extend type Mutation {
-  editEmote(emote_id: ObjectID!, data: EditEmoteInput!): Emote @hasPermissions
 }
 
 enum ChannelEmoteListItemAction {

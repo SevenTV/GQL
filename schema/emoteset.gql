@@ -1,3 +1,20 @@
+extend type Query {
+  emoteSet(id: ObjectID!): EmoteSet!
+  namedEmoteSet(name: EmoteSetName!): EmoteSet!
+}
+
+extend type Mutation {
+  emoteSet(id: ObjectID!): EmoteSetOps
+  createEmoteSet(data: CreateEmoteSetInput!): EmoteSet
+    @hasPermissions(role: [EMOTESET_CREATE])
+}
+
+type EmoteSetOps {
+  id: ObjectID!
+  emotes(id: ObjectID!, action: ListItemAction!, name: String): [Emote]!
+    @goField(forceResolver: true)
+}
+
 type EmoteSet {
   id: ObjectID!
   name: String!
@@ -15,26 +32,9 @@ type ActiveEmote {
   emote: Emote
 }
 
-extend type Mutation {
-  emoteSet(id: ObjectID!): EmoteSetOps
-  createEmoteSet(data: CreateEmoteSetInput!): EmoteSet
-    @hasPermissions(role: [EMOTESET_CREATE])
-}
-
 input CreateEmoteSetInput {
   name: String!
   privileged: Boolean @hasPermissions(role: [SUPER_ADMINISTRATOR])
-}
-
-type EmoteSetOps {
-  id: ObjectID!
-  emotes(id: ObjectID!, action: ListItemAction!, name: String): [Emote]!
-    @goField(forceResolver: true)
-}
-
-extend type Query {
-  emoteSet(id: ObjectID!): EmoteSet!
-  namedEmoteSet(name: EmoteSetName!): EmoteSet!
 }
 
 enum EmoteSetName {
