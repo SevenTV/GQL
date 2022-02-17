@@ -91,4 +91,5 @@ extend type Query {
 
 extend type Subscription {
   currentUser: User
+  user(id: ObjectID!): User
 }
