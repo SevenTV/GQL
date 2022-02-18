@@ -33,6 +33,8 @@ type User {
   editor_of: [User!]! @goField(forceResolver: true)
 
   roles: [Role!]! @goField(forceResolver: true)
+
+  emote_sets: [EmoteSet!]! @goField(forceResolver: true)
   owned_emotes: [Emote!]! @goField(forceResolver: true)
   connections(type: [ConnectionPlatform!]): [UserConnection]!
     @goField(forceResolver: true)

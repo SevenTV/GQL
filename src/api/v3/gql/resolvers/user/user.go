@@ -53,6 +53,10 @@ func (r *Resolver) Roles(ctx context.Context, obj *model.User) ([]*model.Role, e
 	return result, nil
 }
 
+func (r *Resolver) EmoteSets(ctx context.Context, obj *model.User) ([]*model.EmoteSet, error) {
+	return loaders.For(ctx).EmoteSetByUserID.Load(obj.ID)
+}
+
 // Connections lists the users' connections
 func (r *Resolver) Connections(ctx context.Context, obj *model.User, platforms []model.ConnectionPlatform) ([]*model.UserConnection, error) {
 	result := []*model.UserConnection{}

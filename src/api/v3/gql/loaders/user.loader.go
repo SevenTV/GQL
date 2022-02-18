@@ -17,7 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func userLoader(gCtx global.Context) *loaders.UserLoader {
+func userByID(gCtx global.Context) *loaders.UserLoader {
 	return loaders.NewUserLoader(loaders.UserLoaderConfig{
 		Wait: time.Millisecond * 5,
 		Fetch: func(keys []primitive.ObjectID) ([]*model.User, []error) {

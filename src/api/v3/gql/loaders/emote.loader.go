@@ -17,7 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func emoteLoader(gCtx global.Context) *loaders.EmoteLoader {
+func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 	return loaders.NewEmoteLoader(loaders.EmoteLoaderConfig{
 		Fetch: func(keys []primitive.ObjectID) ([]*model.Emote, []error) {
 			ctx, cancel := context.WithTimeout(gCtx, time.Second*10)
