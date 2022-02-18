@@ -9,7 +9,6 @@ import (
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/structures/v3/aggregations"
-	"github.com/SevenTV/Common/structures/v3/query"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/sirupsen/logrus"
@@ -102,7 +101,7 @@ func DoAuth(ctx global.Context, t string) (*structures.User, errors.APIError) {
 
 		}
 	}
-	defaultRoles := query.DefaultRoles.Fetch(ctx, ctx.Inst().Mongo, ctx.Inst().Redis)
+	defaultRoles, _ := ctx.Inst().Query.Roles(ctx, bson.M{"default": true})
 	user.AddRoles(defaultRoles...)
 
 	if user.TokenVersion != v {

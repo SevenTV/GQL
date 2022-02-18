@@ -61,6 +61,10 @@ func (r *Resolver) User() generated.UserResolver {
 	return user.New(r.Resolver)
 }
 
+func (r *Resolver) UserPartial() generated.UserPartialResolver {
+	return user.NewPartial(r.Resolver)
+}
+
 func (r *Resolver) UserOps() generated.UserOpsResolver {
 	return user.NewOps(r.Resolver)
 }

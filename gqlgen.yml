@@ -56,4 +56,4 @@ models:
       - github.com/99designs/gqlgen/graphql.Int32
 
   ObjectID:
-    model: github.com/SevenTV/GQL/scalars.ObjectID
+    model: github.com/SevenTV/GQL/models.ObjectID

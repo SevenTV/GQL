@@ -67,9 +67,10 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 	}
 }
 
-func UserStructureToPartialModel(ctx global.Context, s *structures.User) *model.PartialUser {
+func UserStructureToPartialModel(ctx global.Context, s *structures.User) *model.UserPartial {
 	m := UserStructureToModel(ctx, s)
-	return &model.PartialUser{
+
+	return &model.UserPartial{
 		ID:          m.ID,
 		UserType:    m.UserType,
 		Username:    m.Username,

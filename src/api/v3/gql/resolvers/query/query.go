@@ -6,8 +6,10 @@ import (
 	"github.com/SevenTV/GQL/graph/generated"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/api/v3/gql/auth"
+	"github.com/SevenTV/GQL/src/api/v3/gql/helpers"
 	"github.com/SevenTV/GQL/src/api/v3/gql/loaders"
 	"github.com/SevenTV/GQL/src/api/v3/gql/types"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -38,8 +40,13 @@ func (r *Resolver) Users(ctx context.Context, query string) ([]*model.User, erro
 }
 
 func (r *Resolver) Roles(ctx context.Context) ([]*model.Role, error) {
-	// TODO
-	return nil, nil
+	roles, _ := r.Ctx.Inst().Query.Roles(ctx, bson.M{})
+
+	result := make([]*model.Role, len(roles))
+	for i, rol := range roles {
+		result[i] = helpers.RoleStructureToModel(r.Ctx, rol)
+	}
+	return result, nil
 }
 
 func (r *Resolver) Role(ctx context.Context, id primitive.ObjectID) (*model.Role, error) {

@@ -7,7 +7,6 @@ import (
 	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures/v3"
-	"github.com/SevenTV/Common/structures/v3/query"
 	"github.com/SevenTV/GQL/graph/generated"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/api/v3/gql/helpers"
@@ -27,15 +26,30 @@ func New(r types.Resolver) generated.UserResolver {
 	return &Resolver{r}
 }
 
+// Roles resolves the roles of a user
 func (r *Resolver) Roles(ctx context.Context, obj *model.User) ([]*model.Role, error) {
-	defaults := query.DefaultRoles.Fetch(ctx, r.Ctx.Inst().Mongo, r.Ctx.Inst().Redis)
-	result := make([]*model.Role, len(obj.Roles)+len(defaults))
+	m := make(map[primitive.ObjectID]*model.Role)
+	defaults, _ := r.Ctx.Inst().Query.Roles(ctx, bson.M{"default": true})
 
-	result = append(result, obj.Roles...)
+	for _, rol := range obj.Roles {
+		m[rol.ID] = rol
+	}
 	for _, rol := range defaults {
-		result = append(obj.Roles, helpers.RoleStructureToModel(r.Ctx, rol))
+		if _, ok := m[rol.ID]; ok {
+			continue
+		}
+		m[rol.ID] = helpers.RoleStructureToModel(r.Ctx, rol)
 	}
 
+	result := make([]*model.Role, 0, len(m))
+	for _, rol := range m {
+		result = append(result, rol)
+	}
+	sort.Slice(result, func(i, j int) bool {
+		a := result[i]
+		b := result[j]
+		return a.Position > b.Position
+	})
 	return result, nil
 }
 

@@ -32,7 +32,7 @@ type User {
   editors: [UserEditor!]! @goField(forceResolver: true)
   editor_of: [User!]! @goField(forceResolver: true)
 
-  roles: [Role]! @goField(forceResolver: true)
+  roles: [Role!]! @goField(forceResolver: true)
   owned_emotes: [Emote!]! @goField(forceResolver: true)
   connections(type: [ConnectionPlatform!]): [UserConnection]!
     @goField(forceResolver: true)
@@ -44,7 +44,7 @@ type User {
     @hasPermissions(role: [MANAGE_REPORTS])
 }
 
-type PartialUser {
+type UserPartial {
   id: ObjectID!
   user_type: String!
   username: String!
@@ -53,7 +53,7 @@ type PartialUser {
   avatar_url: String!
   biography: String!
   tag_color: Int!
-  roles: [Role]!
+  roles: [Role!]! @goField(forceResolver: true)
 }
 
 type UserEditor {
