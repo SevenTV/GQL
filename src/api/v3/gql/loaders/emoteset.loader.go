@@ -31,30 +31,31 @@ func emoteSetByID(gCtx global.Context) *loaders.EmoteSetLoader {
 				mongo.Pipeline{
 					{{Key: "$match", Value: bson.M{"_id": bson.M{"$in": keys}}}},
 					{{
-						Key: "$lookup",
-						Value: mongo.Lookup{
-							From:         mongo.CollectionNameEmotes,
-							LocalField:   "emotes.id",
-							ForeignField: "_id",
-							As:           "_emotes",
+						Key: "$group",
+						Value: bson.M{
+							"_id":  nil,
+							"sets": bson.M{"$push": "$$ROOT"},
 						},
 					}},
 					{{
-						Key: "$set",
-						Value: bson.M{
-							"emotes": bson.M{"$map": bson.M{
-								"input": "$emotes",
-								"in": bson.M{"$mergeObjects": bson.A{
-									"$$this",
-									bson.M{"emote": bson.M{
-										"$arrayElemAt": bson.A{"$_emotes", bson.M{"$indexOfArray": bson.A{"$_emotes._id", "$$this.id"}}},
-									}},
-								}},
-							}},
+						Key: "$lookup",
+						Value: mongo.Lookup{
+							From:         mongo.CollectionNameEmotes,
+							LocalField:   "sets.emotes.id",
+							ForeignField: "_id",
+							As:           "emotes",
+						},
+					}},
+					{{
+						Key: "$lookup",
+						Value: mongo.Lookup{
+							From:         mongo.CollectionNameUsers,
+							LocalField:   "emotes.owner_id",
+							ForeignField: "_id",
+							As:           "emote_owners",
 						},
 					}},
 				},
-				aggregations.GetEmoteRelationshipOwner(aggregations.UserRelationshipOptions{Roles: true}),
 			))
 			if err != nil {
 				logrus.WithError(err).Error("mongo, failed to spawn aggregation")
@@ -64,11 +65,29 @@ func emoteSetByID(gCtx global.Context) *loaders.EmoteSetLoader {
 			// Transform emote set structures into models
 			m := make(map[primitive.ObjectID]*structures.EmoteSet)
 			for i := 0; cur.Next(ctx); i++ {
-				v := &structures.EmoteSet{}
+				v := &aggregatedEmoteSetByID{}
 				if err = cur.Decode(v); err != nil {
 					errs[i] = err
 				}
-				m[v.ID] = v
+
+				emoteMap := make(map[primitive.ObjectID]*structures.Emote)
+				ownerMap := make(map[primitive.ObjectID]*structures.User)
+				for _, emote := range v.Emotes {
+					emoteMap[emote.ID] = emote
+				}
+				for _, user := range v.EmoteOwners {
+					ownerMap[user.ID] = user
+				}
+
+				for _, set := range v.Sets {
+					for _, ae := range set.Emotes {
+						ae.Emote = emoteMap[ae.ID]
+						if ae.Emote != nil {
+							ae.Emote.Owner = ownerMap[ae.Emote.OwnerID]
+						}
+					}
+					m[set.ID] = set
+				}
 			}
 			if err = multierror.Append(err, cur.Close(ctx)).ErrorOrNil(); err != nil {
 				logrus.WithError(err).Error("mongo, failed to close the cursor")
@@ -83,6 +102,12 @@ func emoteSetByID(gCtx global.Context) *loaders.EmoteSetLoader {
 			return models, errs
 		},
 	})
+}
+
+type aggregatedEmoteSetByID struct {
+	Sets        []*structures.EmoteSet `bson:"sets"`
+	Emotes      []*structures.Emote    `bson:"emotes"`
+	EmoteOwners []*structures.User     `bson:"emote_owners"`
 }
 
 func emoteSetByUserID(gCtx global.Context) *loaders.BatchEmoteSetLoader {
