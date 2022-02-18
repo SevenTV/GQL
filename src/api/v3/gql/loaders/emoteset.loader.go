@@ -61,6 +61,13 @@ func emoteSetByID(gCtx global.Context) *loaders.EmoteSetLoader {
 				logrus.WithError(err).Error("mongo, failed to spawn aggregation")
 			}
 
+			// Get roles (to assign to emote owners)
+			roles, _ := gCtx.Inst().Query.Roles(ctx, bson.M{})
+			roleMap := make(map[primitive.ObjectID]*structures.Role)
+			for _, role := range roles {
+				roleMap[role.ID] = role
+			}
+
 			// Iterate over cursor
 			// Transform emote set structures into models
 			m := make(map[primitive.ObjectID]*structures.EmoteSet)
@@ -79,11 +86,19 @@ func emoteSetByID(gCtx global.Context) *loaders.EmoteSetLoader {
 					ownerMap[user.ID] = user
 				}
 
+				var ok bool
 				for _, set := range v.Sets {
 					for _, ae := range set.Emotes {
-						ae.Emote = emoteMap[ae.ID]
-						if ae.Emote != nil {
-							ae.Emote.Owner = ownerMap[ae.Emote.OwnerID]
+						if ae.Emote, ok = emoteMap[ae.ID]; ok {
+							if ae.Emote.Owner, ok = ownerMap[ae.Emote.OwnerID]; ok {
+								for _, roleID := range ae.Emote.Owner.RoleIDs {
+									role, roleOK := roleMap[roleID]
+									if !roleOK {
+										continue
+									}
+									ae.Emote.Owner.Roles = append(ae.Emote.Owner.Roles, role)
+								}
+							}
 						}
 					}
 					m[set.ID] = set
@@ -144,10 +159,26 @@ func emoteSetByUserID(gCtx global.Context) *loaders.BatchEmoteSetLoader {
 							As:           "emotes",
 						},
 					}},
+					{{
+						Key: "$lookup",
+						Value: mongo.Lookup{
+							From:         mongo.CollectionNameUsers,
+							LocalField:   "emotes.owner_id",
+							ForeignField: "_id",
+							As:           "emote_owners",
+						},
+					}},
 				},
 			))
 			if err != nil {
 				logrus.WithError(err).Error("mongo, failed to spawn aggregation")
+			}
+
+			// Get roles (to assign to emote owners)
+			roles, _ := gCtx.Inst().Query.Roles(ctx, bson.M{})
+			roleMap := make(map[primitive.ObjectID]*structures.Role)
+			for _, role := range roles {
+				roleMap[role.ID] = role
 			}
 
 			// Iterate over cursor
@@ -160,12 +191,28 @@ func emoteSetByUserID(gCtx global.Context) *loaders.BatchEmoteSetLoader {
 
 				// Map emotes bound to the set
 				emoteMap := make(map[primitive.ObjectID]*structures.Emote)
+				ownerMap := make(map[primitive.ObjectID]*structures.User)
 				for _, emote := range v.Emotes {
 					emoteMap[emote.ID] = emote
 				}
+				for _, user := range v.EmoteOwners {
+					ownerMap[user.ID] = user
+				}
+
+				var ok bool
 				for _, set := range v.Sets {
 					for _, ae := range set.Emotes {
-						ae.Emote = emoteMap[ae.ID]
+						if ae.Emote, ok = emoteMap[ae.ID]; ok {
+							if ae.Emote.Owner, ok = ownerMap[ae.Emote.OwnerID]; ok {
+								for _, roleID := range ae.Emote.Owner.RoleIDs {
+									role, roleOK := roleMap[roleID]
+									if !roleOK {
+										continue
+									}
+									ae.Emote.Owner.Roles = append(ae.Emote.Owner.Roles, role)
+								}
+							}
+						}
 					}
 				}
 				m[v.UserID] = v.Sets
@@ -190,7 +237,8 @@ func emoteSetByUserID(gCtx global.Context) *loaders.BatchEmoteSetLoader {
 }
 
 type aggregatedEmoteSetByUserID struct {
-	UserID primitive.ObjectID     `bson:"_id"`
-	Sets   []*structures.EmoteSet `bson:"sets"`
-	Emotes []*structures.Emote    `bson:"emotes"`
+	UserID      primitive.ObjectID     `bson:"_id"`
+	Sets        []*structures.EmoteSet `bson:"sets"`
+	Emotes      []*structures.Emote    `bson:"emotes"`
+	EmoteOwners []*structures.User     `bson:"emote_owners"`
 }
