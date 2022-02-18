@@ -3,6 +3,10 @@ extend type Query {
   namedEmoteSet(name: EmoteSetName!): EmoteSet!
 }
 
+extend type Subscription {
+  emoteSet(id: ObjectID!, init: Boolean): EmoteSet!
+}
+
 extend type Mutation {
   emoteSet(id: ObjectID!): EmoteSetOps
   createEmoteSet(data: CreateEmoteSetInput!): EmoteSet
