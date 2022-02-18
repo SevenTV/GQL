@@ -37,6 +37,10 @@ func (r *Resolver) Emote() generated.EmoteResolver {
 	return emote.New(r.Resolver)
 }
 
+func (r *Resolver) EmotePartial() generated.EmotePartialResolver {
+	return emote.NewPartial(r.Resolver)
+}
+
 func (r *Resolver) Mutation() generated.MutationResolver {
 	return mutation.New(r.Resolver)
 }

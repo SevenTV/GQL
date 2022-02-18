@@ -196,6 +196,21 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 	}
 }
 
+func EmoteStructureToPartialModel(ctx global.Context, m *model.Emote) *model.EmotePartial {
+	return &model.EmotePartial{
+		ID:        m.ID,
+		Name:      m.Name,
+		Flags:     m.Flags,
+		Status:    m.Status,
+		Tags:      m.Tags,
+		Animated:  m.Animated,
+		CreatedAt: m.CreatedAt,
+		OwnerID:   m.OwnerID,
+		Owner:     m.Owner,
+		Images:    m.Images,
+	}
+}
+
 func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model.EmoteSet {
 	emotes := make([]*model.ActiveEmote, len(s.Emotes))
 	for i, e := range s.Emotes {

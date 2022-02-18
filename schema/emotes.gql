@@ -10,7 +10,7 @@ extend type Query {
 }
 
 extend type Subscription {
-  emote(id: ObjectID!): Emote
+  emote(id: ObjectID!, init: Boolean): EmotePartial!
 }
 
 extend type Mutation {
@@ -37,6 +37,19 @@ type Emote {
   reports: [Report!]!
     @goField(forceResolver: true)
     @hasPermissions(role: [MANAGE_REPORTS])
+}
+
+type EmotePartial {
+  id: ObjectID!
+  name: String!
+  flags: Int!
+  status: Int!
+  tags: [String!]!
+  animated: Boolean!
+  created_at: Time!
+  owner_id: ObjectID!
+  owner: User! @goField(forceResolver: true)
+  images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
 }
 
 input EmoteSearchFilter {
