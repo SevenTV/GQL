@@ -5,8 +5,8 @@ extend type Query {
 }
 
 extend type Subscription {
-  currentUser: User
-  user(id: ObjectID!): User
+  currentUser(init: Boolean): UserPartial
+  user(id: ObjectID!, init: Boolean): UserPartial!
 }
 
 extend type Mutation {
