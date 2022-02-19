@@ -26,14 +26,17 @@ func (r *Resolver) Emote(ctx context.Context, id primitive.ObjectID, init *bool)
 		return helpers.EmoteStructureToPartialModel(r.Ctx, emote), nil
 	}
 
-	emote, err := getEmote()
-	if err != nil {
-		return nil, err
-	}
 	ch := make(chan *model.EmotePartial, 1)
-	ch <- emote
+	if init != nil && *init {
+		emote, err := getEmote()
+		if err != nil {
+			return nil, err
+		}
+		ch <- emote
+	}
 
 	go func() {
+		defer close(ch)
 		sub := r.subscribe(ctx, "emotes", id)
 		for range sub {
 			emote, _ := getEmote()

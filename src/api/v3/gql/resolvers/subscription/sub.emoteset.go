@@ -35,6 +35,7 @@ func (r *Resolver) EmoteSet(ctx context.Context, id primitive.ObjectID, init *bo
 	}
 
 	go func() {
+		defer close(ch)
 		sub := r.subscribe(ctx, "emote_sets", id)
 		for range sub {
 			set, _ := getEmoteSet()
