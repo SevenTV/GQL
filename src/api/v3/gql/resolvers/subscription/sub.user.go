@@ -13,8 +13,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// var json = jsoniter.ConfigCompatibleWithStandardLibrary
-
 func (r *Resolver) CurrentUser(ctx context.Context, init *bool) (<-chan *model.UserPartial, error) {
 	actor := auth.For(ctx)
 	if actor == nil {
