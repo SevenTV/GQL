@@ -15,7 +15,7 @@ extend type Mutation {
 
 type EmoteSetOps {
   id: ObjectID!
-  emotes(id: ObjectID!, action: ListItemAction!, name: String): [Emote]!
+  emotes(id: ObjectID!, action: ListItemAction!, name: String): [ActiveEmote!]!
     @goField(forceResolver: true)
 }
 

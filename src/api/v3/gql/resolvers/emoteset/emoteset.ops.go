@@ -11,6 +11,7 @@ import (
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/api/events"
 	"github.com/SevenTV/GQL/src/api/v3/gql/auth"
+	"github.com/SevenTV/GQL/src/api/v3/gql/helpers"
 	"github.com/SevenTV/GQL/src/api/v3/gql/loaders"
 	"github.com/SevenTV/GQL/src/api/v3/gql/types"
 	"github.com/hashicorp/go-multierror"
@@ -27,7 +28,7 @@ func NewOps(r types.Resolver) generated.EmoteSetOpsResolver {
 	return &Resolver{r}
 }
 
-func (r *Resolver) Emotes(ctx context.Context, obj *model.EmoteSetOps, id primitive.ObjectID, action model.ListItemAction, nameArg *string) ([]*model.Emote, error) {
+func (r *Resolver) Emotes(ctx context.Context, obj *model.EmoteSetOps, id primitive.ObjectID, action model.ListItemAction, nameArg *string) ([]*model.ActiveEmote, error) {
 	actor := auth.For(ctx)
 	logF := logrus.WithFields(logrus.Fields{
 		"emote_set_id": obj.ID,
@@ -103,6 +104,14 @@ func (r *Resolver) Emotes(ctx context.Context, obj *model.EmoteSetOps, id primit
 			events.Publish(r.Ctx, "users", actor.ID)
 		}
 	}()
+
+	setModel := helpers.EmoteSetStructureToModel(r.Ctx, b.EmoteSet)
 	emotes, errs := loaders.For(ctx).EmoteByID.LoadAll(emoteIDs)
-	return emotes, multierror.Append(nil, errs...).ErrorOrNil()
+	for i, e := range emotes {
+		if ae := setModel.Emotes[i]; ae != nil {
+			setModel.Emotes[i].Emote = e
+		}
+	}
+
+	return setModel.Emotes, multierror.Append(nil, errs...).ErrorOrNil()
 }

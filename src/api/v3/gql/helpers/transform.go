@@ -240,3 +240,12 @@ func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model
 		Owner:      owner,
 	}
 }
+
+func ActiveEmoteStructureToModel(ctx global.Context, s *structures.ActiveEmote) *model.ActiveEmote {
+	return &model.ActiveEmote{
+		ID:        s.ID,
+		Name:      s.Name,
+		Flags:     int(s.Flags),
+		Timestamp: s.Timestamp,
+	}
+}
