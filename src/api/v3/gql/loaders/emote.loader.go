@@ -4,15 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures/v3"
-	"github.com/SevenTV/Common/structures/v3/aggregations"
 	"github.com/SevenTV/GQL/graph/loaders"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/api/v3/gql/helpers"
 	"github.com/SevenTV/GQL/src/global"
-	"github.com/hashicorp/go-multierror"
-	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -26,36 +22,40 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 			// Fetch emote data from the database
 			models := make([]*model.Emote, len(keys))
 			errs := make([]error, len(keys))
-			cur, err := gCtx.Inst().Mongo.Collection(mongo.CollectionNameEmotes).Aggregate(ctx, aggregations.Combine(
-				mongo.Pipeline{{{Key: "$match", Value: bson.M{"_id": bson.M{"$in": keys}}}}},
-				aggregations.GetEmoteRelationshipOwner(aggregations.UserRelationshipOptions{Roles: true}),
-			))
-			if err != nil {
-				logrus.New().WithError(err).Error("mongo, failed to spawn aggregation")
-			}
 
 			// Initially fill the response with unknown emotes in case some cannot be found
 			unknownModel := helpers.EmoteStructureToModel(gCtx, structures.DeletedEmote)
 			for i := 0; i < len(models); i++ {
 				models[i] = unknownModel
 			}
-			// Iterate over cursor
-			// Transform emote structures into models
-			m := make(map[primitive.ObjectID]*structures.Emote)
-			for i := 0; cur.Next(ctx); i++ {
-				v := &structures.Emote{}
-				if err = cur.Decode(v); err != nil {
-					errs[i] = err
-				}
-				m[v.ID] = v
-			}
-			if err = multierror.Append(err, cur.Close(ctx)).ErrorOrNil(); err != nil {
-				logrus.WithError(err).Error("mongo, failed to close the cursor")
+
+			// Get roles (to assign to emote owners)
+			roles, _ := gCtx.Inst().Query.Roles(ctx, bson.M{})
+			roleMap := make(map[primitive.ObjectID]*structures.Role)
+			for _, role := range roles {
+				roleMap[role.ID] = role
 			}
 
-			for i, v := range keys {
-				if x, ok := m[v]; ok {
-					models[i] = helpers.EmoteStructureToModel(gCtx, x)
+			// Iterate over cursor
+			// Transform emote structures into models
+			emotes, err := gCtx.Inst().Query.Emotes(ctx, bson.M{
+				"_id":             bson.M{"$in": keys},
+				"state.lifecycle": structures.EmoteLifecycleLive,
+			})
+
+			if err == nil {
+				m := make(map[primitive.ObjectID]*structures.Emote)
+				for _, e := range emotes {
+					if e == nil {
+						continue
+					}
+					m[e.ID] = e
+				}
+
+				for i, v := range keys {
+					if x, ok := m[v]; ok {
+						models[i] = helpers.EmoteStructureToModel(gCtx, x)
+					}
 				}
 			}
 
