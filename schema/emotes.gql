@@ -43,7 +43,7 @@ type EmotePartial {
   id: ObjectID!
   name: String!
   flags: Int!
-  status: Int!
+  lifecycle: Int!
   tags: [String!]!
   animated: Boolean!
   created_at: Time!

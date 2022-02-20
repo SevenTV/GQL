@@ -201,7 +201,7 @@ func EmoteStructureToPartialModel(ctx global.Context, m *model.Emote) *model.Emo
 		ID:        m.ID,
 		Name:      m.Name,
 		Flags:     m.Flags,
-		Status:    m.Lifecycle,
+		Lifecycle: m.Lifecycle,
 		Tags:      m.Tags,
 		Animated:  m.Animated,
 		CreatedAt: m.CreatedAt,
