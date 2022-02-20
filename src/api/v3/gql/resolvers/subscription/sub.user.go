@@ -79,6 +79,7 @@ func (r *Resolver) User(ctx context.Context, id primitive.ObjectID, init *bool) 
 	}
 
 	go func() {
+		defer close(ch)
 		sub := r.subscribe(ctx, "users", id)
 		for range sub {
 			user, _ := getUser()
