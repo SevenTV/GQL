@@ -29,7 +29,7 @@ func New(r types.Resolver) generated.UserResolver {
 // Roles resolves the roles of a user
 func (r *Resolver) Roles(ctx context.Context, obj *model.User) ([]*model.Role, error) {
 	m := make(map[primitive.ObjectID]*model.Role)
-	defaults, _ := r.Ctx.Inst().Query.Roles(ctx, bson.M{})
+	defaults, _ := r.Ctx.Inst().Query.Roles(ctx, bson.M{"default": true})
 
 	for _, rol := range obj.Roles {
 		m[rol.ID] = rol
