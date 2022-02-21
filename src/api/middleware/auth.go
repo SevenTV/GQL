@@ -43,24 +43,23 @@ func Auth(gCtx global.Context) Middleware {
 
 func DoAuth(ctx global.Context, t string) (*structures.User, errors.APIError) {
 	// Verify the token
-	_, claims, err := auth.VerifyJWT(ctx.Config().Credentials.JWTSecret, strings.Split(t, "."))
+	claims := &auth.JWTClaimUser{}
+	_, err := auth.VerifyJWT(ctx.Config().Credentials.JWTSecret, strings.Split(t, "."), claims)
 	if err != nil {
 		return nil, errors.ErrUnauthorized().SetDetail(err.Error())
 	}
 
 	// User ID from parsed token
-	u := claims["u"]
-	if u == nil {
+	if claims.UserID == "" {
 		return nil, errors.ErrUnauthorized().SetDetail("Bad Token")
 	}
-	userID, err := primitive.ObjectIDFromHex(u.(string))
+	userID, err := primitive.ObjectIDFromHex(claims.UserID)
 	if err != nil {
 		return nil, errors.ErrUnauthorized().SetDetail(err.Error())
 	}
 
 	// Version of parsed token
 	user := &structures.User{}
-	v := claims["v"].(float64)
 
 	pipeline := mongo.Pipeline{{{Key: "$match", Value: bson.M{"_id": userID}}}}
 	pipeline = append(pipeline, aggregations.UserRelationRoles...)
@@ -84,6 +83,10 @@ func DoAuth(ctx global.Context, t string) (*structures.User, errors.APIError) {
 		return nil, errors.ErrInternalServerError().SetDetail(err.Error())
 	}
 
+	if user.TokenVersion != claims.TokenVersion {
+		return nil, errors.ErrUnauthorized().SetDetail("Token Version Mismatch")
+	}
+
 	// Check bans
 	for _, ban := range user.Bans {
 		// Check for No Auth effect
@@ -103,10 +106,6 @@ func DoAuth(ctx global.Context, t string) (*structures.User, errors.APIError) {
 	}
 	defaultRoles, _ := ctx.Inst().Query.Roles(ctx, bson.M{"default": true})
 	user.AddRoles(defaultRoles...)
-
-	if user.TokenVersion != v {
-		return nil, errors.ErrUnauthorized().SetDetail("Token Version Mismatch")
-	}
 
 	return user, nil
 }
