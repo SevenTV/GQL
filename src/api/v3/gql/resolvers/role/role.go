@@ -5,7 +5,6 @@ import (
 
 	"github.com/SevenTV/GQL/graph/generated"
 	"github.com/SevenTV/GQL/graph/model"
-	"github.com/SevenTV/GQL/src/api/v3/gql/loaders"
 	"github.com/SevenTV/GQL/src/api/v3/gql/types"
 )
 
@@ -17,6 +16,7 @@ func New(r types.Resolver) generated.RoleResolver {
 	return &Resolver{r}
 }
 
-func (r *Resolver) Members(ctx context.Context, obj *model.Role) ([]*model.User, error) {
-	return loaders.For(ctx).UsersByRoleID.Load(obj.ID.Hex())
+func (r *Resolver) Members(ctx context.Context, obj *model.Role, page *int, limit *int) ([]*model.User, error) {
+	// TODO
+	return nil, nil
 }

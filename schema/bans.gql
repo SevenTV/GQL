@@ -21,6 +21,6 @@ type Ban {
   expire_at: Time!
   created_at: Time!
 
-  victim: User! @goField(forceResolver: true)
-  actor: User! @goField(forceResolver: true)
+  victim: User @goField(forceResolver: true)
+  actor: User @goField(forceResolver: true)
 }

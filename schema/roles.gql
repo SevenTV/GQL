@@ -24,7 +24,7 @@ type Role {
   position: Int!
   created_at: Time!
 
-  members: [User!]! @goField(forceResolver: true)
+  members(page: Int, limit: Int): [User!]! @goField(forceResolver: true)
 }
 
 input CreateRoleInput {
