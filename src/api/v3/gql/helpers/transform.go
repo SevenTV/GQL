@@ -151,7 +151,7 @@ func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
 func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote {
 	images := []*model.Image{}
 	for _, f := range s.Formats {
-		for i, im := range f.Files {
+		for _, im := range f.Files {
 			format := model.ImageFormatWebp
 			switch f.Name {
 			case structures.EmoteFormatNameAVIF:
@@ -162,11 +162,10 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 				format = model.ImageFormatPng
 			}
 
-			size := strconv.Itoa(i + 1)
 			images = append(images, &model.Image{
 				Name:     im.Name,
 				Format:   format,
-				URL:      fmt.Sprintf("//%s/emote/%s/%sx", ctx.Config().CdnURL, s.ID.Hex(), size),
+				URL:      fmt.Sprintf("//%s/emote/%s/%s", ctx.Config().CdnURL, s.ID.Hex(), im.Name),
 				Width:    int(im.Width),
 				Height:   int(im.Height),
 				Animated: im.Animated,
