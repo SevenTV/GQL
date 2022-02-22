@@ -1,3 +1,24 @@
+extend type Query {
+  currentUser: User
+  user(id: ObjectID!): User!
+  users(query: String!): [User!]!
+}
+
+extend type Subscription {
+  currentUser(init: Boolean): UserPartial
+  user(id: ObjectID!, init: Boolean): UserPartial!
+}
+
+extend type Mutation {
+  user(id: ObjectID!): UserOps
+}
+
+type UserOps {
+  id: ObjectID!
+  connections(id: String!, data: UserConnectionUpdate!): [UserConnection]
+    @goField(forceResolver: true)
+}
+
 type User {
   id: ObjectID!
   user_type: String!
@@ -11,7 +32,9 @@ type User {
   editors: [UserEditor!]! @goField(forceResolver: true)
   editor_of: [User!]! @goField(forceResolver: true)
 
-  roles: [Role]!
+  roles: [Role!]! @goField(forceResolver: true)
+
+  emote_sets: [EmoteSet!]! @goField(forceResolver: true)
   owned_emotes: [Emote!]! @goField(forceResolver: true)
   connections(type: [ConnectionPlatform!]): [UserConnection]!
     @goField(forceResolver: true)
@@ -23,7 +46,7 @@ type User {
     @hasPermissions(role: [MANAGE_REPORTS])
 }
 
-type PartialUser {
+type UserPartial {
   id: ObjectID!
   user_type: String!
   username: String!
@@ -32,7 +55,7 @@ type PartialUser {
   avatar_url: String!
   biography: String!
   tag_color: Int!
-  roles: [Role]!
+  roles: [Role!]! @goField(forceResolver: true)
 }
 
 type UserEditor {
@@ -59,14 +82,9 @@ type UserConnection {
   emote_set: EmoteSet @goField(forceResolver: true)
 }
 
-extend type Mutation {
-  user(id: ObjectID!): UserOps
-}
-
-type UserOps {
-  id: ObjectID!
-  connections(id: String!, data: UserConnectionUpdate!): [UserConnection]
-    @goField(forceResolver: true)
+enum ConnectionPlatform {
+  TWITCH
+  YOUTUBE
 }
 
 input UserConnectionUpdate {
@@ -76,15 +94,4 @@ input UserConnectionUpdate {
 type UserSearchResult {
   total: Int!
   items: [User!]!
-}
-
-extend type Query {
-  currentUser: User
-  user(id: ObjectID!): User!
-  users(query: String!): [User!]!
-}
-
-enum ConnectionPlatform {
-  TWITCH
-  YOUTUBE
 }

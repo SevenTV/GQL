@@ -11,6 +11,8 @@ require (
 	github.com/SevenTV/Common v0.0.0-20220116095702-01d8c2b41521
 	github.com/bugsnag/panicwrap v1.3.4
 	github.com/fasthttp/router v1.4.6
+	github.com/fasthttp/websocket v1.4.6
+	github.com/gorilla/websocket v1.4.2
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1
@@ -25,7 +27,6 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

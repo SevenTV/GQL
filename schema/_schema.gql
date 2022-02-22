@@ -3,6 +3,7 @@ scalar ObjectID
 
 schema {
   query: Query
+  subscription: Subscription
   mutation: Mutation
 }
 

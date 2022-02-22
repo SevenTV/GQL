@@ -10,6 +10,7 @@ import (
 	"github.com/SevenTV/GQL/src/api/v3/gql/resolvers/query"
 	"github.com/SevenTV/GQL/src/api/v3/gql/resolvers/report"
 	"github.com/SevenTV/GQL/src/api/v3/gql/resolvers/role"
+	"github.com/SevenTV/GQL/src/api/v3/gql/resolvers/subscription"
 	"github.com/SevenTV/GQL/src/api/v3/gql/resolvers/user"
 	user_connections "github.com/SevenTV/GQL/src/api/v3/gql/resolvers/user-connections"
 	user_editor "github.com/SevenTV/GQL/src/api/v3/gql/resolvers/user-editor"
@@ -36,12 +37,20 @@ func (r *Resolver) Emote() generated.EmoteResolver {
 	return emote.New(r.Resolver)
 }
 
+func (r *Resolver) EmotePartial() generated.EmotePartialResolver {
+	return emote.NewPartial(r.Resolver)
+}
+
 func (r *Resolver) Mutation() generated.MutationResolver {
 	return mutation.New(r.Resolver)
 }
 
 func (r *Resolver) Query() generated.QueryResolver {
 	return query.New(r.Resolver)
+}
+
+func (r *Resolver) Subscription() generated.SubscriptionResolver {
+	return subscription.New(r.Resolver)
 }
 
 func (r *Resolver) Report() generated.ReportResolver {
@@ -54,6 +63,10 @@ func (r *Resolver) Role() generated.RoleResolver {
 
 func (r *Resolver) User() generated.UserResolver {
 	return user.New(r.Resolver)
+}
+
+func (r *Resolver) UserPartial() generated.UserPartialResolver {
+	return user.NewPartial(r.Resolver)
 }
 
 func (r *Resolver) UserOps() generated.UserOpsResolver {

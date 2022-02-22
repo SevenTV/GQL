@@ -67,9 +67,8 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 	}
 }
 
-func UserStructureToPartialModel(ctx global.Context, s *structures.User) *model.PartialUser {
-	m := UserStructureToModel(ctx, s)
-	return &model.PartialUser{
+func UserStructureToPartialModel(ctx global.Context, m *model.User) *model.UserPartial {
+	return &model.UserPartial{
 		ID:          m.ID,
 		UserType:    m.UserType,
 		Username:    m.Username,
@@ -185,7 +184,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		ID:        s.ID,
 		Name:      s.Name,
 		Flags:     int(s.Flags),
-		Status:    int(s.State.Lifecycle),
+		Lifecycle: int(s.State.Lifecycle),
 		Tags:      s.Tags,
 		Animated:  s.FrameCount > 1,
 		CreatedAt: s.ID.Timestamp(),
@@ -194,6 +193,21 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		Channels:  &model.UserSearchResult{},
 		Images:    images,
 		Reports:   []*model.Report{},
+	}
+}
+
+func EmoteStructureToPartialModel(ctx global.Context, m *model.Emote) *model.EmotePartial {
+	return &model.EmotePartial{
+		ID:        m.ID,
+		Name:      m.Name,
+		Flags:     m.Flags,
+		Lifecycle: m.Lifecycle,
+		Tags:      m.Tags,
+		Animated:  m.Animated,
+		CreatedAt: m.CreatedAt,
+		OwnerID:   m.OwnerID,
+		Owner:     m.Owner,
+		Images:    m.Images,
 	}
 }
 
@@ -224,5 +238,14 @@ func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model
 		Emotes:     emotes,
 		EmoteSlots: int(s.EmoteSlots),
 		Owner:      owner,
+	}
+}
+
+func ActiveEmoteStructureToModel(ctx global.Context, s *structures.ActiveEmote) *model.ActiveEmote {
+	return &model.ActiveEmote{
+		ID:        s.ID,
+		Name:      s.Name,
+		Flags:     int(s.Flags),
+		Timestamp: s.Timestamp,
 	}
 }

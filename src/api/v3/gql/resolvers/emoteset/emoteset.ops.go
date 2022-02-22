@@ -9,7 +9,9 @@ import (
 	"github.com/SevenTV/Common/structures/v3/mutations"
 	"github.com/SevenTV/GQL/graph/generated"
 	"github.com/SevenTV/GQL/graph/model"
+	"github.com/SevenTV/GQL/src/api/events"
 	"github.com/SevenTV/GQL/src/api/v3/gql/auth"
+	"github.com/SevenTV/GQL/src/api/v3/gql/helpers"
 	"github.com/SevenTV/GQL/src/api/v3/gql/loaders"
 	"github.com/SevenTV/GQL/src/api/v3/gql/types"
 	"github.com/hashicorp/go-multierror"
@@ -26,7 +28,7 @@ func NewOps(r types.Resolver) generated.EmoteSetOpsResolver {
 	return &Resolver{r}
 }
 
-func (r *Resolver) Emotes(ctx context.Context, obj *model.EmoteSetOps, id primitive.ObjectID, action model.ListItemAction, nameArg *string) ([]*model.Emote, error) {
+func (r *Resolver) Emotes(ctx context.Context, obj *model.EmoteSetOps, id primitive.ObjectID, action model.ListItemAction, nameArg *string) ([]*model.ActiveEmote, error) {
 	actor := auth.For(ctx)
 	logF := logrus.WithFields(logrus.Fields{
 		"emote_set_id": obj.ID,
@@ -65,6 +67,51 @@ func (r *Resolver) Emotes(ctx context.Context, obj *model.EmoteSetOps, id primit
 	for i, e := range b.EmoteSet.Emotes {
 		emoteIDs[i] = e.ID
 	}
+
+	// Publish updates for;
+	// emote set, owner of emote set, actor
+	go func() {
+		// Find users that have this set active
+		sentToActor := false
+		sentToOwner := false
+		cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Find(ctx, bson.M{
+			"connections.emote_set_id": b.EmoteSet.ID,
+		})
+		if err == nil {
+			for cur.Next(ctx) {
+				u := &structures.User{}
+				if err = cur.Decode(u); err != nil {
+					continue
+				}
+
+				events.Publish(r.Ctx, "users", u.ID)
+				if u.ID == actor.ID {
+					sentToActor = true
+				} else if u.ID == b.EmoteSet.OwnerID {
+					sentToOwner = true
+				}
+			}
+		}
+
+		// Publish an emote set update
+		events.Publish(r.Ctx, "emote_sets", b.EmoteSet.ID)
+		// Send user update for set owner
+		if !sentToOwner && b.EmoteSet.OwnerID != actor.ID {
+			events.Publish(r.Ctx, "users", b.EmoteSet.OwnerID)
+		}
+		// Send user update for actor
+		if !sentToActor {
+			events.Publish(r.Ctx, "users", actor.ID)
+		}
+	}()
+
+	setModel := helpers.EmoteSetStructureToModel(r.Ctx, b.EmoteSet)
 	emotes, errs := loaders.For(ctx).EmoteByID.LoadAll(emoteIDs)
-	return emotes, multierror.Append(nil, errs...).ErrorOrNil()
+	for i, e := range emotes {
+		if ae := setModel.Emotes[i]; ae != nil {
+			setModel.Emotes[i].Emote = e
+		}
+	}
+
+	return setModel.Emotes, multierror.Append(nil, errs...).ErrorOrNil()
 }

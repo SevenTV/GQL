@@ -1,3 +1,20 @@
+extend type Query {
+  reports(
+    status: ReportStatus
+    limit: Int
+    after_id: String
+    before_id: String
+  ): [Report]! @hasPermissions(role: [MANAGE_REPORTS])
+  report(id: ObjectID!): Report @hasPermissions(role: [MANAGE_REPORTS])
+}
+
+extend type Mutation {
+  createReport(data: CreateReportInput!): Report
+    @hasPermissions(role: [REPORT_CREATE])
+  editReport(report_id: ObjectID!, data: EditReportInput!): Report
+    @hasPermissions(role: [MANAGE_REPORTS])
+}
+
 type Report {
   id: ObjectID!
   target_kind: TargetKind!
@@ -22,23 +39,6 @@ enum ReportStatus {
   OPEN
   ASSIGNED
   CLOSED
-}
-
-extend type Query {
-  reports(
-    status: ReportStatus
-    limit: Int
-    after_id: String
-    before_id: String
-  ): [Report]! @hasPermissions(role: [MANAGE_REPORTS])
-  report(id: ObjectID!): Report @hasPermissions(role: [MANAGE_REPORTS])
-}
-
-extend type Mutation {
-  createReport(data: CreateReportInput!): Report
-    @hasPermissions(role: [REPORT_CREATE])
-  editReport(report_id: ObjectID!, data: EditReportInput!): Report
-    @hasPermissions(role: [MANAGE_REPORTS])
 }
 
 input CreateReportInput {
