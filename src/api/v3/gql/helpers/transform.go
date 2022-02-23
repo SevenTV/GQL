@@ -144,6 +144,7 @@ func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
 		Denied:    strconv.Itoa(int(s.Denied)),
 		Position:  int(s.Position),
 		CreatedAt: s.ID.Timestamp(),
+		Invisible: s.Invisible,
 		Members:   []*model.User{},
 	}
 }

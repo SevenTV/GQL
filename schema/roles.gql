@@ -23,6 +23,7 @@ type Role {
   denied: String!
   position: Int!
   created_at: Time!
+  invisible: Boolean!
 
   members(page: Int, limit: Int): [User!]! @goField(forceResolver: true)
 }
