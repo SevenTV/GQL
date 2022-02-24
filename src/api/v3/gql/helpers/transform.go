@@ -232,6 +232,7 @@ func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model
 		Tags:       s.Tags,
 		Emotes:     emotes,
 		EmoteSlots: int(s.EmoteSlots),
+		OwnerID:    &s.OwnerID,
 		Owner:      owner,
 	}
 }

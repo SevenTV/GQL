@@ -80,6 +80,10 @@ func (r *Resolver) UserEmote() generated.UserEmoteResolver {
 	return user_emote.New(r.Resolver)
 }
 
+func (r *Resolver) EmoteSet() generated.EmoteSetResolver {
+	return emoteset.New(r.Resolver)
+}
+
 func (r *Resolver) EmoteSetOps() generated.EmoteSetOpsResolver {
 	return emoteset.NewOps(r.Resolver)
 }

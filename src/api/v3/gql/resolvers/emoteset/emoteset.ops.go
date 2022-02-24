@@ -20,15 +20,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type Resolver struct {
+type ResolverOps struct {
 	types.Resolver
 }
 
 func NewOps(r types.Resolver) generated.EmoteSetOpsResolver {
-	return &Resolver{r}
+	return &ResolverOps{r}
 }
 
-func (r *Resolver) Emotes(ctx context.Context, obj *model.EmoteSetOps, id primitive.ObjectID, action model.ListItemAction, nameArg *string) ([]*model.ActiveEmote, error) {
+func (r *ResolverOps) Emotes(ctx context.Context, obj *model.EmoteSetOps, id primitive.ObjectID, action model.ListItemAction, nameArg *string) ([]*model.ActiveEmote, error) {
 	actor := auth.For(ctx)
 	logF := logrus.WithFields(logrus.Fields{
 		"emote_set_id": obj.ID,
