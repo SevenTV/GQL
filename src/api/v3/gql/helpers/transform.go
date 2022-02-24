@@ -78,6 +78,7 @@ func UserStructureToPartialModel(ctx global.Context, m *model.User) *model.UserP
 		Biography:   m.Biography,
 		TagColor:    m.TagColor,
 		Roles:       m.Roles,
+		Connections: m.Connections,
 	}
 }
 
@@ -118,19 +119,13 @@ func UserConnectionStructureToModel(ctx global.Context, s *structures.UserConnec
 		logrus.WithError(err).Errorf("couldn't decode %s user connection", s.Platform)
 	}
 
-	// Has an emote set?
-	set := &model.EmoteSet{ID: s.EmoteSetID}
-	if s.EmoteSet != nil {
-		set = EmoteSetStructureToModel(ctx, s.EmoteSet)
-	}
-
 	return &model.UserConnection{
 		ID:          s.ID,
 		DisplayName: displayName,
 		Platform:    model.ConnectionPlatform(s.Platform),
 		LinkedAt:    s.LinkedAt,
 		EmoteSlots:  int(s.EmoteSlots),
-		EmoteSet:    set,
+		EmoteSetID:  &s.EmoteSetID,
 	}
 }
 

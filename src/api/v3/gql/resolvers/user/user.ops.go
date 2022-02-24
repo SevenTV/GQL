@@ -9,6 +9,7 @@ import (
 	"github.com/SevenTV/Common/structures/v3/mutations"
 	"github.com/SevenTV/GQL/graph/generated"
 	"github.com/SevenTV/GQL/graph/model"
+	"github.com/SevenTV/GQL/src/api/events"
 	"github.com/SevenTV/GQL/src/api/v3/gql/auth"
 	"github.com/SevenTV/GQL/src/api/v3/gql/helpers"
 	"github.com/SevenTV/GQL/src/api/v3/gql/types"
@@ -57,5 +58,6 @@ func (r *ResolverOps) Connections(ctx context.Context, obj *model.UserOps, id st
 	}
 
 	result := helpers.UserStructureToModel(r.Ctx, b.User)
+	events.Publish(r.Ctx, "users", b.User.ID)
 	return result.Connections, nil
 }
