@@ -93,7 +93,7 @@ func (r *Resolver) Editors(ctx context.Context, obj *model.User) ([]*model.UserE
 	for _, e := range obj.Editors {
 		for _, u := range users {
 			if e.ID == u.ID {
-				e.User = u
+				e.User = helpers.UserStructureToPartialModel(r.Ctx, u)
 				result = append(result, e)
 				break
 			}
@@ -109,8 +109,18 @@ func (r *Resolver) Editors(ctx context.Context, obj *model.User) ([]*model.UserE
 	return result, multierror.Append(nil, errs...).ErrorOrNil()
 }
 
-func (r *Resolver) EditorOf(ctx context.Context, obj *model.User) ([]*model.User, error) {
-	return nil, nil
+func (r *Resolver) EditorOf(ctx context.Context, obj *model.User) ([]*model.UserEditor, error) {
+	result := []*model.UserEditor{}
+	editables, err := r.Ctx.Inst().Query.UserEditorOf(ctx, obj.ID)
+	if err == nil {
+		for _, ed := range editables {
+			if ed.HasPermission(structures.UserEditorPermissionModifyEmotes) {
+				result = append(result, helpers.UserEditorStructureToModel(r.Ctx, ed))
+			}
+		}
+	}
+
+	return result, err
 }
 
 func (r *Resolver) OwnedEmotes(ctx context.Context, obj *model.User) ([]*model.Emote, error) {

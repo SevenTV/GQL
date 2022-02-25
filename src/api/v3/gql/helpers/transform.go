@@ -93,7 +93,7 @@ func UserEditorStructureToModel(ctx global.Context, s *structures.UserEditor) *m
 		Permissions: int(s.Permissions),
 		Visible:     s.Visible,
 		AddedAt:     s.AddedAt,
-		User:        UserStructureToModel(ctx, s.User),
+		User:        UserStructureToPartialModel(ctx, UserStructureToModel(ctx, s.User)),
 	}
 }
 
