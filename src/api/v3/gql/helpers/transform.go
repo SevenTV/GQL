@@ -146,28 +146,38 @@ func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
 
 func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote {
 	images := []*model.Image{}
-	for _, f := range s.Formats {
-		for _, im := range f.Files {
-			format := model.ImageFormatWebp
-			switch f.Name {
-			case structures.EmoteFormatNameAVIF:
-				format = model.ImageFormatAvif
-			case structures.EmoteFormatNameGIF:
-				format = model.ImageFormatGif
-			case structures.EmoteFormatNamePNG:
-				format = model.ImageFormatPng
-			}
+	versions := []*model.EmoteVersion{}
+	lifecycle := structures.EmoteLifecycleDisabled
+	animated := false
+	for _, ver := range s.Versions {
+		versions = append(versions, EmoteVersionStructureToModel(ctx, ver))
+		if ver.ID == s.ID {
+			lifecycle = ver.State.Lifecycle
+			animated = ver.FrameCount > 1
+			for _, f := range ver.Formats {
+				for _, im := range f.Files {
+					format := model.ImageFormatWebp
+					switch f.Name {
+					case structures.EmoteFormatNameAVIF:
+						format = model.ImageFormatAvif
+					case structures.EmoteFormatNameGIF:
+						format = model.ImageFormatGif
+					case structures.EmoteFormatNamePNG:
+						format = model.ImageFormatPng
+					}
 
-			images = append(images, &model.Image{
-				Name:     im.Name,
-				Format:   format,
-				URL:      fmt.Sprintf("//%s/emote/%s/%s", ctx.Config().CdnURL, s.ID.Hex(), im.Name),
-				Width:    int(im.Width),
-				Height:   int(im.Height),
-				Animated: im.Animated,
-				Time:     int(im.ProcessingTime),
-				Length:   int(im.Length),
-			})
+					images = append(images, &model.Image{
+						Name:     im.Name,
+						Format:   format,
+						URL:      fmt.Sprintf("//%s/emote/%s/%s", ctx.Config().CdnURL, s.ID.Hex(), im.Name),
+						Width:    int(im.Width),
+						Height:   int(im.Height),
+						Animated: im.Animated,
+						Time:     int(im.ProcessingTime),
+						Length:   int(im.Length),
+					})
+				}
+			}
 		}
 	}
 
@@ -179,14 +189,15 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		ID:        s.ID,
 		Name:      s.Name,
 		Flags:     int(s.Flags),
-		Lifecycle: int(s.State.Lifecycle),
+		Lifecycle: int(lifecycle),
 		Tags:      s.Tags,
-		Animated:  s.FrameCount > 1,
+		Animated:  animated,
 		CreatedAt: s.ID.Timestamp(),
 		OwnerID:   s.OwnerID,
 		Owner:     UserStructureToModel(ctx, owner),
 		Channels:  &model.UserSearchResult{},
 		Images:    images,
+		Versions:  versions,
 		Reports:   []*model.Report{},
 	}
 }
@@ -209,16 +220,15 @@ func EmoteStructureToPartialModel(ctx global.Context, m *model.Emote) *model.Emo
 func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model.EmoteSet {
 	emotes := make([]*model.ActiveEmote, len(s.Emotes))
 	for i, e := range s.Emotes {
-		var em *model.Emote
-		if e.Emote != nil {
-			em = EmoteStructureToModel(ctx, e.Emote)
+		if e.Emote == nil {
+			e.Emote = structures.DeletedEmote
 		}
 		emotes[i] = &model.ActiveEmote{
 			ID:        e.ID,
 			Name:      e.Name,
 			Flags:     int(e.Flags),
 			Timestamp: e.Timestamp,
-			Emote:     em,
+			Emote:     EmoteStructureToModel(ctx, e.Emote),
 		}
 	}
 	var owner *model.User
@@ -234,6 +244,15 @@ func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model
 		EmoteSlots: int(s.EmoteSlots),
 		OwnerID:    &s.OwnerID,
 		Owner:      owner,
+	}
+}
+
+func EmoteVersionStructureToModel(ctx global.Context, s *structures.EmoteVersion) *model.EmoteVersion {
+	return &model.EmoteVersion{
+		ID:          s.ID,
+		Name:        s.Name,
+		Description: s.Description,
+		Timestamp:   s.ID.Timestamp(),
 	}
 }
 

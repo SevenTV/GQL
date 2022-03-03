@@ -39,8 +39,7 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 			// Iterate over cursor
 			// Transform emote structures into models
 			emotes, err := gCtx.Inst().Query.Emotes(ctx, bson.M{
-				"_id":             bson.M{"$in": keys},
-				"state.lifecycle": structures.EmoteLifecycleLive,
+				"versions.id": bson.M{"$in": keys},
 			})
 
 			if err == nil {
@@ -49,11 +48,14 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 					if e == nil {
 						continue
 					}
-					m[e.ID] = e
+					for _, ver := range e.Versions {
+						m[ver.ID] = e
+					}
 				}
 
 				for i, v := range keys {
 					if x, ok := m[v]; ok {
+						x.ID = v
 						models[i] = helpers.EmoteStructureToModel(gCtx, x)
 					}
 				}

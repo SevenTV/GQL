@@ -88,7 +88,7 @@ func emoteSetByID(gCtx global.Context) *loaders.EmoteSetLoader {
 
 				var ok bool
 				for _, set := range v.Sets {
-					for _, ae := range set.Emotes {
+					for indEmotes, ae := range set.Emotes {
 						if ae.Emote, ok = emoteMap[ae.ID]; ok {
 							if ae.Emote.Owner, ok = ownerMap[ae.Emote.OwnerID]; ok {
 								for _, roleID := range ae.Emote.Owner.RoleIDs {
@@ -99,6 +99,8 @@ func emoteSetByID(gCtx global.Context) *loaders.EmoteSetLoader {
 									ae.Emote.Owner.Roles = append(ae.Emote.Owner.Roles, role)
 								}
 							}
+						} else {
+							set.Emotes[indEmotes].Emote = structures.DeletedEmote
 						}
 					}
 					m[set.ID] = set

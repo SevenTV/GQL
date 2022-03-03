@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/structures/v3/aggregations"
@@ -26,7 +27,11 @@ import (
 const EMOTES_QUERY_LIMIT = 300
 
 func (r *Resolver) Emote(ctx context.Context, id primitive.ObjectID) (*model.Emote, error) {
-	return loaders.For(ctx).EmoteByID.Load(id)
+	emote, err := loaders.For(ctx).EmoteByID.Load(id)
+	if emote == nil || emote.ID == structures.DeletedEmote.ID {
+		return nil, errors.ErrUnknownEmote()
+	}
+	return emote, err
 }
 
 func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limitArg *int, filter *model.EmoteSearchFilter, sortArg *model.Sort) (*model.EmoteSearchResult, error) {
@@ -43,7 +48,7 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 	query = strings.Trim(query, " ")
 
 	// Set up db query
-	match := bson.M{"state.lifecycle": structures.EmoteLifecycleLive}
+	match := bson.M{"versions.0.state.lifecycle": structures.EmoteLifecycleLive}
 
 	// Retrieve pagination values
 	page := 1
