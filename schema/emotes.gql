@@ -65,6 +65,7 @@ type EmoteVersion {
   description: String!
   timestamp: Time!
   images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
+  lifecycle: Int!
 }
 
 enum EmoteSearchCategory {

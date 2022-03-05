@@ -151,8 +151,10 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 	animated := false
 	for _, ver := range s.Versions {
 		vimages := []*model.Image{}
-		lifecycle = ver.State.Lifecycle
 		animated = ver.FrameCount > 1
+		if ver.ID == s.ID {
+			lifecycle = ver.State.Lifecycle
+		}
 		for _, f := range ver.Formats {
 			for _, im := range f.Files {
 				format := model.ImageFormatWebp
@@ -259,6 +261,7 @@ func EmoteVersionStructureToModel(ctx global.Context, s *structures.EmoteVersion
 		Description: s.Description,
 		Timestamp:   s.ID.Timestamp(),
 		Images:      images,
+		Lifecycle:   int(s.State.Lifecycle),
 	}
 }
 
