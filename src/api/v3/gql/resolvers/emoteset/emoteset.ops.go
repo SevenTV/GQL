@@ -2,6 +2,7 @@ package emoteset
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/Common/mongo"
@@ -62,6 +63,11 @@ func (r *ResolverOps) Emotes(ctx context.Context, obj *model.EmoteSetOps, id pri
 		logF.WithError(err).Error("failed to update emotes in set")
 		return nil, err
 	}
+
+	// Clear cache keys for active sets / channel count
+	k := r.Ctx.Inst().Redis.ComposeKey("gql-v3", fmt.Sprintf("emote:%s", id.Hex()))
+	_, _ = r.Ctx.Inst().Redis.Del(ctx, k+":active_sets")
+	_, _ = r.Ctx.Inst().Redis.Del(ctx, k+":channel_count")
 
 	emoteIDs := make([]primitive.ObjectID, len(b.EmoteSet.Emotes))
 	for i, e := range b.EmoteSet.Emotes {
