@@ -150,26 +150,32 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 	lifecycle := structures.EmoteLifecycleDisabled
 	animated := false
 	for _, ver := range s.Versions {
-		versions = append(versions, EmoteVersionStructureToModel(ctx, ver))
-		if ver.ID == s.ID {
-			lifecycle = ver.State.Lifecycle
-			animated = ver.FrameCount > 1
-			for _, f := range ver.Formats {
-				for _, im := range f.Files {
-					format := model.ImageFormatWebp
-					switch f.Name {
-					case structures.EmoteFormatNameAVIF:
-						format = model.ImageFormatAvif
-					case structures.EmoteFormatNameGIF:
-						format = model.ImageFormatGif
-					case structures.EmoteFormatNamePNG:
-						format = model.ImageFormatPng
-					}
+		lifecycle = ver.State.Lifecycle
+		animated = ver.FrameCount > 1
+		previewURL := ""
+		for _, f := range ver.Formats {
+			for fi, im := range f.Files {
+				format := model.ImageFormatWebp
+				switch f.Name {
+				case structures.EmoteFormatNameAVIF:
+					format = model.ImageFormatAvif
+				case structures.EmoteFormatNameGIF:
+					format = model.ImageFormatGif
+				case structures.EmoteFormatNamePNG:
+					format = model.ImageFormatPng
+				}
 
+				// Set 3x as preview
+				url := fmt.Sprintf("//%s/emote/%s/%s", ctx.Config().CdnURL, ver.ID.Hex(), im.Name)
+				if fi == 2 && f.Name == structures.EmoteFormatNameWEBP {
+					previewURL = url
+				}
+
+				if ver.ID == s.ID {
 					images = append(images, &model.Image{
 						Name:     im.Name,
 						Format:   format,
-						URL:      fmt.Sprintf("//%s/emote/%s/%s", ctx.Config().CdnURL, s.ID.Hex(), im.Name),
+						URL:      url,
 						Width:    int(im.Width),
 						Height:   int(im.Height),
 						Animated: im.Animated,
@@ -179,6 +185,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 				}
 			}
 		}
+		versions = append(versions, EmoteVersionStructureToModel(ctx, ver, previewURL))
 	}
 
 	owner := structures.DeletedUser
@@ -247,12 +254,13 @@ func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model
 	}
 }
 
-func EmoteVersionStructureToModel(ctx global.Context, s *structures.EmoteVersion) *model.EmoteVersion {
+func EmoteVersionStructureToModel(ctx global.Context, s *structures.EmoteVersion, previewURL string) *model.EmoteVersion {
 	return &model.EmoteVersion{
-		ID:          s.ID,
-		Name:        s.Name,
-		Description: s.Description,
-		Timestamp:   s.ID.Timestamp(),
+		ID:           s.ID,
+		Name:         s.Name,
+		Description:  s.Description,
+		Timestamp:    s.ID.Timestamp(),
+		ThumbnailURL: previewURL,
 	}
 }
 
