@@ -166,6 +166,9 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 				case structures.EmoteFormatNamePNG:
 					format = model.ImageFormatPng
 				}
+				if ver.FrameCount > 1 && !im.Animated {
+					continue // skip if this is an animated emote version but image is static
+				}
 
 				// Set 3x as preview
 				url := fmt.Sprintf("//%s/emote/%s/%s", ctx.Config().CdnURL, ver.ID.Hex(), im.Name)
@@ -221,6 +224,7 @@ func EmoteStructureToPartialModel(ctx global.Context, m *model.Emote) *model.Emo
 		OwnerID:   m.OwnerID,
 		Owner:     m.Owner,
 		Images:    m.Images,
+		Versions:  m.Versions,
 	}
 }
 

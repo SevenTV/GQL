@@ -33,7 +33,7 @@ type Emote {
     @goField(forceResolver: true)
 
   images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
-  versions: [EmoteVersion!]! @goField(forceResolver: true)
+  versions: [EmoteVersion!]!
 
   reports: [Report!]!
     @goField(forceResolver: true)
@@ -51,6 +51,7 @@ type EmotePartial {
   owner_id: ObjectID!
   owner: User! @goField(forceResolver: true)
   images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
+  versions: [EmoteVersion!]!
 }
 
 input EmoteSearchFilter {

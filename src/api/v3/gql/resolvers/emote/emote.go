@@ -47,10 +47,6 @@ func (r *Resolver) Owner(ctx context.Context, obj *model.Emote) (*model.User, er
 	return loaders.For(ctx).UserByID.Load(obj.OwnerID)
 }
 
-func (r *Resolver) Versions(ctx context.Context, obj *model.Emote) ([]*model.EmoteVersion, error) {
-	return obj.Versions, nil
-}
-
 func (r *Resolver) ChannelCount(ctx context.Context, obj *model.Emote) (int, error) {
 	count, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).CountDocuments(ctx, bson.M{
 		"channel_emotes.id": obj.ID,
