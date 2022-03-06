@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -165,6 +166,18 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 
 	models := make([]*model.Emote, len(result))
 	for i, e := range result {
+		// Sort by version timestamp
+		sort.Slice(e.Versions, func(i, j int) bool {
+			a := e.Versions[i]
+			b := e.Versions[j]
+
+			return b.Timestamp.Before(a.Timestamp)
+		})
+
+		// Bring forward the latest version
+		if len(e.Versions) > 0 {
+			e.ID = e.Versions[0].ID
+		}
 		models[i] = helpers.EmoteStructureToModel(r.Ctx, e)
 	}
 
