@@ -58,6 +58,7 @@ input EmoteSearchFilter {
   category: EmoteSearchCategory
   case_sensitive: Boolean
   exact_match: Boolean
+  ignore_tags: Boolean
 }
 
 type EmoteVersion {
