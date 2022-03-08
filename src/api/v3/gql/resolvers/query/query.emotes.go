@@ -137,7 +137,6 @@ func (r *Resolver) Emotes(ctx context.Context, query string, pageArg *int, limit
 		}
 
 		match = append(match, bson.E{Key: "$or", Value: or})
-		fmt.Println("hi", field, order)
 		if validOrder && validField {
 			pipeline = append(pipeline, bson.D{
 				{Key: "$sort", Value: bson.M{field: order}},
