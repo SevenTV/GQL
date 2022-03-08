@@ -1,8 +1,10 @@
 package api
 
 import (
+	"encoding/json"
 	"time"
 
+	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/api/middleware"
 	v2 "github.com/SevenTV/GQL/src/api/v2"
@@ -36,6 +38,15 @@ func New(gCtx global.Context) <-chan struct{} {
 			gqlv3(ctx)
 		case "v2":
 			gqlv2(ctx)
+		default:
+			err := errors.ErrUnknownRoute()
+			b, _ := json.Marshal(map[string]interface{}{
+				"error":      err.Message(),
+				"error_code": err.Code(),
+			})
+			_, _ = ctx.Write(b)
+			ctx.SetContentType("application/json")
+			ctx.SetStatusCode(fasthttp.StatusNotFound)
 		}
 	}
 	router.GET("/{v}", mid)
