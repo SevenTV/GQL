@@ -33,6 +33,7 @@ type Emote {
     @goField(forceResolver: true)
 
   images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
+  versions: [EmoteVersion!]!
 
   reports: [Report!]!
     @goField(forceResolver: true)
@@ -50,12 +51,23 @@ type EmotePartial {
   owner_id: ObjectID!
   owner: User! @goField(forceResolver: true)
   images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
+  versions: [EmoteVersion!]!
 }
 
 input EmoteSearchFilter {
   category: EmoteSearchCategory
   case_sensitive: Boolean
   exact_match: Boolean
+  ignore_tags: Boolean
+}
+
+type EmoteVersion {
+  id: ObjectID!
+  name: String!
+  description: String!
+  timestamp: Time!
+  images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
+  lifecycle: Int!
 }
 
 enum EmoteSearchCategory {

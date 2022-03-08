@@ -146,29 +146,52 @@ func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
 
 func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote {
 	images := []*model.Image{}
-	for _, f := range s.Formats {
-		for _, im := range f.Files {
-			format := model.ImageFormatWebp
-			switch f.Name {
-			case structures.EmoteFormatNameAVIF:
-				format = model.ImageFormatAvif
-			case structures.EmoteFormatNameGIF:
-				format = model.ImageFormatGif
-			case structures.EmoteFormatNamePNG:
-				format = model.ImageFormatPng
-			}
-
-			images = append(images, &model.Image{
-				Name:     im.Name,
-				Format:   format,
-				URL:      fmt.Sprintf("//%s/emote/%s/%s", ctx.Config().CdnURL, s.ID.Hex(), im.Name),
-				Width:    int(im.Width),
-				Height:   int(im.Height),
-				Animated: im.Animated,
-				Time:     int(im.ProcessingTime),
-				Length:   int(im.Length),
-			})
+	versions := []*model.EmoteVersion{}
+	lifecycle := structures.EmoteLifecycleDisabled
+	animated := false
+	for _, ver := range s.Versions {
+		vimages := []*model.Image{}
+		animated = ver.FrameCount > 1
+		if ver.State.Lifecycle < structures.EmoteLifecycleProcessing {
+			continue // skip if lifecycle isn't past pending
 		}
+		if ver.ID == s.ID {
+			lifecycle = ver.State.Lifecycle
+		}
+		for _, f := range ver.Formats {
+			for _, im := range f.Files {
+				format := model.ImageFormatWebp
+				switch f.Name {
+				case structures.EmoteFormatNameAVIF:
+					format = model.ImageFormatAvif
+				case structures.EmoteFormatNameGIF:
+					format = model.ImageFormatGif
+				case structures.EmoteFormatNamePNG:
+					format = model.ImageFormatPng
+				}
+				if ver.FrameCount > 1 && !im.Animated {
+					continue // skip if this is an animated emote version but image is static
+				}
+
+				// Set 3x as preview
+				url := fmt.Sprintf("//%s/emote/%s/%s", ctx.Config().CdnURL, ver.ID.Hex(), im.Name)
+				img := &model.Image{
+					Name:     im.Name,
+					Format:   format,
+					URL:      url,
+					Width:    int(im.Width),
+					Height:   int(im.Height),
+					Animated: im.Animated,
+					Time:     int(im.ProcessingTime),
+					Length:   int(im.Length),
+				}
+				vimages = append(vimages, img)
+				if ver.ID == s.ID {
+					images = append(images, img)
+				}
+			}
+		}
+		versions = append(versions, EmoteVersionStructureToModel(ctx, ver, vimages))
 	}
 
 	owner := structures.DeletedUser
@@ -179,14 +202,15 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		ID:        s.ID,
 		Name:      s.Name,
 		Flags:     int(s.Flags),
-		Lifecycle: int(s.State.Lifecycle),
+		Lifecycle: int(lifecycle),
 		Tags:      s.Tags,
-		Animated:  s.FrameCount > 1,
+		Animated:  animated,
 		CreatedAt: s.ID.Timestamp(),
 		OwnerID:   s.OwnerID,
 		Owner:     UserStructureToModel(ctx, owner),
 		Channels:  &model.UserSearchResult{},
 		Images:    images,
+		Versions:  versions,
 		Reports:   []*model.Report{},
 	}
 }
@@ -203,22 +227,22 @@ func EmoteStructureToPartialModel(ctx global.Context, m *model.Emote) *model.Emo
 		OwnerID:   m.OwnerID,
 		Owner:     m.Owner,
 		Images:    m.Images,
+		Versions:  m.Versions,
 	}
 }
 
 func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model.EmoteSet {
 	emotes := make([]*model.ActiveEmote, len(s.Emotes))
 	for i, e := range s.Emotes {
-		var em *model.Emote
-		if e.Emote != nil {
-			em = EmoteStructureToModel(ctx, e.Emote)
+		if e.Emote == nil {
+			e.Emote = structures.DeletedEmote
 		}
 		emotes[i] = &model.ActiveEmote{
 			ID:        e.ID,
 			Name:      e.Name,
 			Flags:     int(e.Flags),
 			Timestamp: e.Timestamp,
-			Emote:     em,
+			Emote:     EmoteStructureToModel(ctx, e.Emote),
 		}
 	}
 	var owner *model.User
@@ -234,6 +258,17 @@ func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model
 		EmoteSlots: int(s.EmoteSlots),
 		OwnerID:    &s.OwnerID,
 		Owner:      owner,
+	}
+}
+
+func EmoteVersionStructureToModel(ctx global.Context, s *structures.EmoteVersion, images []*model.Image) *model.EmoteVersion {
+	return &model.EmoteVersion{
+		ID:          s.ID,
+		Name:        s.Name,
+		Description: s.Description,
+		Timestamp:   s.ID.Timestamp(),
+		Images:      images,
+		Lifecycle:   int(s.State.Lifecycle),
 	}
 }
 

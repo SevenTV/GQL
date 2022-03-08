@@ -42,7 +42,7 @@ func emoteSetByID(gCtx global.Context) *loaders.EmoteSetLoader {
 						Value: mongo.Lookup{
 							From:         mongo.CollectionNameEmotes,
 							LocalField:   "sets.emotes.id",
-							ForeignField: "_id",
+							ForeignField: "versions.id",
 							As:           "emotes",
 						},
 					}},
@@ -80,7 +80,11 @@ func emoteSetByID(gCtx global.Context) *loaders.EmoteSetLoader {
 				emoteMap := make(map[primitive.ObjectID]*structures.Emote)
 				ownerMap := make(map[primitive.ObjectID]*structures.User)
 				for _, emote := range v.Emotes {
-					emoteMap[emote.ID] = emote
+					for _, ver := range emote.Versions {
+						emote := *emote
+						emote.ID = ver.ID
+						emoteMap[ver.ID] = &emote
+					}
 				}
 				for _, user := range v.EmoteOwners {
 					ownerMap[user.ID] = user
@@ -88,7 +92,7 @@ func emoteSetByID(gCtx global.Context) *loaders.EmoteSetLoader {
 
 				var ok bool
 				for _, set := range v.Sets {
-					for _, ae := range set.Emotes {
+					for indEmotes, ae := range set.Emotes {
 						if ae.Emote, ok = emoteMap[ae.ID]; ok {
 							if ae.Emote.Owner, ok = ownerMap[ae.Emote.OwnerID]; ok {
 								for _, roleID := range ae.Emote.Owner.RoleIDs {
@@ -99,6 +103,8 @@ func emoteSetByID(gCtx global.Context) *loaders.EmoteSetLoader {
 									ae.Emote.Owner.Roles = append(ae.Emote.Owner.Roles, role)
 								}
 							}
+						} else {
+							set.Emotes[indEmotes].Emote = structures.DeletedEmote
 						}
 					}
 					m[set.ID] = set
@@ -155,7 +161,7 @@ func emoteSetByUserID(gCtx global.Context) *loaders.BatchEmoteSetLoader {
 						Value: mongo.Lookup{
 							From:         mongo.CollectionNameEmotes,
 							LocalField:   "sets.emotes.id",
-							ForeignField: "_id",
+							ForeignField: "versions.id",
 							As:           "emotes",
 						},
 					}},
@@ -193,7 +199,11 @@ func emoteSetByUserID(gCtx global.Context) *loaders.BatchEmoteSetLoader {
 				emoteMap := make(map[primitive.ObjectID]*structures.Emote)
 				ownerMap := make(map[primitive.ObjectID]*structures.User)
 				for _, emote := range v.Emotes {
-					emoteMap[emote.ID] = emote
+					for _, ver := range emote.Versions {
+						emote := *emote
+						emote.ID = ver.ID
+						emoteMap[ver.ID] = &emote
+					}
 				}
 				for _, user := range v.EmoteOwners {
 					ownerMap[user.ID] = user
@@ -203,6 +213,7 @@ func emoteSetByUserID(gCtx global.Context) *loaders.BatchEmoteSetLoader {
 				for _, set := range v.Sets {
 					for _, ae := range set.Emotes {
 						if ae.Emote, ok = emoteMap[ae.ID]; ok {
+							ae.Emote.ID = ae.ID
 							if ae.Emote.Owner, ok = ownerMap[ae.Emote.OwnerID]; ok {
 								for _, roleID := range ae.Emote.Owner.RoleIDs {
 									role, roleOK := roleMap[roleID]

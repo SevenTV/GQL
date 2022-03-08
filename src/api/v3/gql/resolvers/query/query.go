@@ -3,6 +3,8 @@ package query
 import (
 	"context"
 
+	"github.com/SevenTV/Common/errors"
+	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/GQL/graph/generated"
 	"github.com/SevenTV/GQL/graph/model"
 	"github.com/SevenTV/GQL/src/api/v3/gql/auth"
@@ -31,7 +33,12 @@ func (r *Resolver) CurrentUser(ctx context.Context) (*model.User, error) {
 }
 
 func (r *Resolver) User(ctx context.Context, id primitive.ObjectID) (*model.User, error) {
-	return loaders.For(ctx).UserByID.Load(id)
+	user, err := loaders.For(ctx).UserByID.Load(id)
+	if user == nil || user.ID == structures.DeletedUser.ID {
+		return nil, errors.ErrUnknownUser()
+	}
+
+	return user, err
 }
 
 func (r *Resolver) Users(ctx context.Context, query string) ([]*model.User, error) {
