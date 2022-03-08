@@ -1,7 +1,7 @@
 package resolvers
 
 import (
-	"github.com/SevenTV/GQL/graph/generated"
+	"github.com/SevenTV/GQL/graph/v3/generated"
 
 	"github.com/SevenTV/GQL/src/api/v3/resolvers/ban"
 	"github.com/SevenTV/GQL/src/api/v3/resolvers/emote"

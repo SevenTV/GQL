@@ -1,4 +1,4 @@
-package api
+package v3
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/SevenTV/GQL/graph/generated"
+	"github.com/SevenTV/GQL/graph/v3/generated"
 	"github.com/SevenTV/GQL/src/api/middleware"
 	"github.com/SevenTV/GQL/src/api/v3/cache"
 	"github.com/SevenTV/GQL/src/api/v3/complexity"
@@ -28,7 +28,7 @@ import (
 	"github.com/valyala/fasthttp/fasthttpadaptor"
 )
 
-func GqlHandler(gCtx global.Context, loader *loaders.Loaders) func(ctx *fasthttp.RequestCtx) {
+func GqlHandlerV3(gCtx global.Context, loader *loaders.Loaders) func(ctx *fasthttp.RequestCtx) {
 	schema := generated.NewExecutableSchema(generated.Config{
 		Resolvers:  resolvers.New(types.Resolver{Ctx: gCtx}),
 		Directives: middlewarev3.New(gCtx),

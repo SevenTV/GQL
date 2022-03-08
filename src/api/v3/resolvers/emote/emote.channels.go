@@ -13,7 +13,7 @@ import (
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/structures/v3/aggregations"
 	"github.com/SevenTV/Common/utils"
-	"github.com/SevenTV/GQL/graph/model"
+	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/api/v3/helpers"
 	"github.com/go-redis/redis/v8"
 	"github.com/hashicorp/go-multierror"

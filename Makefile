@@ -37,23 +37,25 @@ go_installs: build_deps
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 gql:
-	gqlgen
+	gqlgen --config ./gqlgen.v3.yml
 
-	cd graph/loaders && dataloaden UserLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.User"
-	cd graph/loaders && dataloaden BatchUserLoader string "[]*github.com/SevenTV/GQL/graph/model.User"
+	cd graph/v3/loaders && dataloaden UserLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/v3/model.User"
+	cd graph/v3/loaders && dataloaden BatchUserLoader string "[]*github.com/SevenTV/GQL/graph/v3/model.User"
 
-	cd graph/loaders && dataloaden EmoteLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.Emote"
-	cd graph/loaders && dataloaden BatchEmoteLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "[]*github.com/SevenTV/GQL/graph/model.Emote"
+	cd graph/v3/loaders && dataloaden EmoteLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/v3/model.Emote"
+	cd graph/v3/loaders && dataloaden BatchEmoteLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "[]*github.com/SevenTV/GQL/graph/v3/model.Emote"
 
-	cd graph/loaders && dataloaden EmoteSetLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.EmoteSet"
-	cd graph/loaders && dataloaden BatchEmoteSetLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "[]*github.com/SevenTV/GQL/graph/model.EmoteSet"
+	cd graph/v3/loaders && dataloaden EmoteSetLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/v3/model.EmoteSet"
+	cd graph/v3/loaders && dataloaden BatchEmoteSetLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "[]*github.com/SevenTV/GQL/graph/v3/model.EmoteSet"
 
-	cd graph/loaders && dataloaden RoleLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.Role"
+	cd graph/v3/loaders && dataloaden RoleLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/v3/model.Role"
 
-	cd graph/loaders && dataloaden ConnectionLoader string "*github.com/SevenTV/GQL/graph/model.UserConnection"
+	cd graph/v3/loaders && dataloaden ConnectionLoader string "*github.com/SevenTV/GQL/graph/v3/model.UserConnection"
 
-	cd graph/loaders && dataloaden ReportLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.Report"
-	cd graph/loaders && dataloaden BatchReportLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "[]*github.com/SevenTV/GQL/graph/model.Report"
+	cd graph/v3/loaders && dataloaden ReportLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/v3/model.Report"
+	cd graph/v3/loaders && dataloaden BatchReportLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "[]*github.com/SevenTV/GQL/graph/v3/model.Report"
+
+	gqlgen --config ./gqlgen.v2.yml
 
 test:
 	go test -count=1 -cover ./...

@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/SevenTV/GQL/graph/generated"
+	"github.com/SevenTV/GQL/graph/v3/generated"
 	"github.com/SevenTV/GQL/src/global"
 )
 

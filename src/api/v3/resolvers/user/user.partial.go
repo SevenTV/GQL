@@ -4,8 +4,8 @@ import (
 	"context"
 	"sort"
 
-	"github.com/SevenTV/GQL/graph/generated"
-	"github.com/SevenTV/GQL/graph/model"
+	"github.com/SevenTV/GQL/graph/v3/generated"
+	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/api/v3/helpers"
 	"github.com/SevenTV/GQL/src/api/v3/types"
 	"go.mongodb.org/mongo-driver/bson"

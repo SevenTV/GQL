@@ -3,8 +3,8 @@ package report
 import (
 	"context"
 
-	"github.com/SevenTV/GQL/graph/generated"
-	"github.com/SevenTV/GQL/graph/model"
+	"github.com/SevenTV/GQL/graph/v3/generated"
+	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/api/v3/loaders"
 	"github.com/SevenTV/GQL/src/api/v3/types"
 	"github.com/hashicorp/go-multierror"

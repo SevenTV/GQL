@@ -2,8 +2,6 @@ module github.com/SevenTV/GQL
 
 go 1.17
 
-replace github.com/graph-gophers/graphql-go => github.com/troydota/graphql-go v0.0.0-20210702180404-92fc941a47cf
-
 replace github.com/SevenTV/Common => ./Common
 
 require (

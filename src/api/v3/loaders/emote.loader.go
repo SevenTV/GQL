@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/SevenTV/Common/structures/v3"
-	"github.com/SevenTV/GQL/graph/loaders"
-	"github.com/SevenTV/GQL/graph/model"
+	"github.com/SevenTV/GQL/graph/v3/loaders"
+	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/api/v3/helpers"
 	"github.com/SevenTV/GQL/src/global"
 	"go.mongodb.org/mongo-driver/bson"

@@ -3,7 +3,7 @@ package subscription
 import (
 	"context"
 
-	"github.com/SevenTV/GQL/graph/model"
+	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/api/v3/auth"
 	"github.com/SevenTV/GQL/src/api/v3/helpers"
 	"github.com/SevenTV/GQL/src/api/v3/loaders"

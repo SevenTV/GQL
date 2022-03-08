@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/SevenTV/Common/utils"
-	"github.com/SevenTV/GQL/graph/loaders"
+	"github.com/SevenTV/GQL/graph/v3/loaders"
 	"github.com/SevenTV/GQL/src/global"
 )
 

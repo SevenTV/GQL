@@ -1,7 +1,7 @@
 package complexity
 
 import (
-	"github.com/SevenTV/GQL/graph/v3/generated"
+	"github.com/SevenTV/GQL/graph/v2/generated"
 	"github.com/SevenTV/GQL/src/global"
 )
 

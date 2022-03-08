@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/SevenTV/Common/errors"
-	"github.com/SevenTV/GQL/graph/model"
+	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/api/v3/loaders"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
