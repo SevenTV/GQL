@@ -9,7 +9,6 @@ import (
 	"github.com/SevenTV/GQL/src/api/middleware"
 	v2 "github.com/SevenTV/GQL/src/api/v2"
 	v3 "github.com/SevenTV/GQL/src/api/v3"
-	"github.com/SevenTV/GQL/src/api/v3/loaders"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/fasthttp/router"
 	"github.com/sirupsen/logrus"
@@ -18,10 +17,9 @@ import (
 
 func New(gCtx global.Context) <-chan struct{} {
 	done := make(chan struct{})
-	loader := loaders.New(gCtx)
 
-	gqlv3 := v3.GqlHandlerV3(gCtx, loader)
-	gqlv2 := v2.GqlHandlerV2(gCtx, loader)
+	gqlv3 := v3.GqlHandlerV3(gCtx)
+	gqlv2 := v2.GqlHandlerV2(gCtx)
 
 	router := router.New()
 

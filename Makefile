@@ -57,5 +57,7 @@ gql:
 
 	gqlgen --config ./gqlgen.v2.yml
 
+	cd graph/v2/loaders && dataloaden EmoteLoader "string" "*github.com/SevenTV/GQL/graph/v2/model.Emote"
+
 test:
 	go test -count=1 -cover ./...

@@ -15,3 +15,24 @@ directive @internal on FIELD_DEFINITION
 type Query {
   helloWorld: String!
 }
+
+type Meta {
+  announcement: String!
+  featured_broadcast: String!
+  roles: [String!]!
+}
+
+type Broadcast {
+  id: String!
+  title: String!
+  thumbnail_url: String!
+  viewer_count: Int!
+  type: String!
+  game_name: String!
+  game_id: String!
+  language: String!
+  tags: [String!]!
+  mature: Boolean!
+  started_at: String!
+  user_id: String!
+}

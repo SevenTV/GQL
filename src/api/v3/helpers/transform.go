@@ -3,6 +3,7 @@ package helpers
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 
 	"github.com/SevenTV/Common/structures/v3"
@@ -149,6 +150,11 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 	versions := []*model.EmoteVersion{}
 	lifecycle := structures.EmoteLifecycleDisabled
 	animated := false
+
+	// Sort by version timestamp
+	sort.Slice(s.Versions, func(i, j int) bool {
+		return s.Versions[i].Timestamp.After(s.Versions[j].Timestamp)
+	})
 	for _, ver := range s.Versions {
 		vimages := []*model.Image{}
 		animated = ver.FrameCount > 1

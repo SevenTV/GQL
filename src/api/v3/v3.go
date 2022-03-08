@@ -28,7 +28,7 @@ import (
 	"github.com/valyala/fasthttp/fasthttpadaptor"
 )
 
-func GqlHandlerV3(gCtx global.Context, loader *loaders.Loaders) func(ctx *fasthttp.RequestCtx) {
+func GqlHandlerV3(gCtx global.Context) func(ctx *fasthttp.RequestCtx) {
 	schema := generated.NewExecutableSchema(generated.Config{
 		Resolvers:  resolvers.New(types.Resolver{Ctx: gCtx}),
 		Directives: middlewarev3.New(gCtx),
@@ -83,6 +83,7 @@ func GqlHandlerV3(gCtx global.Context, loader *loaders.Loaders) func(ctx *fastht
 		},
 	}
 
+	loader := loaders.New(gCtx)
 	return func(ctx *fasthttp.RequestCtx) {
 		lCtx := context.WithValue(context.WithValue(gCtx, loaders.LoadersKey, loader), helpers.UserKey, ctx.UserValue("user"))
 
