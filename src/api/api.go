@@ -5,7 +5,7 @@ import (
 
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/api/middleware"
-	"github.com/SevenTV/GQL/src/api/v3/gql/loaders"
+	"github.com/SevenTV/GQL/src/api/v3/loaders"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/fasthttp/router"
 	"github.com/sirupsen/logrus"
