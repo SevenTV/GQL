@@ -24,3 +24,7 @@ func (r *Resolver) Query() generated.QueryResolver {
 func (r *Resolver) User() generated.UserResolver {
 	return user.New(r.Resolver)
 }
+
+func (r *Resolver) UserPartial() generated.UserPartialResolver {
+	return user.NewPartial(r.Resolver)
+}

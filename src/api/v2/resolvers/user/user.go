@@ -7,8 +7,11 @@ import (
 	"github.com/SevenTV/GQL/graph/v2/generated"
 	"github.com/SevenTV/GQL/graph/v2/model"
 	"github.com/SevenTV/GQL/src/api/v2/helpers"
+	"github.com/SevenTV/GQL/src/api/v2/loaders"
 	"github.com/SevenTV/GQL/src/api/v2/types"
+	"github.com/hashicorp/go-multierror"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Resolver struct {
@@ -31,4 +34,45 @@ func (r *Resolver) Role(ctx context.Context, obj *model.User) (*model.Role, erro
 		}
 	}
 	return obj.Role, nil
+}
+
+func (r *Resolver) Editors(ctx context.Context, obj *model.User) ([]*model.UserPartial, error) {
+	result := []*model.UserPartial{}
+	editors, errs := loaders.For(ctx).UserByID.LoadAll(obj.EditorIds)
+	if err := multierror.Append(nil, errs...).ErrorOrNil(); err != nil {
+		return result, err
+	}
+
+	for _, ed := range editors {
+		result = append(result, helpers.UserStructureToPartialModel(r.Ctx, ed))
+	}
+	return result, nil
+}
+
+func (r *Resolver) EditorIn(ctx context.Context, obj *model.User) ([]*model.UserPartial, error) {
+	result := []*model.UserPartial{}
+	userID, err := primitive.ObjectIDFromHex(obj.ID)
+	if err != nil {
+		return result, err
+	}
+
+	editors, err := r.Ctx.Inst().Query.UserEditorOf(ctx, userID)
+	if err != nil {
+		return result, err
+	}
+
+	// Get a list of user IDs from the v3 editor list
+	ids := make([]string, len(editors))
+	for i, ed := range editors {
+		ids[i] = ed.ID.Hex()
+	}
+
+	users, errs := loaders.For(ctx).UserByID.LoadAll(ids)
+	if err = multierror.Append(nil, errs...).ErrorOrNil(); err != nil {
+		return result, err
+	}
+	for _, u := range users {
+		result = append(result, helpers.UserStructureToPartialModel(r.Ctx, u))
+	}
+	return result, nil
 }

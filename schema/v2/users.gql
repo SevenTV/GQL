@@ -41,9 +41,9 @@ type User {
   # Get the third party emotes of this users channel. (BTTV/FFZ)
   third_party_emotes: [Emote!]!
   # Get the editors of this user.
-  editors: [UserPartial!]!
+  editors: [UserPartial!]! @goField(forceResolver: true)
   # Get where this user is an editor.
-  editor_in: [UserPartial!]!
+  editor_in: [UserPartial!]! @goField(forceResolver: true)
   # Get the reports on this uer. Requries Permission.
   reports: [Report]
   # Get the logs on this user. Requries Permission.
@@ -82,7 +82,7 @@ type UserPartial {
   # rank of this user
   rank: Int!
   # role of this user
-  role: Role!
+  role: Role! @goField(forceResolver: true)
   # emotes of this user
   emote_ids: [String!]!
   # editor ids for this user

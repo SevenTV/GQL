@@ -152,6 +152,21 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 	return user
 }
 
+func UserStructureToPartialModel(ctx global.Context, s *model.User) *model.UserPartial {
+	return &model.UserPartial{
+		ID:              s.ID,
+		Rank:            s.Rank,
+		Role:            s.Role,
+		EmoteIds:        s.EmoteIds,
+		EditorIds:       s.EditorIds,
+		CreatedAt:       s.CreatedAt,
+		TwitchID:        s.TwitchID,
+		DisplayName:     s.DisplayName,
+		Login:           s.Login,
+		ProfileImageURL: s.ProfileImageURL,
+	}
+}
+
 func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
 	if s == nil {
 		return nil
