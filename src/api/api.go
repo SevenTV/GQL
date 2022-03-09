@@ -76,6 +76,7 @@ func New(gCtx global.Context) <-chan struct{} {
 			// CORS
 			ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
 			ctx.Response.Header.Set("Access-Control-Allow-Headers", "*")
+			ctx.Response.Header.Set("Access-Control-Expose-Headers", "X-Collection-Size")
 			ctx.Response.Header.Set("Access-Control-Allow-Methods", "*")
 			ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
 			if ctx.IsOptions() {

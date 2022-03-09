@@ -55,6 +55,7 @@ func GqlHandlerV2(gCtx global.Context) func(ctx *fasthttp.RequestCtx) {
 	loader := loaders.New(gCtx)
 	return func(ctx *fasthttp.RequestCtx) {
 		lCtx := context.WithValue(context.WithValue(gCtx, loaders.LoadersKey, loader), helpers.UserKey, ctx.UserValue("user"))
+		lCtx = context.WithValue(lCtx, helpers.RequestCtxKey, ctx)
 
 		fasthttpadaptor.NewFastHTTPHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			srv.ServeHTTP(w, r.WithContext(lCtx))

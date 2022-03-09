@@ -58,10 +58,9 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		Channels:     []*model.UserPartial{},
 		ChannelCount: int(version.State.ChannelCount),
 		Owner:        UserStructureToModel(ctx, owner),
-		// Reports:      []*model.Report{},
-		Urls:   urls,
-		Width:  width,
-		Height: width,
+		Urls:         urls,
+		Width:        width,
+		Height:       width,
 	}
 }
 

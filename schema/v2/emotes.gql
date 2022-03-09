@@ -2,16 +2,22 @@ extend type Query {
   # Get audit logs
   # audit_logs(page: Int!, limit: Int, types: [Int!]): [AuditLog!]!
   # Get emote by id.
-  emote(id: String!): Emote
+  emote(id: String!): Emote @deprecated
   # Get emotes by user id.
   # emotes(list: [String!]!): [Emote]
   # Search for emotes.
-  # search_emotes(
-  #   query: String!, limit: Int,
-  #   page: Int, pageSize: Int,
-  #   globalState: String, sortBy: String, sortOrder: Int,
-  #   channel: String, submitted_by: String, filter: EmoteFilter
-  # ): [Emote]!
+  search_emotes(
+    query: String!
+    limit: Int
+    page: Int
+    pageSize: Int
+    submitted_by: String
+    globalState: String
+    sortBy: String
+    sortOrder: Int
+    channel: String
+    filter: EmoteFilter
+  ): [Emote]!
   #
   # Get a user by id, login or current authenticated user (@me).
   # user(id: String!): User
@@ -62,4 +68,10 @@ type Emote {
   width: [Int!]!
   # Get the height of the emote in pixels
   height: [Int!]!
+}
+
+input EmoteFilter {
+  width_range: [Int!]
+  visibility: Int
+  visibility_clear: Int
 }
