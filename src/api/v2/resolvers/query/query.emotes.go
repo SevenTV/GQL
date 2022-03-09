@@ -12,6 +12,7 @@ import (
 	"github.com/SevenTV/GQL/src/api/v2/loaders"
 	"github.com/valyala/fasthttp"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (r *Resolver) Emote(ctx context.Context, id string) (*model.Emote, error) {
@@ -25,7 +26,7 @@ func (r *Resolver) SearchEmotes(
 	pageArg *int,
 	pageSizeArg *int,
 	submittedBy *string,
-	globalState *string,
+	globalStateArg *string,
 	sortByArg *string,
 	sortOrderArg *int,
 	channel *string,
@@ -60,11 +61,33 @@ func (r *Resolver) SearchEmotes(
 		sortMap = bson.M{sortField: sortOrder}
 	}
 
+	// Global State
+	filterDoc := bson.M{}
+	if globalStateArg != nil && *globalStateArg != "include" {
+		set, err := r.Ctx.Inst().Query.GlobalEmoteSet(ctx)
+		if err == nil {
+			ids := make([]primitive.ObjectID, len(set.Emotes))
+			for i, ae := range set.Emotes {
+				ids[i] = ae.ID
+			}
+
+			switch *globalStateArg {
+			case "only":
+				filterDoc["_id"] = bson.M{"$in": ids}
+			case "hide":
+				filterDoc["_id"] = bson.M{"$not": bson.M{"$in": ids}}
+			}
+		}
+	}
+
 	result, totalCount, err := r.Ctx.Inst().Query.SearchEmotes(ctx, query.SearchEmotesOptions{
 		Query: queryArg,
 		Page:  page,
 		Limit: limit,
 		Sort:  sortMap,
+		Filter: &query.SearchEmotesFilter{
+			Document: filterDoc,
+		},
 	})
 	if err != nil {
 		return nil, err
