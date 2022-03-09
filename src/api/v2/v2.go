@@ -38,7 +38,7 @@ func GqlHandlerV2(gCtx global.Context) func(ctx *fasthttp.RequestCtx) {
 
 	srv.Use(&extension.ComplexityLimit{
 		Func: func(ctx context.Context, rc *graphql.OperationContext) int {
-			return 75
+			return 100
 		},
 	})
 

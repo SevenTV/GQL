@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	v2structures "github.com/SevenTV/Common/structures/v2"
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/GQL/graph/v2/model"
 	"github.com/SevenTV/GQL/src/global"
@@ -67,8 +68,12 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 	highestRole := s.GetHighestRole()
 	rank := 0
-	if highestRole != nil {
+	if highestRole != nil && !highestRole.ID.IsZero() {
 		rank = int(highestRole.Position)
+		highestRole.Allowed = s.FinalPermission()
+		highestRole.Denied = 0
+	} else {
+		highestRole = nil
 	}
 
 	// Get the twitch/yt connections
@@ -82,14 +87,26 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 		}
 	}
 
+	// Avatar URL
 	avatarURL := ""
 	if s.AvatarID != "" {
 		avatarURL = fmt.Sprintf("//%s/pp/%s/%s", ctx.Config().CdnURL, s.ID.Hex(), s.AvatarID)
 	}
 
+	// Editors
+	editorIds := make([]string, len(s.Editors))
+	for i, ed := range s.Editors {
+		// ignore if no permission to manage active emotes
+		// (this is the only editor permission in v2)
+		if !ed.HasPermission(structures.UserEditorPermissionModifyEmotes) {
+			continue
+		}
+		editorIds[i] = ed.ID.Hex()
+	}
+
 	user := &model.User{
 		ID:          s.ID.Hex(),
-		Email:       &s.Email,
+		Email:       nil,
 		Description: s.Biography,
 		Rank:        rank,
 		Role:        RoleStructureToModel(ctx, highestRole),
@@ -103,7 +120,7 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 		// Emotes:            []*model.Emote{},
 		OwnedEmotes:      []*model.Emote{},
 		ThirdPartyEmotes: []*model.Emote{},
-		// Editors:           []*model.UserPartial{},
+		EditorIds:        editorIds,
 		// EditorIn:          []*model.UserPartial{},
 		// Reports:           []*model.Report{},
 		// AuditEntries:      []*model.AuditLog{},
@@ -136,12 +153,44 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 }
 
 func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
+	if s == nil {
+		return nil
+	}
+
+	p := 0
+	switch s.Allowed {
+	case structures.RolePermissionCreateEmote:
+		p |= int(v2structures.RolePermissionEmoteCreate)
+	case structures.RolePermissionEditEmote:
+		p |= int(v2structures.RolePermissionEmoteEditOwned)
+	case structures.RolePermissionEditAnyEmote:
+		p |= int(v2structures.RolePermissionEmoteEditAll)
+	case structures.RolePermissionReportCreate:
+		p |= int(v2structures.RolePermissionCreateReports)
+	case structures.RolePermissionManageBans:
+		p |= int(v2structures.RolePermissionBanUsers)
+	case structures.RolePermissionSuperAdministrator:
+		p |= int(v2structures.RolePermissionAdministrator)
+	case structures.RolePermissionManageRoles:
+		p |= int(v2structures.RolePermissionManageRoles)
+	case structures.RolePermissionManageUsers:
+		p |= int(v2structures.RolePermissionManageUsers)
+	case structures.RolePermissionManageStack:
+		p |= int(v2structures.RolePermissionEditApplicationMeta)
+	case structures.RolePermissionManageCosmetics:
+		p |= int(v2structures.RolePermissionManageEntitlements)
+	case structures.RolePermissionFeatureZeroWidthEmoteType:
+		p |= int(v2structures.EmoteVisibilityZeroWidth)
+	case structures.RolePermissionFeatureProfilePictureAnimation:
+		p |= int(v2structures.RolePermissionUseCustomAvatars)
+	}
+
 	return &model.Role{
 		ID:       s.ID.Hex(),
 		Name:     s.Name,
 		Position: int(s.Position),
 		Color:    int(s.Color),
-		Allowed:  strconv.Itoa(int(s.Allowed)),
-		Denied:   strconv.Itoa(int(s.Denied)),
+		Allowed:  strconv.Itoa(p),
+		Denied:   "0",
 	}
 }

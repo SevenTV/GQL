@@ -1,3 +1,8 @@
+extend type Query {
+  # Get a user by id, login or current authenticated user (@me).
+  user(id: String!): User
+}
+
 type User {
   # id of this user
   id: String!
@@ -8,7 +13,7 @@ type User {
   # user descriptino
   description: String!
   # role of this user
-  role: Role!
+  role: Role! @goField(forceResolver: true)
   # emotes of this user
   emote_ids: [String!]!
   # emote aliases of this user

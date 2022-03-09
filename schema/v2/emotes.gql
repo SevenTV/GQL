@@ -19,8 +19,6 @@ extend type Query {
     filter: EmoteFilter
   ): [Emote]!
   #
-  # Get a user by id, login or current authenticated user (@me).
-  # user(id: String!): User
   #  Get a role by id
   #role(id: String!): Role
   # Search for users.
