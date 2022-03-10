@@ -17,7 +17,7 @@ type User {
   # emotes of this user
   emote_ids: [String!]! @goField(forceResolver: true)
   # emote aliases of this user
-  emote_aliases: [[String!]!]!
+  emote_aliases: [[String!]!]! @goField(forceResolver: true)
   # editor ids for this user
   editor_ids: [String!]!
   # date of creation

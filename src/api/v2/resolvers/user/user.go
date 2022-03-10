@@ -54,6 +54,25 @@ func (r *Resolver) EmoteIds(ctx context.Context, obj *model.User) ([]string, err
 	return result, nil
 }
 
+func (r *Resolver) EmoteAliases(ctx context.Context, obj *model.User) ([][]string, error) {
+	result := [][]string{}
+	if obj.EmoteSetID == "" {
+		return result, nil
+	}
+	emotes, err := loaders.For(ctx).UserEmotes.Load(obj.EmoteSetID)
+	if err != nil {
+		return result, err
+	}
+	for _, e := range emotes {
+		if e.OriginalName == nil {
+			continue // no original name property means no alias set
+		}
+		result = append(result, []string{e.ID, e.Name})
+	}
+
+	return result, nil
+}
+
 func (r *Resolver) Editors(ctx context.Context, obj *model.User) ([]*model.UserPartial, error) {
 	result := []*model.UserPartial{}
 	editors, errs := loaders.For(ctx).UserByID.LoadAll(obj.EditorIds)

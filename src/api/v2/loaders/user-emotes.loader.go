@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/GQL/graph/v2/loaders"
 	"github.com/SevenTV/GQL/graph/v2/model"
 	"github.com/SevenTV/GQL/src/api/v2/helpers"
@@ -30,27 +29,26 @@ func userEmotesLoader(gCtx global.Context) *loaders.UserEmotesLoader {
 
 			sets, err := gCtx.Inst().Query.EmoteSets(ctx, bson.M{"_id": bson.M{"$in": ids}})
 			if err == nil {
-				m := make(map[primitive.ObjectID][]*structures.Emote)
+				m := make(map[primitive.ObjectID][]*model.Emote)
 				// iterate over sets
 				for _, set := range sets {
 					// iterate over emotes of set
 					for _, ae := range set.Emotes {
+						em := helpers.EmoteStructureToModel(gCtx, ae.Emote)
+
 						// set "alias"?
-						if ae.Name != ae.Emote.Name {
-							ae.Emote.Name = ae.Name
+						if ae.Name != em.Name {
+							em.OriginalName = &ae.Emote.Name
+							em.Name = ae.Name
 						}
 
-						m[set.ID] = append(m[set.ID], ae.Emote)
+						m[set.ID] = append(m[set.ID], em)
 					}
 				}
 
 				for i, v := range ids {
 					if x, ok := m[v]; ok {
-						models := make([]*model.Emote, len(x))
-						for ii, e := range x {
-							models[ii] = helpers.EmoteStructureToModel(gCtx, e)
-						}
-						modelLists[i] = models
+						modelLists[i] = x
 					}
 				}
 			}
