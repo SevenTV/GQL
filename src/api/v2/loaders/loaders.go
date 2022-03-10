@@ -11,14 +11,16 @@ import (
 const LoadersKey = utils.Key("dataloadersv2")
 
 type Loaders struct {
-	UserByID *loaders.UserLoader
+	UserByID   *loaders.UserLoader
+	UserEmotes *loaders.UserEmotesLoader
 
 	EmoteByID *loaders.EmoteLoader
 }
 
 func New(gCtx global.Context) *Loaders {
 	return &Loaders{
-		UserByID: userByID(gCtx),
+		UserByID:   userByID(gCtx),
+		UserEmotes: userEmotesLoader(gCtx),
 
 		EmoteByID: emoteByID(gCtx),
 	}

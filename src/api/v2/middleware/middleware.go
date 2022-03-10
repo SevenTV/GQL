@@ -6,5 +6,7 @@ import (
 )
 
 func New(ctx global.Context) generated.DirectiveRoot {
-	return generated.DirectiveRoot{}
+	return generated.DirectiveRoot{
+		Internal: internal(ctx),
+	}
 }

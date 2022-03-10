@@ -15,7 +15,7 @@ type User {
   # role of this user
   role: Role! @goField(forceResolver: true)
   # emotes of this user
-  emote_ids: [String!]!
+  emote_ids: [String!]! @goField(forceResolver: true)
   # emote aliases of this user
   emote_aliases: [[String!]!]!
   # editor ids for this user
@@ -35,7 +35,8 @@ type User {
   # YouTube ID
   youtube_id: String!
   # Get the emotes added to this users channel.
-  emotes: [Emote!]!
+  emotes: [Emote!]! @goField(forceResolver: true)
+  emote_set_id: String! @internal
   # Get the emotes this user has uploaded.
   owned_emotes: [Emote!]!
   # Get the third party emotes of this users channel. (BTTV/FFZ)

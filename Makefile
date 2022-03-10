@@ -58,6 +58,7 @@ gql:
 	gqlgen --config ./gqlgen.v2.yml
 
 	cd graph/v2/loaders && dataloaden UserLoader "string" "*github.com/SevenTV/GQL/graph/v2/model.User"
+	cd graph/v2/loaders && dataloaden UserEmotesLoader "string" "[]*github.com/SevenTV/GQL/graph/v2/model.Emote"
 
 	cd graph/v2/loaders && dataloaden EmoteLoader "string" "*github.com/SevenTV/GQL/graph/v2/model.Emote"
 

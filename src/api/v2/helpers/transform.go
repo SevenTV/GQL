@@ -8,6 +8,7 @@ import (
 
 	v2structures "github.com/SevenTV/Common/structures/v2"
 	"github.com/SevenTV/Common/structures/v3"
+	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/graph/v2/model"
 	"github.com/SevenTV/GQL/src/global"
 )
@@ -41,6 +42,17 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		}
 	}
 
+	vis := 0
+	if !utils.BitField.HasBits(int64(s.Flags), int64(structures.EmoteFlagsListed)) {
+		vis |= int(v2structures.EmoteVisibilityUnlisted)
+	}
+	if utils.BitField.HasBits(int64(s.Flags), int64(structures.ActiveEmoteFlagZeroWidth)) {
+		vis |= int(v2structures.EmoteVisibilityZeroWidth)
+	}
+	if utils.BitField.HasBits(int64(s.Flags), int64(structures.EmoteFlagsPrivate)) {
+		vis |= int(v2structures.EmoteVisibilityPrivate)
+	}
+
 	owner := structures.DeletedUser
 	if s.Owner != nil {
 		owner = s.Owner
@@ -50,7 +62,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		ID:           s.ID.Hex(),
 		Name:         s.Name,
 		OwnerID:      s.OwnerID.Hex(),
-		Visibility:   0, // TODO
+		Visibility:   vis, // TODO
 		Mime:         "image/webp",
 		Status:       int(version.State.Lifecycle),
 		Tags:         s.Tags,
@@ -76,14 +88,22 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 		highestRole = nil
 	}
 
-	// Get the twitch/yt connections
+	// The emote set attached to twitch connection
+	// his is a non-v2 property added to facilitate fetching of "user emotes"
+	emoteSetID := ""
+
+	// Twitch/YT connections
 	var twConn *structures.UserConnection
 	var ytConn *structures.UserConnection
+
 	for _, conn := range s.Connections {
 		if ytConn == nil && conn.Platform == structures.UserConnectionPlatformYouTube {
 			ytConn = conn
 		} else if twConn == nil && conn.Platform == structures.UserConnectionPlatformTwitch {
 			twConn = conn
+			if emoteSetID == "" {
+				emoteSetID = conn.EmoteSetID.Hex()
+			}
 		}
 	}
 
@@ -117,6 +137,7 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 		DisplayName:     s.DisplayName,
 		Login:           s.Username,
 		ProfileImageURL: avatarURL,
+		EmoteSetID:      emoteSetID,
 		// Emotes:            []*model.Emote{},
 		OwnedEmotes:      []*model.Emote{},
 		ThirdPartyEmotes: []*model.Emote{},

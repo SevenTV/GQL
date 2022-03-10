@@ -23,6 +23,7 @@ func New(r types.Resolver) generated.UserResolver {
 		Resolver: r,
 	}
 }
+
 func (r *Resolver) Role(ctx context.Context, obj *model.User) (*model.Role, error) {
 	if obj.Role == nil {
 		// Get default role
@@ -34,6 +35,23 @@ func (r *Resolver) Role(ctx context.Context, obj *model.User) (*model.Role, erro
 		}
 	}
 	return obj.Role, nil
+}
+
+func (r *Resolver) Emotes(ctx context.Context, obj *model.User) ([]*model.Emote, error) {
+	return loaders.For(ctx).UserEmotes.Load(obj.EmoteSetID)
+}
+
+func (r *Resolver) EmoteIds(ctx context.Context, obj *model.User) ([]string, error) {
+	result := []string{}
+	emotes, err := loaders.For(ctx).UserEmotes.Load(obj.EmoteSetID)
+	if err != nil {
+		return result, err
+	}
+
+	for _, e := range emotes {
+		result = append(result, e.ID)
+	}
+	return result, nil
 }
 
 func (r *Resolver) Editors(ctx context.Context, obj *model.User) ([]*model.UserPartial, error) {
