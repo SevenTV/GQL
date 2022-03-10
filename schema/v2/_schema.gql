@@ -3,6 +3,7 @@ scalar ObjectID
 
 schema {
   query: Query
+  mutation: Mutation
 }
 
 directive @goField(
@@ -11,10 +12,6 @@ directive @goField(
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 directive @internal on FIELD_DEFINITION
-
-type Query {
-  helloWorld: String!
-}
 
 type Meta {
   announcement: String!

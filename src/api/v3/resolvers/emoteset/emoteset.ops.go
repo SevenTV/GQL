@@ -74,41 +74,9 @@ func (r *ResolverOps) Emotes(ctx context.Context, obj *model.EmoteSetOps, id pri
 		emoteIDs[i] = e.ID
 	}
 
-	// Publish updates for;
-	// emote set, owner of emote set, actor
+	// Publish an emote set update
 	go func() {
-		// Find users that have this set active
-		sentToActor := false
-		sentToOwner := false
-		cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Find(ctx, bson.M{
-			"connections.emote_set_id": b.EmoteSet.ID,
-		})
-		if err == nil {
-			for cur.Next(ctx) {
-				u := &structures.User{}
-				if err = cur.Decode(u); err != nil {
-					continue
-				}
-
-				events.Publish(r.Ctx, "users", u.ID)
-				if u.ID == actor.ID {
-					sentToActor = true
-				} else if u.ID == b.EmoteSet.OwnerID {
-					sentToOwner = true
-				}
-			}
-		}
-
-		// Publish an emote set update
 		events.Publish(r.Ctx, "emote_sets", b.EmoteSet.ID)
-		// Send user update for set owner
-		if !sentToOwner && b.EmoteSet.OwnerID != actor.ID {
-			events.Publish(r.Ctx, "users", b.EmoteSet.OwnerID)
-		}
-		// Send user update for actor
-		if !sentToActor {
-			events.Publish(r.Ctx, "users", actor.ID)
-		}
 	}()
 
 	setModel := helpers.EmoteSetStructureToModel(r.Ctx, b.EmoteSet)

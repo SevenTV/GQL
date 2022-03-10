@@ -62,7 +62,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		ID:           s.ID.Hex(),
 		Name:         s.Name,
 		OwnerID:      s.OwnerID.Hex(),
-		Visibility:   vis, // TODO
+		Visibility:   vis,
 		Mime:         "image/webp",
 		Status:       int(version.State.Lifecycle),
 		Tags:         s.Tags,

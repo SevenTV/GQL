@@ -3,8 +3,6 @@ extend type Query {
   # audit_logs(page: Int!, limit: Int, types: [Int!]): [AuditLog!]!
   # Get emote by id.
   emote(id: String!): Emote @deprecated
-  # Get emotes by user id.
-  # emotes(list: [String!]!): [Emote]
   # Search for emotes.
   search_emotes(
     query: String!
@@ -29,11 +27,31 @@ extend type Query {
   # meta(): Meta
 }
 
+extend type Mutation {
+  # Add an emote to a channel. Requires permission.
+  addChannelEmote(channel_id: String!, emote_id: String!, reason: String): User
+  # Edit a channel emote with overrides
+  editChannelEmote(
+    channel_id: String!
+    emote_id: String!
+    data: ChannelEmoteInput!
+    reason: String
+  ): User
+  # Remove an emote from a channel. Requires permission.
+  removeChannelEmote(
+    channel_id: String!
+    emote_id: String!
+    reason: String
+  ): User
+}
+
 type Emote {
   # Id of the emote
   id: String!
   # name of the emote
   name: String!
+  # original name of the emote; only present if a custom name is set
+  original_name: String
   # id of the owner of the emote
   owner_id: String!
   # visibility of the emote
@@ -72,4 +90,8 @@ input EmoteFilter {
   width_range: [Int!]
   visibility: Int
   visibility_clear: Int
+}
+
+input ChannelEmoteInput {
+  alias: String
 }
