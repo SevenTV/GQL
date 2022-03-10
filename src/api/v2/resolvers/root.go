@@ -2,6 +2,7 @@ package resolvers
 
 import (
 	"github.com/SevenTV/GQL/graph/v2/generated"
+	"github.com/SevenTV/GQL/src/api/v2/resolvers/emote"
 	"github.com/SevenTV/GQL/src/api/v2/resolvers/query"
 	"github.com/SevenTV/GQL/src/api/v2/resolvers/user"
 	"github.com/SevenTV/GQL/src/api/v2/types"
@@ -27,4 +28,8 @@ func (r *Resolver) User() generated.UserResolver {
 
 func (r *Resolver) UserPartial() generated.UserPartialResolver {
 	return user.NewPartial(r.Resolver)
+}
+
+func (r *Resolver) Emote() generated.EmoteResolver {
+	return emote.New(r.Resolver)
 }
