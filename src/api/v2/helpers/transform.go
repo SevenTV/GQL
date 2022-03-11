@@ -46,7 +46,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 	if !utils.BitField.HasBits(int64(s.Flags), int64(structures.EmoteFlagsListed)) {
 		vis |= int(v2structures.EmoteVisibilityUnlisted)
 	}
-	if utils.BitField.HasBits(int64(s.Flags), int64(structures.ActiveEmoteFlagZeroWidth)) {
+	if utils.BitField.HasBits(int64(s.Flags), int64(structures.EmoteFlagsZeroWidth)) {
 		vis |= int(v2structures.EmoteVisibilityZeroWidth)
 	}
 	if utils.BitField.HasBits(int64(s.Flags), int64(structures.EmoteFlagsPrivate)) {
@@ -125,13 +125,13 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 	}
 
 	user := &model.User{
-		ID:          s.ID.Hex(),
-		Email:       nil,
-		Description: s.Biography,
-		Rank:        rank,
-		Role:        RoleStructureToModel(ctx, highestRole),
-		// EmoteIds:          []string{},
-		// EmoteAliases:      [][]string{},
+		ID:           s.ID.Hex(),
+		Email:        nil,
+		Description:  s.Biography,
+		Rank:         rank,
+		Role:         RoleStructureToModel(ctx, highestRole),
+		EmoteIds:     []string{},
+		EmoteAliases: [][]string{},
 		// EditorIds:         []string{},
 		CreatedAt:       s.ID.Timestamp().Format(time.RFC3339),
 		DisplayName:     s.DisplayName,

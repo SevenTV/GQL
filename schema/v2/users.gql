@@ -3,6 +3,24 @@ extend type Query {
   user(id: String!): User
 }
 
+extend type Mutation {
+  # Add an emote to a channel. Requires permission.
+  addChannelEmote(channel_id: String!, emote_id: String!, reason: String): User
+  # Edit a channel emote with overrides
+  editChannelEmote(
+    channel_id: String!
+    emote_id: String!
+    data: ChannelEmoteInput!
+    reason: String
+  ): User
+  # Remove an emote from a channel. Requires permission.
+  removeChannelEmote(
+    channel_id: String!
+    emote_id: String!
+    reason: String
+  ): User
+}
+
 type User {
   # id of this user
   id: String!
@@ -125,4 +143,8 @@ type Notification {
 type NotificationMessagePart {
   type: Int!
   data: String!
+}
+
+input ChannelEmoteInput {
+  alias: String
 }
