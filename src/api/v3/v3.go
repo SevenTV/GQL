@@ -2,6 +2,8 @@ package v3
 
 import (
 	"context"
+	goerrors "errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -11,6 +13,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/GQL/graph/v3/generated"
 	"github.com/SevenTV/GQL/src/api/middleware"
 	"github.com/SevenTV/GQL/src/api/v3/cache"
@@ -26,6 +29,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func GqlHandlerV3(gCtx global.Context) func(ctx *fasthttp.RequestCtx) {
@@ -51,6 +55,23 @@ func GqlHandlerV3(gCtx global.Context) func(ctx *fasthttp.RequestCtx) {
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: cache.NewRedisCache(gCtx, "", time.Hour*6),
 	})
+
+	errorPresenter := func(ctx context.Context, e error) *gqlerror.Error {
+		err := graphql.DefaultErrorPresenter(ctx, e)
+		var apiErr errors.APIError
+		if goerrors.As(e, &apiErr) {
+			err.Message = fmt.Sprintf("%d %s", apiErr.Code(), apiErr.Message())
+			err.Extensions = map[string]interface{}{
+				"fields":  apiErr.GetFields(),
+				"message": apiErr.Message(),
+				"code":    apiErr.Code(),
+			}
+		}
+
+		return err
+	}
+	srv.SetErrorPresenter(errorPresenter)
+	exec.SetErrorPresenter(errorPresenter)
 
 	srv.SetRecoverFunc(func(ctx context.Context, err interface{}) (userMessage error) {
 		logrus.Error("panic in handler: ", err)

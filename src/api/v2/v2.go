@@ -2,6 +2,8 @@ package v2
 
 import (
 	"context"
+	goerrors "errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -22,6 +24,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func GqlHandlerV2(gCtx global.Context) func(ctx *fasthttp.RequestCtx) {
@@ -40,6 +43,20 @@ func GqlHandlerV2(gCtx global.Context) func(ctx *fasthttp.RequestCtx) {
 		Func: func(ctx context.Context, rc *graphql.OperationContext) int {
 			return 100
 		},
+	})
+	srv.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
+		err := graphql.DefaultErrorPresenter(ctx, e)
+		var apiErr errors.APIError
+		if goerrors.As(e, &apiErr) {
+			err.Message = fmt.Sprintf("%d %s", apiErr.Code(), apiErr.Message())
+			err.Extensions = map[string]interface{}{
+				"fields":  apiErr.GetFields(),
+				"message": apiErr.Message(),
+				"code":    apiErr.Code(),
+			}
+		}
+
+		return err
 	})
 
 	srv.Use(extension.Introspection{})
