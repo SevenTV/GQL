@@ -80,7 +80,9 @@ func (r *Resolver) Editors(ctx context.Context, obj *model.User) ([]*model.UserP
 		return result, err
 	}
 
-	for _, ed := range editors {
+	setIDs := make([]string, len(editors))
+	for i, ed := range editors {
+		setIDs[i] = ed.EmoteSetID
 		result = append(result, helpers.UserStructureToPartialModel(r.Ctx, ed))
 	}
 	return result, nil

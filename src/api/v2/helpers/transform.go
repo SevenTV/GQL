@@ -179,6 +179,7 @@ func UserStructureToPartialModel(ctx global.Context, s *model.User) *model.UserP
 		Rank:            s.Rank,
 		Role:            s.Role,
 		EmoteIds:        s.EmoteIds,
+		EmoteSetID:      s.EmoteSetID,
 		EditorIds:       s.EditorIds,
 		CreatedAt:       s.CreatedAt,
 		TwitchID:        s.TwitchID,

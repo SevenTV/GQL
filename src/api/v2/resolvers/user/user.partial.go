@@ -7,6 +7,7 @@ import (
 	"github.com/SevenTV/GQL/graph/v2/generated"
 	"github.com/SevenTV/GQL/graph/v2/model"
 	"github.com/SevenTV/GQL/src/api/v2/helpers"
+	"github.com/SevenTV/GQL/src/api/v2/loaders"
 	"github.com/SevenTV/GQL/src/api/v2/types"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -32,4 +33,17 @@ func (r *ResolverPartial) Role(ctx context.Context, obj *model.UserPartial) (*mo
 		}
 	}
 	return obj.Role, nil
+}
+
+func (*ResolverPartial) EmoteIds(ctx context.Context, obj *model.UserPartial) ([]string, error) {
+	result := []string{}
+	emotes, err := loaders.For(ctx).UserEmotes.Load(obj.EmoteSetID)
+	if err != nil {
+		return result, err
+	}
+
+	for _, e := range emotes {
+		result = append(result, e.ID)
+	}
+	return result, nil
 }

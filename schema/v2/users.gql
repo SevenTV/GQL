@@ -19,6 +19,19 @@ extend type Mutation {
     emote_id: String!
     reason: String
   ): User
+
+  # Add an editor to a channel. Requires permission.
+  addChannelEditor(
+    channel_id: String!
+    editor_id: String!
+    reason: String
+  ): User
+  # Remove an editor from a channel. Requires permission.
+  removeChannelEditor(
+    channel_id: String!
+    editor_id: String!
+    reason: String
+  ): User
 }
 
 type User {
@@ -103,7 +116,8 @@ type UserPartial {
   # role of this user
   role: Role! @goField(forceResolver: true)
   # emotes of this user
-  emote_ids: [String!]!
+  emote_ids: [String!]! @goField(forceResolver: true)
+  emote_set_id: String! @internal
   # editor ids for this user
   editor_ids: [String!]!
   # date of creation

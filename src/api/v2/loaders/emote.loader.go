@@ -15,6 +15,7 @@ import (
 
 func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 	return loaders.NewEmoteLoader(loaders.EmoteLoaderConfig{
+		Wait: time.Millisecond * 25,
 		Fetch: func(keys []string) ([]*model.Emote, []error) {
 			ctx, cancel := context.WithTimeout(gCtx, time.Second*10)
 			defer cancel()

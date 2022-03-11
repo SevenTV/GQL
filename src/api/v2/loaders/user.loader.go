@@ -13,7 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func userByID(gCtx global.Context) *loaders.UserLoader {
+func userLoader(gCtx global.Context, keyName string) *loaders.UserLoader {
 	return loaders.NewUserLoader(loaders.UserLoaderConfig{
 		Wait: time.Millisecond * 25,
 		Fetch: func(keys []string) ([]*model.User, []error) {
@@ -24,11 +24,11 @@ func userByID(gCtx global.Context) *loaders.UserLoader {
 			errs := make([]error, len(keys))
 
 			// Parse IDs
-			ids := make([]primitive.ObjectID, len(keys))
+			ids := make([]interface{}, len(keys))
 			for i, k := range keys {
 				id, err := primitive.ObjectIDFromHex(k)
 				if err != nil {
-					errs[i] = err
+					ids[i] = k
 					continue
 				}
 				ids[i] = id
@@ -36,15 +36,20 @@ func userByID(gCtx global.Context) *loaders.UserLoader {
 
 			// Fetch users
 			users, err := gCtx.Inst().Query.Users(ctx, bson.M{
-				"_id": bson.M{"$in": ids},
+				keyName: bson.M{"$in": ids},
 			})
 			if err == nil {
-				m := make(map[primitive.ObjectID]*structures.User)
+				m := make(map[interface{}]*structures.User)
 				for _, u := range users {
 					if u == nil {
 						continue
 					}
-					m[u.ID] = u
+					switch keyName {
+					case "username":
+						m[u.Username] = u
+					default:
+						m[u.ID] = u
+					}
 				}
 
 				for i, v := range ids {
