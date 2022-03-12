@@ -76,6 +76,12 @@ func (r *Resolver) EditEmote(ctx context.Context, opt model.EmoteInput, reason *
 		} else if !emote.HasFlag(structures.EmoteFlagsZeroWidth) && utils.BitField.HasBits(vis, int64(v2structures.EmoteVisibilityZeroWidth)) {
 			flags |= structures.EmoteFlagsZeroWidth
 		}
+		// privacy
+		if emote.HasFlag(structures.EmoteFlagsPrivate) && !utils.BitField.HasBits(vis, int64(v2structures.EmoteVisibilityPrivate)) {
+			flags &= ^structures.EmoteFlagsPrivate
+		} else if !emote.HasFlag(structures.EmoteFlagsPrivate) && utils.BitField.HasBits(vis, int64(v2structures.EmoteVisibilityPrivate)) {
+			flags |= structures.EmoteFlagsPrivate
+		}
 
 		eb.SetFlags(flags)
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/SevenTV/GQL/graph/v2/model"
 	"github.com/SevenTV/GQL/src/api/v2/helpers"
 	"github.com/SevenTV/GQL/src/api/v2/loaders"
+	"github.com/SevenTV/GQL/src/api/v3/auth"
 	"github.com/valyala/fasthttp"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -32,6 +33,8 @@ func (r *Resolver) SearchEmotes(
 	channel *string,
 	filter *model.EmoteFilter,
 ) ([]*model.Emote, error) {
+	actor := auth.For(ctx)
+
 	// Define page
 	page := 1
 	if pageArg != nil && *pageArg > 1 {
@@ -81,6 +84,7 @@ func (r *Resolver) SearchEmotes(
 	}
 
 	result, totalCount, err := r.Ctx.Inst().Query.SearchEmotes(ctx, query.SearchEmotesOptions{
+		Actor: actor,
 		Query: queryArg,
 		Page:  page,
 		Limit: limit,

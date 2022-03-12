@@ -10,6 +10,7 @@ import (
 	"github.com/SevenTV/Common/structures/v3/query"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/graph/v3/model"
+	"github.com/SevenTV/GQL/src/api/v3/auth"
 	"github.com/SevenTV/GQL/src/api/v3/helpers"
 	"github.com/SevenTV/GQL/src/api/v3/loaders"
 	"go.mongodb.org/mongo-driver/bson"
@@ -27,6 +28,8 @@ func (r *Resolver) Emote(ctx context.Context, id primitive.ObjectID) (*model.Emo
 }
 
 func (r *Resolver) Emotes(ctx context.Context, queryValue string, pageArg *int, limitArg *int, filterArg *model.EmoteSearchFilter, sortArg *model.Sort) (*model.EmoteSearchResult, error) {
+	actor := auth.For(ctx)
+
 	// Define limit (how many emotes can be returned in a single query)
 	limit := 20
 	if limitArg != nil {
@@ -79,6 +82,7 @@ func (r *Resolver) Emotes(ctx context.Context, queryValue string, pageArg *int, 
 
 	// Run query
 	result, totalCount, err := r.Ctx.Inst().Query.SearchEmotes(ctx, query.SearchEmotesOptions{
+		Actor: actor,
 		Query: queryValue,
 		Page:  page,
 		Limit: limit,
