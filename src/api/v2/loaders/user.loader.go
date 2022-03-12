@@ -35,7 +35,7 @@ func userLoader(gCtx global.Context, keyName string) *loaders.UserLoader {
 			}
 
 			// Fetch users
-			users, err := gCtx.Inst().Query.Users(ctx, bson.M{
+			users, _, err := gCtx.Inst().Query.SearchUsers(ctx, bson.M{
 				keyName: bson.M{"$in": ids},
 			})
 			if err == nil {

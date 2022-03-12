@@ -1,6 +1,8 @@
 extend type Query {
   # Get a user by id, login or current authenticated user (@me).
   user(id: String!): User
+  # Search for users.
+  search_users(query: String!, page: Int, limit: Int): [UserPartial]!
 }
 
 extend type Mutation {
