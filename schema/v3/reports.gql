@@ -10,7 +10,7 @@ extend type Query {
 
 extend type Mutation {
   createReport(data: CreateReportInput!): Report
-    @hasPermissions(role: [REPORT_CREATE])
+    @hasPermissions(role: [CREATE_REPORT])
   editReport(report_id: ObjectID!, data: EditReportInput!): Report
     @hasPermissions(role: [MANAGE_REPORTS])
 }

@@ -23,18 +23,16 @@ func hasPermission(gCtx global.Context) func(ctx context.Context, obj interface{
 			switch v {
 			case model.PermissionBypassPrivacy:
 				perms |= structures.RolePermissionBypassPrivacy
-			case model.PermissionEmotesetCreate:
+			case model.PermissionCreateEmoteSet:
 				perms |= structures.RolePermissionCreateEmoteSet
-			case model.PermissionEmotesetEdit:
+			case model.PermissionEditEmote:
 				perms |= structures.RolePermissionEditEmoteSet
-			case model.PermissionEmoteCreate:
+			case model.PermissionCreateEmote:
 				perms |= structures.RolePermissionCreateEmote
-			case model.PermissionEmoteEditAny:
+			case model.PermissionEditAnyEmote:
 				perms |= structures.RolePermissionEditAnyEmote
-			case model.PermissionEmotesetEditAny:
+			case model.PermissionEditAnyEmoteSet:
 				perms |= structures.RolePermissionEditAnyEmoteSet
-			case model.PermissionEmoteEdit:
-				perms |= structures.RolePermissionEditEmote
 			case model.PermissionFeatureProfilePictureAnimation:
 				perms |= structures.RolePermissionFeatureProfilePictureAnimation
 			case model.PermissionFeatureZerowidthEmoteType:
@@ -53,7 +51,7 @@ func hasPermission(gCtx global.Context) func(ctx context.Context, obj interface{
 				perms |= structures.RolePermissionManageStack
 			case model.PermissionManageUsers:
 				perms |= structures.RolePermissionManageUsers
-			case model.PermissionReportCreate:
+			case model.PermissionCreateReport:
 				perms |= structures.RolePermissionReportCreate
 			case model.PermissionSendMessages:
 				perms |= structures.RolePermissionSendMessages
