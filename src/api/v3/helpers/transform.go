@@ -286,3 +286,16 @@ func ActiveEmoteStructureToModel(ctx global.Context, s *structures.ActiveEmote) 
 		Timestamp: s.Timestamp,
 	}
 }
+
+func MessageStructureToModRequestModel(ctx global.Context, s *structures.Message) *model.ModRequestMessage {
+	mb := structures.NewMessageBuilder(s)
+	req := mb.DecodeModRequest()
+	return &model.ModRequestMessage{
+		ID:         s.ID,
+		Kind:       model.MessageKind(s.Kind.String()),
+		CreatedAt:  s.CreatedAt,
+		Author:     UserStructureToModel(ctx, s.Author),
+		TargetKind: int(req.TargetKind),
+		TargetID:   req.TargetID,
+	}
+}

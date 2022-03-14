@@ -57,7 +57,6 @@ func (r *Resolver) Roles(ctx context.Context) ([]*model.Role, error) {
 }
 
 func (r *Resolver) Role(ctx context.Context, id primitive.ObjectID) (*model.Role, error) {
-	// TODO
 	return loaders.For(ctx).RoleByID.Load(id)
 }
 
@@ -70,7 +69,7 @@ func (r *Resolver) Report(ctx context.Context, id primitive.ObjectID) (*model.Re
 	return loaders.For(ctx).ReportByID.Load(id)
 }
 
-func (r *Resolver) Inbox(ctx context.Context, afterID *primitive.ObjectID) ([]*model.Message, error) {
+func (r *Resolver) Inbox(ctx context.Context, afterID *primitive.ObjectID) ([]*model.InboxMessage, error) {
 	// TODO
 	return nil, nil
 }

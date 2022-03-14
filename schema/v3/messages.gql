@@ -1,5 +1,6 @@
 extend type Query {
-  inbox(after_id: ObjectID): [Message]! @hasPermissions
+  inbox(after_id: ObjectID): [InboxMessage!]! @hasPermissions
+  mod_requests(after_id: ObjectID): [ModRequestMessage!]!
 }
 
 extend type Mutation {
@@ -10,21 +11,48 @@ extend type Mutation {
     content: String!
     important: Boolean
     anonymous: Boolean
-  ): Message @hasPermissions(role: [SEND_MESSAGES])
+  ): InboxMessage @hasPermissions(role: [SEND_MESSAGES])
 }
 
-type Message {
+interface Message {
   id: ObjectID!
   kind: MessageKind!
   created_at: Time!
   author: User!
-  data: String!
   read: Boolean!
   read_at: Time
 }
 
+type InboxMessage implements Message {
+  id: ObjectID!
+  kind: MessageKind!
+  created_at: Time!
+  author: User!
+  read: Boolean!
+  read_at: Time
+
+  subject: String!
+  content: String!
+  important: Boolean!
+  starred: Boolean!
+  pinned: Boolean!
+}
+
+type ModRequestMessage implements Message {
+  id: ObjectID!
+  kind: MessageKind!
+  created_at: Time!
+  author: User!
+  read: Boolean!
+  read_at: Time
+
+  target_kind: Int!
+  target_id: ObjectID!
+}
+
 enum MessageKind {
   EMOTE_COMMENT
+  MOD_REQUEST
   INBOX
   NEWS
 }
