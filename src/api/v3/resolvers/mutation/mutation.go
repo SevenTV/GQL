@@ -22,11 +22,6 @@ func (r *Resolver) SetUserRole(ctx context.Context, userID primitive.ObjectID, r
 	return nil, nil
 }
 
-func (r *Resolver) EditEmote(ctx context.Context, emoteID primitive.ObjectID, data model.EditEmoteInput) (*model.Emote, error) {
-	// TODO
-	return nil, nil
-}
-
 func (r *Resolver) CreateRole(ctx context.Context, data model.CreateRoleInput) (*model.Role, error) {
 	// TODO
 	return nil, nil
@@ -58,11 +53,6 @@ func (r *Resolver) CreateBan(ctx context.Context, victimID primitive.ObjectID, r
 }
 
 func (r *Resolver) EditBan(ctx context.Context, banID primitive.ObjectID, reason *string, effects *int, expireAt *string) (*model.Ban, error) {
-	// TODO
-	return nil, nil
-}
-
-func (r *Resolver) ReadMessages(ctx context.Context, messageIds []primitive.ObjectID, read *bool) (*int, error) {
 	// TODO
 	return nil, nil
 }

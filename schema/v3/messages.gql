@@ -4,7 +4,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  readMessages(message_ids: [ObjectID!]!, read: Boolean): Int @hasPermissions
+  readMessages(message_ids: [ObjectID!]!, read: Boolean!): Int! @hasPermissions
   sendInboxMessage(
     recipients: [String!]!
     subject: String!

@@ -3,6 +3,7 @@ package query
 import (
 	"context"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/structures/v3/query"
@@ -38,7 +39,8 @@ func (r *Resolver) ModRequests(ctx context.Context, afterIDArg *primitive.Object
 		},
 	})
 	if err != nil {
-		return nil, err
+		graphql.AddError(ctx, err)
+		return []*model.ModRequestMessage{}, nil
 	}
 
 	result := make([]*model.ModRequestMessage, len(messages))
