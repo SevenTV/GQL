@@ -2,7 +2,6 @@ package query
 
 import (
 	"context"
-	"sort"
 	"strings"
 
 	"github.com/SevenTV/Common/errors"
@@ -99,17 +98,9 @@ func (r *Resolver) Emotes(ctx context.Context, queryValue string, pageArg *int, 
 
 	models := make([]*model.Emote, len(result))
 	for i, e := range result {
-		// Sort by version timestamp
-		sort.Slice(e.Versions, func(i, j int) bool {
-			a := e.Versions[i]
-			b := e.Versions[j]
-
-			return b.Timestamp.Before(a.Timestamp)
-		})
-
 		// Bring forward the latest version
 		if len(e.Versions) > 0 {
-			e.ID = e.Versions[0].ID
+			e.ID = e.GetLatestVersion(true).ID
 		}
 		models[i] = helpers.EmoteStructureToModel(r.Ctx, e)
 	}

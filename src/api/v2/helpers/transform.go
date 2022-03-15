@@ -16,8 +16,7 @@ import (
 var twitchPictureSizeRegExp = regexp.MustCompile("([0-9]{2,3})x([0-9]{2,3})")
 
 func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote {
-	eb := structures.NewEmoteBuilder(s)
-	version, _ := eb.GetVersion(s.ID)
+	version, _ := s.GetVersion(s.ID)
 
 	width := make([]int, 4)
 	height := make([]int, 4)
@@ -43,7 +42,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 	}
 
 	vis := 0
-	if !utils.BitField.HasBits(int64(s.Flags), int64(structures.EmoteFlagsListed)) {
+	if !version.State.Listed {
 		vis |= int(v2structures.EmoteVisibilityUnlisted)
 	}
 	if utils.BitField.HasBits(int64(s.Flags), int64(structures.EmoteFlagsZeroWidth)) {

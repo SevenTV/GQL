@@ -40,6 +40,10 @@ func (r *Resolver) EmotePartial() generated.EmotePartialResolver {
 	return emote.NewPartial(r.Resolver)
 }
 
+func (r *Resolver) EmoteOps() generated.EmoteOpsResolver {
+	return emote.NewOps(r.Resolver)
+}
+
 func (r *Resolver) EmoteVersion() generated.EmoteVersionResolver {
 	return emote.NewVersion(r.Resolver)
 }

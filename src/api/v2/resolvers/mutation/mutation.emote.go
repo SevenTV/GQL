@@ -29,7 +29,7 @@ func (r *Resolver) EditEmote(ctx context.Context, opt model.EmoteInput, reason *
 	}
 
 	// Fetch the emote
-	emotes, err := r.Ctx.Inst().Query.Emotes(ctx, bson.M{"_id": emoteID})
+	emotes, err := r.Ctx.Inst().Query.Emotes(ctx, bson.M{"versions.id": emoteID})
 	if err != nil {
 		return nil, errors.ErrInternalServerError().SetDetail(err.Error())
 	}
@@ -38,6 +38,7 @@ func (r *Resolver) EditEmote(ctx context.Context, opt model.EmoteInput, reason *
 	}
 
 	emote := emotes[0]
+	version, _ := emote.GetVersion(emoteID)
 	eb := structures.NewEmoteBuilder(emote)
 
 	// Make edits
@@ -59,16 +60,18 @@ func (r *Resolver) EditEmote(ctx context.Context, opt model.EmoteInput, reason *
 		flags := emote.Flags
 
 		// listed
-		if !emote.HasFlag(structures.EmoteFlagsListed) && !utils.BitField.HasBits(vis, int64(v2structures.EmoteVisibilityUnlisted)) {
+		if !version.State.Listed && !utils.BitField.HasBits(vis, int64(v2structures.EmoteVisibilityUnlisted)) {
 			if !actor.HasPermission(structures.RolePermissionEditAnyEmote) {
 				return nil, errors.ErrInsufficientPrivilege().SetDetail("Not allowed to list this emote")
 			}
-			flags |= structures.EmoteFlagsListed
-		} else if emote.HasFlag(structures.EmoteFlagsListed) && utils.BitField.HasBits(vis, int64(v2structures.EmoteVisibilityUnlisted)) {
+			version.State.Listed = true
+			eb.UpdateVersion(version.ID, version)
+		} else if version.State.Listed && utils.BitField.HasBits(vis, int64(v2structures.EmoteVisibilityUnlisted)) {
 			if !actor.HasPermission(structures.RolePermissionEditAnyEmote) {
 				return nil, errors.ErrInsufficientPrivilege().SetDetail("Not allowed to unlist this emote")
 			}
-			flags &= ^structures.EmoteFlagsListed
+			version.State.Listed = false
+			eb.UpdateVersion(version.ID, version)
 		}
 		// zero-width
 		if emote.HasFlag(structures.EmoteFlagsZeroWidth) && !utils.BitField.HasBits(vis, int64(v2structures.EmoteVisibilityZeroWidth)) {
