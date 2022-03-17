@@ -3,7 +3,6 @@ package query
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/structures/v3/query"
@@ -25,22 +24,22 @@ func (r *Resolver) ModRequests(ctx context.Context, afterIDArg *primitive.Object
 		afterID = *afterIDArg
 	}
 
-	match := bson.M{
-		"kind": structures.MessageKindModRequest,
-		"read": false,
-	}
+	match := bson.M{}
 	if !afterID.IsZero() {
-		match["_id"] = bson.M{"$gt": afterID}
+		match["message_id"] = bson.M{"$gt": afterID}
 	}
 	messages, err := r.Ctx.Inst().Query.ModRequestMessages(ctx, query.ModRequestMessagesQueryOptions{
-		Actor: actor,
+		Actor:  actor,
+		Filter: match,
 		Targets: map[structures.ObjectKind]bool{
 			structures.ObjectKindEmote: true,
 		},
 	})
 	if err != nil {
-		graphql.AddError(ctx, err)
-		return []*model.ModRequestMessage{}, nil
+		if err.(errors.APIError).Code() == errors.ErrNoItems().Code() {
+			return []*model.ModRequestMessage{}, nil
+		}
+		return nil, err
 	}
 
 	result := make([]*model.ModRequestMessage, len(messages))
