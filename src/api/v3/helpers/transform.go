@@ -275,6 +275,7 @@ func EmoteVersionStructureToModel(ctx global.Context, s *structures.EmoteVersion
 		Timestamp:   s.ID.Timestamp(),
 		Images:      images,
 		Lifecycle:   int(s.State.Lifecycle),
+		Listed:      s.State.Listed,
 	}
 }
 

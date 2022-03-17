@@ -100,7 +100,10 @@ func (r *Resolver) SearchEmotes(
 	for i, e := range result {
 		// Bring forward the latest version
 		if len(e.Versions) > 0 {
-			e.ID = e.GetLatestVersion(true).ID
+			ver := e.GetLatestVersion(true)
+			if ver != nil {
+				e.ID = ver.ID
+			}
 		}
 		models[i] = helpers.EmoteStructureToModel(r.Ctx, e)
 	}

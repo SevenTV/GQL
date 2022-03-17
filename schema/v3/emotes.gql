@@ -14,7 +14,12 @@ extend type Subscription {
 }
 
 extend type Mutation {
-  editEmote(emote_id: ObjectID!, data: EditEmoteInput!): Emote @hasPermissions
+  emote(id: ObjectID!): EmoteOps!
+}
+
+type EmoteOps {
+  id: ObjectID!
+  update(params: EmoteUpdate!): Emote! @goField(forceResolver: true)
 }
 
 type Emote {
@@ -68,6 +73,7 @@ type EmoteVersion {
   timestamp: Time!
   images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
   lifecycle: Int!
+  listed: Boolean!
 }
 
 enum EmoteSearchCategory {
@@ -93,9 +99,12 @@ input UserEmoteInput {
   alias: String
 }
 
-input EditEmoteInput {
+input EmoteUpdate {
   name: String
+  version_name: String
+  version_description: String
   flags: Int
-  owner_id: String
+  owner_id: ObjectID
   tags: [String!]
+  listed: Boolean
 }
