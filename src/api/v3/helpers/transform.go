@@ -158,7 +158,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 	for _, ver := range s.Versions {
 		vimages := []*model.Image{}
 		animated = ver.FrameCount > 1
-		if ver.State.Lifecycle < structures.EmoteLifecycleProcessing {
+		if ver.State.Lifecycle < structures.EmoteLifecycleProcessing || ver.IsUnavailable() {
 			continue // skip if lifecycle isn't past pending
 		}
 		if ver.ID == s.ID {

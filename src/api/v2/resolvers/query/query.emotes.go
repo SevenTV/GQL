@@ -4,6 +4,8 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/SevenTV/Common/errors"
+	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/structures/v3/query"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/graph/v2/model"
@@ -16,7 +18,11 @@ import (
 )
 
 func (r *Resolver) Emote(ctx context.Context, id string) (*model.Emote, error) {
-	return loaders.For(ctx).EmoteByID.Load(id)
+	emote, err := loaders.For(ctx).EmoteByID.Load(id)
+	if emote == nil || emote.ID == structures.DeletedEmote.ID.Hex() {
+		return nil, errors.ErrUnknownEmote()
+	}
+	return emote, err
 }
 
 func (r *Resolver) SearchEmotes(

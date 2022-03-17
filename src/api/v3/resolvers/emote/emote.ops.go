@@ -6,6 +6,7 @@ import (
 	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/structures/v3/mutations"
+	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/graph/v3/generated"
 	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/api/events"
@@ -40,6 +41,14 @@ func (r *ResolverOps) Update(ctx context.Context, obj *model.EmoteOps, params mo
 	ver, _ := emote.GetVersion(obj.ID)
 	eb := structures.NewEmoteBuilder(emote)
 
+	// Cannot edit deleted version without privileges
+	if !actor.HasPermission(structures.RolePermissionEditAnyEmote) && ver.IsUnavailable() {
+		return nil, errors.ErrUnknownEmote()
+	}
+	if ver.IsProcessing() {
+		return nil, errors.ErrInsufficientPrivilege().SetDetail("Cannot edit emote in a processing state")
+	}
+
 	// Edit name
 	if params.Name != nil {
 		eb.SetName(*params.Name)
@@ -69,6 +78,10 @@ func (r *ResolverOps) Update(ctx context.Context, obj *model.EmoteOps, params mo
 	}
 	if params.VersionDescription != nil {
 		ver.Description = *params.VersionDescription
+		versionUpdated = true
+	}
+	if params.Deleted != nil {
+		ver.State.Lifecycle = utils.Ternary(*params.Deleted, structures.EmoteLifecycleDeleted, structures.EmoteLifecycleLive).(structures.EmoteLifecycle)
 		versionUpdated = true
 	}
 	if versionUpdated {

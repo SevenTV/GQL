@@ -53,6 +53,10 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 
 				for i, v := range ids {
 					if x, ok := m[v]; ok {
+						ver, _ := x.GetVersion(v)
+						if ver == nil || ver.IsUnavailable() {
+							continue
+						}
 						x.ID = v
 						models[i] = helpers.EmoteStructureToModel(gCtx, x)
 					}

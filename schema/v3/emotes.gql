@@ -107,4 +107,5 @@ input EmoteUpdate {
   owner_id: ObjectID
   tags: [String!]
   listed: Boolean
+  deleted: Boolean
 }
