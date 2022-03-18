@@ -30,6 +30,8 @@ extend type Query {
 extend type Mutation {
   # Edit an emote. Requires permission.
   editEmote(emote: EmoteInput!, reason: String): Emote
+  # Delete an emote. Requires permission.
+  deleteEmote(id: String!, reason: String!): Boolean
 }
 
 type Emote {

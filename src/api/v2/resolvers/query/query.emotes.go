@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/SevenTV/Common/errors"
+	v2structures "github.com/SevenTV/Common/structures/v2"
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/structures/v3/query"
 	"github.com/SevenTV/Common/utils"
@@ -36,7 +37,7 @@ func (r *Resolver) SearchEmotes(
 	sortByArg *string,
 	sortOrderArg *int,
 	channel *string,
-	filter *model.EmoteFilter,
+	filterArg *model.EmoteFilter,
 ) ([]*model.Emote, error) {
 	actor := auth.For(ctx)
 
@@ -71,6 +72,7 @@ func (r *Resolver) SearchEmotes(
 
 	// Global State
 	filterDoc := bson.M{}
+	onlyListed := true
 	if globalStateArg != nil && *globalStateArg != "include" {
 		set, err := r.Ctx.Inst().Query.GlobalEmoteSet(ctx)
 		if err == nil {
@@ -81,10 +83,48 @@ func (r *Resolver) SearchEmotes(
 
 			switch *globalStateArg {
 			case "only":
-				filterDoc["_id"] = bson.M{"$in": ids}
+				filterDoc["versions.id"] = bson.M{"$in": ids}
 			case "hide":
-				filterDoc["_id"] = bson.M{"$not": bson.M{"$in": ids}}
+				filterDoc["versions.id"] = bson.M{"$not": bson.M{"$in": ids}}
 			}
+		}
+	}
+	if filterArg != nil {
+		var vis int32
+		var visc int32
+		if filterArg.Visibility != nil {
+			vis = int32(*filterArg.Visibility)
+		}
+		if filterArg.VisibilityClear != nil {
+			visc = int32(*filterArg.VisibilityClear)
+		}
+
+		// Handle legacy mod queue
+		// Where visibility: 4, visibility_clear: 256, meaning emotes pending approval
+		if vis == v2structures.EmoteVisibilityUnlisted && visc == v2structures.EmoteVisibilityPermanentlyUnlisted {
+			// Fetch mod items
+			items, err := r.Ctx.Inst().Query.ModRequestMessages(ctx, query.ModRequestMessagesQueryOptions{
+				Actor: actor,
+				Targets: map[structures.ObjectKind]bool{
+					structures.ObjectKindEmote: true,
+				},
+			})
+			if err != nil {
+				return nil, err
+			}
+
+			// Fetch emotes
+			emoteIDs := make([]primitive.ObjectID, len(items))
+			for i, msg := range items {
+				mb := structures.NewMessageBuilder(msg)
+				req := mb.DecodeModRequest()
+				emoteIDs[i] = req.TargetID
+			}
+			// Set to filter
+			filterDoc["versions.id"] = bson.M{
+				"$in": emoteIDs,
+			}
+			onlyListed = false
 		}
 	}
 
@@ -106,7 +146,7 @@ func (r *Resolver) SearchEmotes(
 	for i, e := range result {
 		// Bring forward the latest version
 		if len(e.Versions) > 0 {
-			ver := e.GetLatestVersion(true)
+			ver := e.GetLatestVersion(onlyListed)
 			if ver != nil {
 				e.ID = ver.ID
 			}
