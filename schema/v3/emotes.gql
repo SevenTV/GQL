@@ -39,6 +39,7 @@ type Emote {
 
   images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
   versions: [EmoteVersion!]!
+  listed: Boolean!
 
   reports: [Report!]!
     @goField(forceResolver: true)
@@ -57,6 +58,7 @@ type EmotePartial {
   owner: User! @goField(forceResolver: true)
   images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
   versions: [EmoteVersion!]!
+  listed: Boolean!
 }
 
 input EmoteSearchFilter {

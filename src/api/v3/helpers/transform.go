@@ -149,6 +149,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 	images := []*model.Image{}
 	versions := []*model.EmoteVersion{}
 	lifecycle := structures.EmoteLifecycleDisabled
+	listed := false
 	animated := false
 
 	// Sort by version timestamp
@@ -163,6 +164,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		}
 		if ver.ID == s.ID {
 			lifecycle = ver.State.Lifecycle
+			listed = ver.State.Listed
 		}
 		for _, f := range ver.Formats {
 			for _, im := range f.Files {
@@ -217,6 +219,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		Channels:  &model.UserSearchResult{},
 		Images:    images,
 		Versions:  versions,
+		Listed:    listed,
 		Reports:   []*model.Report{},
 	}
 }
@@ -234,6 +237,7 @@ func EmoteStructureToPartialModel(ctx global.Context, m *model.Emote) *model.Emo
 		Owner:     m.Owner,
 		Images:    m.Images,
 		Versions:  m.Versions,
+		Listed:    m.Listed,
 	}
 }
 
