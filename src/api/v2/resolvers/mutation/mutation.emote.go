@@ -60,15 +60,30 @@ func (r *Resolver) EditEmote(ctx context.Context, opt model.EmoteInput, reason *
 		vis := int64(*opt.Visibility)
 		flags := emote.Flags
 
-		readModRequests := func(msg *structures.Message) error {
-			mb := structures.NewMessageBuilder(msg)
-			// Mark the message as read
-			mm := mutations.MessageMutation{MessageBuilder: mb}
-			_, err := mm.SetReadStates(ctx, r.Ctx.Inst().Mongo, true, mutations.MessageReadStateOptions{
+		readModRequests := func() error {
+			// Fetch mod request
+			targetIDs := make([]primitive.ObjectID, len(emote.Versions))
+			for i, ver := range emote.Versions {
+				targetIDs[i] = ver.ID
+			}
+			items, _ := r.Ctx.Inst().Query.ModRequestMessages(ctx, query.ModRequestMessagesQueryOptions{
 				Actor: actor,
+				Targets: map[structures.ObjectKind]bool{
+					structures.ObjectKindEmote: true,
+				},
+				TargetIDs: targetIDs,
 			})
-			if err != nil {
-				return err
+
+			for _, msg := range items {
+				mb := structures.NewMessageBuilder(msg)
+				// Mark the message as read
+				mm := mutations.MessageMutation{MessageBuilder: mb}
+				_, err := mm.SetReadStates(ctx, r.Ctx.Inst().Mongo, true, mutations.MessageReadStateOptions{
+					Actor: actor,
+				})
+				if err != nil {
+					return err
+				}
 			}
 			return nil
 		}
@@ -84,28 +99,15 @@ func (r *Resolver) EditEmote(ctx context.Context, opt model.EmoteInput, reason *
 			// Handle legacy moderation
 			// This was how emotes were approved in v2,
 			// so we must clear the Mod Request.
-			{
-				// Fetch mod request
-				targetIDs := make([]primitive.ObjectID, len(emote.Versions))
-				for i, ver := range emote.Versions {
-					targetIDs[i] = ver.ID
-				}
-				items, _ := r.Ctx.Inst().Query.ModRequestMessages(ctx, query.ModRequestMessagesQueryOptions{
-					Actor: actor,
-					Targets: map[structures.ObjectKind]bool{
-						structures.ObjectKindEmote: true,
-					},
-					TargetIDs: targetIDs,
-				})
-				if len(items) > 0 {
-					for _, msg := range items {
-						if err = readModRequests(msg); err != nil {
-							return nil, err
-						}
-					}
-				} else {
-					return nil, errors.ErrEmoteNameInvalid().SetDetail("[Legacy] Found no mod request for this emote")
-				}
+			if err = readModRequests(); err != nil {
+				return nil, err
+			}
+		} else if !version.State.Listed && utils.BitField.HasBits(vis, int64(v2structures.EmoteVisibilityPermanentlyUnlisted)) {
+			// Handle legacy moderation
+			// "Permanently unlisted" flag means reading the
+			// mod request without listing the emote
+			if err = readModRequests(); err != nil {
+				return nil, err
 			}
 		} else if version.State.Listed && utils.BitField.HasBits(vis, int64(v2structures.EmoteVisibilityUnlisted)) {
 			if !actor.HasPermission(structures.RolePermissionEditAnyEmote) {
@@ -114,6 +116,7 @@ func (r *Resolver) EditEmote(ctx context.Context, opt model.EmoteInput, reason *
 			version.State.Listed = false
 			eb.UpdateVersion(version.ID, version)
 		}
+
 		// zero-width
 		if emote.HasFlag(structures.EmoteFlagsZeroWidth) && !utils.BitField.HasBits(vis, int64(v2structures.EmoteVisibilityZeroWidth)) {
 			flags &= ^structures.EmoteFlagsZeroWidth
