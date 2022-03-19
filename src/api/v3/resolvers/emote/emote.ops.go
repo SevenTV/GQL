@@ -88,8 +88,7 @@ func (r *ResolverOps) Update(ctx context.Context, obj *model.EmoteOps, params mo
 		eb.UpdateVersion(obj.ID, ver)
 	}
 
-	em := mutations.EmoteMutation{EmoteBuilder: eb}
-	if _, err := em.Edit(ctx, r.Ctx.Inst().Mongo, mutations.EmoteEditOptions{
+	if err := r.Ctx.Inst().Mutate.EditEmote(ctx, eb, mutations.EmoteEditOptions{
 		Actor: actor,
 	}); err != nil {
 		return nil, err

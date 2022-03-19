@@ -84,10 +84,8 @@ func (r *Resolver) doSetChannelEditor(
 		}
 	}
 
-	eb := structures.NewUserBuilder(target)
-	um := mutations.UserMutation{UserBuilder: eb}
-
-	if _, err := um.Editors(ctx, r.Ctx.Inst().Mongo, mutations.UserEditorsOptions{
+	ub := structures.NewUserBuilder(target)
+	if err := r.Ctx.Inst().Mutate.ModifyUserEditors(ctx, ub, mutations.UserEditorsOptions{
 		Actor:             actor,
 		Editor:            editor,
 		EditorPermissions: structures.UserEditorPermissionModifyEmotes,

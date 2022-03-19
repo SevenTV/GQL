@@ -38,9 +38,7 @@ func (r *Resolver) ReadMessages(ctx context.Context, messageIds []primitive.Obje
 
 	updated := 0
 	for _, msg := range messages {
-		mm := &mutations.MessageMutation{MessageBuilder: structures.NewMessageBuilder(msg)}
-
-		result, err := mm.SetReadStates(ctx, r.Ctx.Inst().Mongo, read, mutations.MessageReadStateOptions{
+		result, err := r.Ctx.Inst().Mutate.SetMessageReadStates(ctx, structures.NewMessageBuilder(msg), read, mutations.MessageReadStateOptions{
 			Actor:               actor,
 			SkipPermissionCheck: false,
 		})

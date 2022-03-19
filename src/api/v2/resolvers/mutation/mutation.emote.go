@@ -77,8 +77,7 @@ func (r *Resolver) EditEmote(ctx context.Context, opt model.EmoteInput, reason *
 			for _, msg := range items {
 				mb := structures.NewMessageBuilder(msg)
 				// Mark the message as read
-				mm := mutations.MessageMutation{MessageBuilder: mb}
-				_, err := mm.SetReadStates(ctx, r.Ctx.Inst().Mongo, true, mutations.MessageReadStateOptions{
+				_, err := r.Ctx.Inst().Mutate.SetMessageReadStates(ctx, mb, true, mutations.MessageReadStateOptions{
 					Actor: actor,
 				})
 				if err != nil {
@@ -133,8 +132,7 @@ func (r *Resolver) EditEmote(ctx context.Context, opt model.EmoteInput, reason *
 		eb.SetFlags(flags)
 	}
 
-	em := mutations.EmoteMutation{EmoteBuilder: eb}
-	if _, err = em.Edit(ctx, r.Ctx.Inst().Mongo, mutations.EmoteEditOptions{
+	if err = r.Ctx.Inst().Mutate.EditEmote(ctx, eb, mutations.EmoteEditOptions{
 		Actor: actor,
 	}); err != nil {
 		return nil, err
@@ -175,8 +173,7 @@ func (r *Resolver) DeleteEmote(ctx context.Context, id string, reason string) (*
 	version.State.Lifecycle = structures.EmoteLifecycleDeleted
 	eb.UpdateVersion(version.ID, version)
 
-	em := mutations.EmoteMutation{EmoteBuilder: eb}
-	if _, err = em.Edit(ctx, r.Ctx.Inst().Mongo, mutations.EmoteEditOptions{
+	if err = r.Ctx.Inst().Mutate.EditEmote(ctx, eb, mutations.EmoteEditOptions{
 		Actor: actor,
 	}); err != nil {
 		return nil, err

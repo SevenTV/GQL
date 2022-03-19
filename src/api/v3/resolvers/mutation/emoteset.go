@@ -29,12 +29,9 @@ func (r *Resolver) CreateEmoteSet(ctx context.Context, input model.CreateEmoteSe
 		SetPrivileged(isPrivileged).
 		SetOwnerID(actor.ID).
 		SetEmoteSlots(250)
-	m := mutations.EmoteSetMutation{
-		EmoteSetBuilder: b,
-	}
 
 	// Execute mutation
-	if _, err := m.Create(ctx, r.Ctx.Inst().Mongo, mutations.EmoteSetMutationOptions{
+	if err := r.Ctx.Inst().Mutate.CreateEmoteSet(ctx, b, mutations.EmoteSetMutationOptions{
 		Actor: actor,
 	}); err != nil {
 		return nil, err

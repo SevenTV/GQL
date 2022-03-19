@@ -152,8 +152,7 @@ func (r *Resolver) doSetChannelEmote(
 	action mutations.ListItemAction,
 	b *structures.EmoteSetBuilder,
 ) error {
-	m := mutations.EmoteSetMutation{EmoteSetBuilder: b}
-	if _, err := m.SetEmote(ctx, r.Ctx.Inst().Mongo, mutations.EmoteSetMutationSetEmoteOptions{
+	if err := r.Ctx.Inst().Mutate.EditEmotesInSet(ctx, b, mutations.EmoteSetMutationSetEmoteOptions{
 		Actor: actor,
 		Emotes: []mutations.EmoteSetMutationSetEmoteItem{{
 			Action: action,

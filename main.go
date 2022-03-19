@@ -12,6 +12,7 @@ import (
 
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/redis"
+	"github.com/SevenTV/Common/structures/v3/mutations"
 	"github.com/SevenTV/Common/structures/v3/query"
 	"github.com/SevenTV/GQL/src/api"
 	"github.com/SevenTV/GQL/src/configure"
@@ -93,6 +94,7 @@ func main() {
 		gCtx.Inst().Mongo = instance.WrapMongo(mongoInst)
 		gCtx.Inst().Redis = redisInst
 		gCtx.Inst().Query = query.New(mongoInst, redisInst)
+		gCtx.Inst().Mutate = mutations.New(mongoInst, redisInst)
 	}
 
 	serverDone := api.New(gCtx)

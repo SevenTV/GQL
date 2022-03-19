@@ -50,8 +50,7 @@ func (r *ResolverOps) Emotes(ctx context.Context, obj *model.EmoteSetOps, id pri
 	}
 
 	// Mutate the thing
-	m := mutations.EmoteSetMutation{EmoteSetBuilder: b}
-	if _, err := m.SetEmote(ctx, r.Ctx.Inst().Mongo, mutations.EmoteSetMutationSetEmoteOptions{
+	if err := r.Ctx.Inst().Mutate.EditEmotesInSet(ctx, b, mutations.EmoteSetMutationSetEmoteOptions{
 		Actor: actor,
 		Emotes: []mutations.EmoteSetMutationSetEmoteItem{{
 			Action: mutations.ListItemAction(action),

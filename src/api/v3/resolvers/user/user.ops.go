@@ -42,9 +42,8 @@ func (r *ResolverOps) Connections(ctx context.Context, obj *model.UserOps, id st
 
 	// Perform a mutation
 	var err error
-	m := mutations.UserMutation{UserBuilder: b}
 	if d.EmoteSetID != nil {
-		if _, err = m.SetActiveEmoteSet(ctx, r.Ctx.Inst().Mongo, mutations.SetUserActiveEmoteSet{
+		if err = r.Ctx.Inst().Mutate.SetUserConnectionActiveEmoteSet(ctx, b, mutations.SetUserActiveEmoteSet{
 			EmoteSetID:   *d.EmoteSetID,
 			Platform:     structures.UserConnectionPlatformTwitch,
 			Actor:        actor,
