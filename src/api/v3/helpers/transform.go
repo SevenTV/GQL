@@ -304,3 +304,15 @@ func MessageStructureToModRequestModel(ctx global.Context, s *structures.Message
 		TargetID:   req.TargetID,
 	}
 }
+
+func BanStructureToModel(ctx global.Context, s *structures.Ban) *model.Ban {
+	return &model.Ban{
+		ID:        s.ID,
+		Reason:    s.Reason,
+		Effects:   int(s.Effects),
+		ExpireAt:  s.ExpireAt,
+		CreatedAt: s.ID.Timestamp(),
+		ActorID:   s.ActorID,
+		VictimID:  s.VictimID,
+	}
+}

@@ -34,6 +34,12 @@ func userLoader(gCtx global.Context, keyName string) *loaders.UserLoader {
 				ids[i] = id
 			}
 
+			// Initially fill the response with "deleted user" models in case some cannot be found
+			deletedModel := helpers.UserStructureToModel(gCtx, structures.DeletedUser)
+			for i := 0; i < len(models); i++ {
+				models[i] = deletedModel
+			}
+
 			// Fetch users
 			users, _, err := gCtx.Inst().Query.SearchUsers(ctx, bson.M{
 				keyName: bson.M{"$in": ids},

@@ -18,19 +18,38 @@ import (
 )
 
 func (r *Resolver) User(ctx context.Context, id string) (*model.User, error) {
+	var (
+		isMe  = id == "@me"
+		model *model.User
+		err   error
+	)
 	if primitive.IsValidObjectID(id) {
-		return loaders.For(ctx).UserByID.Load(id)
+		model, err = loaders.For(ctx).UserByID.Load(id)
 	} else if id == "@me" {
 		// Handle @me (fetch actor)
 		// this sets the queried user ID to that of the actor user
 		actor := auth.For(ctx)
+		if actor == nil {
+			return nil, errors.ErrUnauthorized()
+		}
 		id = actor.ID.Hex()
-		return loaders.For(ctx).UserByID.Load(id)
+		model, err = loaders.For(ctx).UserByID.Load(id)
 	} else {
 		// at this point we assume the query is for a username
 		// (it was neither an id, or the @me label)
-		return loaders.For(ctx).UserByUsername.Load(strings.ToLower(id))
+		model, err = loaders.For(ctx).UserByUsername.Load(strings.ToLower(id))
 	}
+
+	// Check if banned
+	if !isMe && model != nil {
+		userID, _ := primitive.ObjectIDFromHex(model.ID)
+		if _, banned := r.Ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{ // remove emotes made by usersa who own nothing and are happy
+			Filter: bson.M{"effects": bson.M{"$bitsAnySet": structures.BanEffectMemoryHole}},
+		}).MemoryHole[userID]; banned {
+			return nil, errors.ErrUnknownUser()
+		}
+	}
+	return model, err
 }
 
 func (r *Resolver) SearchUsers(ctx context.Context, queryArg string, page *int, limit *int) ([]*model.UserPartial, error) {

@@ -18,9 +18,9 @@ func New(r types.Resolver) generated.BanResolver {
 }
 
 func (r *Resolver) Victim(ctx context.Context, obj *model.Ban) (*model.User, error) {
-	return loaders.For(ctx).UserByID.Load(obj.Victim.ID)
+	return loaders.For(ctx).UserByID.Load(obj.VictimID)
 }
 
 func (r *Resolver) Actor(ctx context.Context, obj *model.Ban) (*model.User, error) {
-	return loaders.For(ctx).UserByID.Load(obj.Actor.ID)
+	return loaders.For(ctx).UserByID.Load(obj.ActorID)
 }

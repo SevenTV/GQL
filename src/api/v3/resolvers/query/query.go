@@ -5,6 +5,7 @@ import (
 
 	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/Common/structures/v3"
+	"github.com/SevenTV/Common/structures/v3/query"
 	"github.com/SevenTV/GQL/graph/v3/generated"
 	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/api/v3/auth"
@@ -33,6 +34,12 @@ func (r *Resolver) CurrentUser(ctx context.Context) (*model.User, error) {
 }
 
 func (r *Resolver) User(ctx context.Context, id primitive.ObjectID) (*model.User, error) {
+	if _, banned := r.Ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{ // remove emotes made by usersa who own nothing and are happy
+		Filter: bson.M{"effects": bson.M{"$bitsAnySet": structures.BanEffectMemoryHole}},
+	}).MemoryHole[id]; banned {
+		return nil, errors.ErrUnknownUser()
+	}
+
 	user, err := loaders.For(ctx).UserByID.Load(id)
 	if user == nil || user.ID == structures.DeletedUser.ID {
 		return nil, errors.ErrUnknownUser()

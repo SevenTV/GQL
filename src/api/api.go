@@ -26,7 +26,7 @@ func New(gCtx global.Context) <-chan struct{} {
 	router.RedirectTrailingSlash = true
 	mid := func(ctx *fasthttp.RequestCtx) {
 		if err := middleware.Auth(gCtx)(ctx); err != nil {
-			ctx.Response.Header.Add("X-Auth-Failure", err.Error())
+			ctx.Response.Header.Add("X-Auth-Failure", err.Message())
 			goto handler
 		}
 

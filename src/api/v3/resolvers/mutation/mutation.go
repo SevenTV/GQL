@@ -47,16 +47,6 @@ func (r *Resolver) EditReport(ctx context.Context, reportID primitive.ObjectID, 
 	return nil, nil
 }
 
-func (r *Resolver) CreateBan(ctx context.Context, victimID primitive.ObjectID, reason string, effects int, expireAt *string, anonymous *bool) (*model.Ban, error) {
-	// TODO
-	return nil, nil
-}
-
-func (r *Resolver) EditBan(ctx context.Context, banID primitive.ObjectID, reason *string, effects *int, expireAt *string) (*model.Ban, error) {
-	// TODO
-	return nil, nil
-}
-
 func (r *Resolver) SendInboxMessage(ctx context.Context, recipients []string, subject string, content string, important *bool, anonymous *bool) (*model.InboxMessage, error) {
 	// TODO
 	return nil, nil

@@ -9,6 +9,7 @@ import (
 	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/structures/v3/aggregations"
+	"github.com/SevenTV/Common/structures/v3/query"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/sirupsen/logrus"
@@ -86,26 +87,24 @@ func DoAuth(ctx global.Context, t string) (*structures.User, errors.APIError) {
 	if user.TokenVersion != claims.TokenVersion {
 		return nil, errors.ErrUnauthorized().SetDetail("Token Version Mismatch")
 	}
-
-	// Check bans
-	for _, ban := range user.Bans {
-		// Check for No Auth effect
-		if ban.HasEffect(structures.BanEffectNoAuth) {
-			return nil, errors.ErrInsufficientPrivilege().SetDetail("You are banned!").SetFields(errors.Fields{
-				"ban": map[string]string{
-					"reason":    ban.Reason,
-					"expire_at": ban.ExpireAt.Format(time.RFC3339),
-				},
-			})
-		}
-		// Check for No Permissions effect
-		if ban.HasEffect(structures.BanEffectNoPermissions) {
-			user.Roles = []*structures.Role{structures.RevocationRole}
-
-		}
-	}
 	defaultRoles, _ := ctx.Inst().Query.Roles(ctx, bson.M{"default": true})
 	user.AddRoles(defaultRoles...)
+
+	// Check bans
+	bans := ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{
+		Filter: bson.M{"effects": bson.M{"$bitsAnySet": structures.BanEffectNoAuth | structures.BanEffectNoPermissions}},
+	})
+	if ban, noAuth := bans.NoAuth[userID]; noAuth {
+		return nil, errors.ErrInsufficientPrivilege().SetDetail("You are banned!").SetFields(errors.Fields{
+			"ban": map[string]string{
+				"reason":    ban.Reason,
+				"expire_at": ban.ExpireAt.Format(time.RFC3339),
+			},
+		})
+	}
+	if _, noRights := bans.NoPermissions[userID]; noRights {
+		user.Roles = []*structures.Role{structures.RevocationRole}
+	}
 
 	return user, nil
 }
