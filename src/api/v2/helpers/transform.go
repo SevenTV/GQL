@@ -230,3 +230,15 @@ func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
 		Denied:   "0",
 	}
 }
+
+func BanStructureToModel(ctx global.Context, s *structures.Ban) *model.Ban {
+	victimID := s.VictimID.Hex()
+	actorID := s.ActorID.Hex()
+	return &model.Ban{
+		ID:         s.ID.Hex(),
+		UserID:     &victimID,
+		Reason:     s.Reason,
+		Active:     s.ExpireAt.After(time.Now()),
+		IssuedByID: &actorID,
+	}
+}

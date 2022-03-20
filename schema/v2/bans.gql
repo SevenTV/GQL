@@ -1,3 +1,10 @@
+extend type Mutation {
+  # Ban a user. Requires permission.
+  banUser(victim_id: String!, expire_at: String, reason: String): Response
+  # Unban a user. Requires permission.
+  unbanUser(victim_id: String!, reason: String): Response
+}
+
 type Ban {
   # ID of the ban.
   id: String!
