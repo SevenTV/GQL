@@ -30,25 +30,23 @@ func userByID(gCtx global.Context) *loaders.UserLoader {
 				models[i] = deletedModel
 			}
 
-			users, _, err := gCtx.Inst().Query.SearchUsers(ctx, bson.M{
+			users := gCtx.Inst().Query.Users(ctx, bson.M{
 				"_id": bson.M{
 					"$in": keys,
 				},
-			})
+			}).Items()
 
-			if err == nil {
-				m := make(map[primitive.ObjectID]*structures.User)
-				for _, u := range users {
-					if u == nil {
-						continue
-					}
-					m[u.ID] = u
+			m := make(map[primitive.ObjectID]*structures.User)
+			for _, u := range users {
+				if u == nil {
+					continue
 				}
+				m[u.ID] = u
+			}
 
-				for i, v := range keys {
-					if x, ok := m[v]; ok {
-						models[i] = helpers.UserStructureToModel(gCtx, x)
-					}
+			for i, v := range keys {
+				if x, ok := m[v]; ok {
+					models[i] = helpers.UserStructureToModel(gCtx, x)
 				}
 			}
 
