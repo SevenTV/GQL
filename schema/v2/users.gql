@@ -93,7 +93,7 @@ type User {
   # Get the user's current live broadcast
   broadcast: Broadcast
   # Get the user's most recent notifications
-  notifications: [Notification]!
+  notifications: [Notification]! @goField(forceResolver: true)
   # Get amount of unread notifications this user has
   notification_count: Int!
   # Cosmetics

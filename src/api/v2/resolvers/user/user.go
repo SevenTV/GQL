@@ -2,6 +2,8 @@ package user
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/GQL/graph/v2/generated"
@@ -114,4 +116,19 @@ func (r *Resolver) EditorIn(ctx context.Context, obj *model.User) ([]*model.User
 		result = append(result, helpers.UserStructureToPartialModel(r.Ctx, u))
 	}
 	return result, nil
+}
+
+func (r *Resolver) Notifications(ctx context.Context, obj *model.User) ([]*model.Notification, error) {
+	return []*model.Notification{{
+		ID:           primitive.NewObjectID().Hex(),
+		Announcement: true,
+		Title:        "Notifications have evolved",
+		Timestamp:    time.Now().Format(time.RFC3339),
+		MessageParts: []*model.NotificationMessagePart{{
+			Type: 1,
+			Data: fmt.Sprintf("The new Inbox system replaces notifications! To see your messages, go to %s", r.Ctx.Config().WebsiteURL),
+		}},
+		Read:   false,
+		ReadAt: new(string),
+	}}, nil
 }
