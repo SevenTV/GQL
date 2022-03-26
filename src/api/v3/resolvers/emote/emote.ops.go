@@ -81,7 +81,7 @@ func (r *ResolverOps) Update(ctx context.Context, obj *model.EmoteOps, params mo
 		versionUpdated = true
 	}
 	if params.Deleted != nil {
-		ver.State.Lifecycle = utils.Ternary(*params.Deleted, structures.EmoteLifecycleDeleted, structures.EmoteLifecycleLive).(structures.EmoteLifecycle)
+		ver.State.Lifecycle = utils.Ternary(*params.Deleted, structures.EmoteLifecycleDeleted, structures.EmoteLifecycleLive)
 		versionUpdated = true
 	}
 	if versionUpdated {

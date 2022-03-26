@@ -54,7 +54,7 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 		ID:               s.ID,
 		UserType:         string(s.UserType),
 		Username:         s.Username,
-		DisplayName:      utils.Ternary(len(s.DisplayName) > 0, s.DisplayName, s.Username).(string),
+		DisplayName:      utils.Ternary(len(s.DisplayName) > 0, s.DisplayName, s.Username),
 		CreatedAt:        s.ID.Timestamp(),
 		AvatarURL:        avatarURL,
 		Biography:        s.Biography,

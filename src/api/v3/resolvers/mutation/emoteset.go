@@ -5,7 +5,6 @@ import (
 
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/structures/v3/mutations"
-	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/api/v3/auth"
 	"github.com/SevenTV/GQL/src/api/v3/loaders"
@@ -23,7 +22,10 @@ func (r *Resolver) CreateEmoteSet(ctx context.Context, input model.CreateEmoteSe
 	actor := auth.For(ctx)
 
 	// Set up emote set builder
-	isPrivileged := utils.Ternary(input.Privileged != nil, input.Privileged, false).(bool)
+	isPrivileged := false
+	if input.Privileged != nil && *input.Privileged {
+		isPrivileged = true
+	}
 	b := structures.NewEmoteSetBuilder(nil).
 		SetName(input.Name).
 		SetPrivileged(isPrivileged).
