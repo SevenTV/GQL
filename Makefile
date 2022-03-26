@@ -19,9 +19,7 @@ linux:
 	GOOS=linux GOARCH=amd64 go build -v -ldflags "-X 'main.Version=${VERSION}' -X 'main.Unix=$(shell date +%s)' -X 'main.User=${BUILDER}'" -o bin/gql .
 
 lint:
-# Disable staticcheck because they do not yet support generics.
-# Remove the comment once support is added
-#	staticcheck ./...
+	staticcheck ./...
 	go vet ./...
 	golangci-lint run
 	yarn prettier --write .
@@ -35,7 +33,7 @@ build_deps:
 	go install github.com/seventv/dataloaden@cc5ac4900
 
 go_installs: build_deps
-	go install honnef.co/go/tools/cmd/staticcheck@master
+	go install honnef.co/go/tools/cmd/staticcheck@generics
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 gql:
