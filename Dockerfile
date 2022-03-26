@@ -1,4 +1,4 @@
-FROM golang:1.18-alpine as builder
+FROM golang:1.18 as builder
 
 WORKDIR /tmp/gql
 
@@ -10,9 +10,9 @@ ARG VERSION
 ENV GQL_BUILDER=${BUILDER}
 ENV GQL_VERSION=${VERSION}
 
-RUN apk add --no-cache make git gcc && \
+RUN apt-get install make git gcc && \
     make build_deps && \
-    make linux
+    make
 
 FROM ubuntu:latest
 
