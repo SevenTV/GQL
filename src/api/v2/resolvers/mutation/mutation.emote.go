@@ -66,7 +66,7 @@ func (r *Resolver) EditEmote(ctx context.Context, opt model.EmoteInput, reason *
 			for i, ver := range emote.Versions {
 				targetIDs[i] = ver.ID
 			}
-			items, _ := r.Ctx.Inst().Query.ModRequestMessages(ctx, query.ModRequestMessagesQueryOptions{
+			result := r.Ctx.Inst().Query.ModRequestMessages(ctx, query.ModRequestMessagesQueryOptions{
 				Actor: actor,
 				Targets: map[structures.ObjectKind]bool{
 					structures.ObjectKindEmote: true,
@@ -74,7 +74,7 @@ func (r *Resolver) EditEmote(ctx context.Context, opt model.EmoteInput, reason *
 				TargetIDs: targetIDs,
 			})
 
-			for _, msg := range items {
+			for _, msg := range result.Items() {
 				mb := structures.NewMessageBuilder(msg)
 				// Mark the message as read
 				_, err := r.Ctx.Inst().Mutate.SetMessageReadStates(ctx, mb, true, mutations.MessageReadStateOptions{

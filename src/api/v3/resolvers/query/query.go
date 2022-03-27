@@ -76,11 +76,6 @@ func (r *Resolver) Report(ctx context.Context, id primitive.ObjectID) (*model.Re
 	return loaders.For(ctx).ReportByID.Load(id)
 }
 
-func (r *Resolver) Inbox(ctx context.Context, afterID *primitive.ObjectID) ([]*model.InboxMessage, error) {
-	// TODO
-	return nil, nil
-}
-
 type Sort struct {
 	Value string    `json:"value"`
 	Order SortOrder `json:"order"`

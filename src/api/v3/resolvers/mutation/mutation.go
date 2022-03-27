@@ -46,8 +46,3 @@ func (r *Resolver) EditReport(ctx context.Context, reportID primitive.ObjectID, 
 	// primitive.ObjectID
 	return nil, nil
 }
-
-func (r *Resolver) SendInboxMessage(ctx context.Context, recipients []string, subject string, content string, important *bool, anonymous *bool) (*model.InboxMessage, error) {
-	// TODO
-	return nil, nil
-}

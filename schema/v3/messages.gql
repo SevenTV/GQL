@@ -1,12 +1,13 @@
 extend type Query {
-  inbox(after_id: ObjectID): [InboxMessage!]! @hasPermissions
+  inbox(user_id: ObjectID!, after_id: ObjectID, limit: Int): [InboxMessage!]!
+    @hasPermissions
   mod_requests(after_id: ObjectID): [ModRequestMessage!]!
 }
 
 extend type Mutation {
   readMessages(message_ids: [ObjectID!]!, read: Boolean!): Int! @hasPermissions
   sendInboxMessage(
-    recipients: [String!]!
+    recipients: [ObjectID!]!
     subject: String!
     content: String!
     important: Boolean
@@ -36,6 +37,7 @@ type InboxMessage implements Message {
   important: Boolean!
   starred: Boolean!
   pinned: Boolean!
+  placeholders: StringMap!
 }
 
 type ModRequestMessage implements Message {

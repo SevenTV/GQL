@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/utils"
@@ -289,6 +290,25 @@ func ActiveEmoteStructureToModel(ctx global.Context, s *structures.ActiveEmote) 
 		Name:      s.Name,
 		Flags:     int(s.Flags),
 		Timestamp: s.Timestamp,
+	}
+}
+
+func MessageStructureToInboxModel(ctx global.Context, s *structures.Message) *model.InboxMessage {
+	mb := structures.NewMessageBuilder(s)
+	inb := mb.DecodeInbox()
+	return &model.InboxMessage{
+		ID:           s.ID,
+		Kind:         model.MessageKind(s.Kind.String()),
+		CreatedAt:    s.CreatedAt,
+		Author:       UserStructureToModel(ctx, s.Author),
+		Read:         s.Read,
+		ReadAt:       &time.Time{},
+		Subject:      inb.Subject,
+		Content:      inb.Content,
+		Important:    inb.Important,
+		Starred:      inb.Starred,
+		Pinned:       inb.Pinned,
+		Placeholders: utils.Ternary(inb.Placeholders == nil, map[string]string{}, inb.Placeholders),
 	}
 }
 
