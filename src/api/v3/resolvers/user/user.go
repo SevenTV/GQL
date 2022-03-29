@@ -28,31 +28,12 @@ func New(r types.Resolver) generated.UserResolver {
 
 // Roles resolves the roles of a user
 func (r *Resolver) Roles(ctx context.Context, obj *model.User) ([]*model.Role, error) {
-	m := make(map[primitive.ObjectID]*model.Role)
-	defaults, _ := r.Ctx.Inst().Query.Roles(ctx, bson.M{"default": true})
-
-	for _, rol := range obj.Roles {
-		m[rol.ID] = rol
-	}
-	for _, rol := range defaults {
-		if _, ok := m[rol.ID]; ok {
-			continue
-		}
-		m[rol.ID] = helpers.RoleStructureToModel(r.Ctx, rol)
-	}
-
-	result := make([]*model.Role, len(m))
-	i := 0
-	for _, rol := range m {
-		result[i] = rol
-		i++
-	}
-	sort.Slice(result, func(i, j int) bool {
-		a := result[i]
-		b := result[j]
+	sort.Slice(obj.Roles, func(i, j int) bool {
+		a := obj.Roles[i]
+		b := obj.Roles[j]
 		return a.Position > b.Position
 	})
-	return result, nil
+	return obj.Roles, nil
 }
 
 func (r *Resolver) EmoteSets(ctx context.Context, obj *model.User) ([]*model.EmoteSet, error) {

@@ -148,7 +148,8 @@ func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
 
 func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote {
 	images := []*model.Image{}
-	versions := []*model.EmoteVersion{}
+	versions := make([]*model.EmoteVersion, len(s.Versions))
+	versionCount := int32(0)
 	lifecycle := structures.EmoteLifecycleDisabled
 	listed := false
 	animated := false
@@ -158,18 +159,19 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		return s.Versions[i].Timestamp.After(s.Versions[j].Timestamp)
 	})
 	for _, ver := range s.Versions {
-		vimages := []*model.Image{}
-		animated = ver.FrameCount > 1
 		if ver.State.Lifecycle < structures.EmoteLifecycleProcessing || ver.IsUnavailable() {
 			continue // skip if lifecycle isn't past pending
 		}
-		if ver.ID == s.ID {
-			lifecycle = ver.State.Lifecycle
-			listed = ver.State.Listed
-		}
+
+		files := ver.GetFiles("", true)
+		images = make([]*model.Image, len(files))
+		vimages := make([]*model.Image, 0)
 		for _, f := range ver.Formats {
-			for _, im := range f.Files {
+			files := ver.GetFiles(f.Name, true)
+			vimages = make([]*model.Image, len(files))
+			for i, fi := range files {
 				format := model.ImageFormatWebp
+
 				switch f.Name {
 				case structures.EmoteFormatNameAVIF:
 					format = model.ImageFormatAvif
@@ -178,29 +180,23 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 				case structures.EmoteFormatNamePNG:
 					format = model.ImageFormatPng
 				}
-				if ver.FrameCount > 1 && !im.Animated {
-					continue // skip if this is an animated emote version but image is static
-				}
 
-				// Set 3x as preview
-				url := fmt.Sprintf("//%s/emote/%s/%s", ctx.Config().CdnURL, ver.ID.Hex(), im.Name)
-				img := &model.Image{
-					Name:     im.Name,
-					Format:   format,
-					URL:      url,
-					Width:    int(im.Width),
-					Height:   int(im.Height),
-					Animated: im.Animated,
-					Time:     int(im.ProcessingTime),
-					Length:   int(im.Length),
-				}
-				vimages = append(vimages, img)
-				if ver.ID == s.ID {
-					images = append(images, img)
-				}
+				url := fmt.Sprintf("//%s/emote/%s/%s", ctx.Config().CdnURL, ver.ID.Hex(), fi.Name)
+				img := EmoteFileStructureToModel(ctx, fi, format, url)
+				vimages[i] = img
 			}
 		}
-		versions = append(versions, EmoteVersionStructureToModel(ctx, ver, vimages))
+
+		if ver.ID == s.ID {
+			lifecycle = ver.State.Lifecycle
+			listed = ver.State.Listed
+			images = vimages
+		}
+		versions[versionCount] = EmoteVersionStructureToModel(ctx, ver, vimages)
+		versionCount++
+	}
+	if len(versions) != int(versionCount) {
+		versions = versions[0:versionCount]
 	}
 
 	owner := structures.DeletedUser
@@ -281,6 +277,19 @@ func EmoteVersionStructureToModel(ctx global.Context, s *structures.EmoteVersion
 		Images:      images,
 		Lifecycle:   int(s.State.Lifecycle),
 		Listed:      s.State.Listed,
+	}
+}
+
+func EmoteFileStructureToModel(ctx global.Context, s *structures.EmoteFile, format model.ImageFormat, url string) *model.Image {
+	return &model.Image{
+		Name:     s.Name,
+		Format:   format,
+		URL:      url,
+		Width:    int(s.Width),
+		Height:   int(s.Height),
+		Animated: s.Animated,
+		Time:     int(s.ProcessingTime),
+		Length:   int(s.Length),
 	}
 }
 
