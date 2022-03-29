@@ -147,7 +147,7 @@ func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
 }
 
 func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote {
-	images := []*model.Image{}
+	images := make([]*model.Image, 0)
 	versions := make([]*model.EmoteVersion, len(s.Versions))
 	versionCount := int32(0)
 	lifecycle := structures.EmoteLifecycleDisabled
@@ -164,27 +164,22 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 		}
 
 		files := ver.GetFiles("", true)
-		images = make([]*model.Image, len(files))
-		vimages := make([]*model.Image, 0)
-		for _, f := range ver.Formats {
-			files := ver.GetFiles(f.Name, true)
-			vimages = make([]*model.Image, len(files))
-			for i, fi := range files {
-				format := model.ImageFormatWebp
+		vimages := make([]*model.Image, len(files))
+		for i, fi := range files {
+			format := model.ImageFormatWebp
 
-				switch f.Name {
-				case structures.EmoteFormatNameAVIF:
-					format = model.ImageFormatAvif
-				case structures.EmoteFormatNameGIF:
-					format = model.ImageFormatGif
-				case structures.EmoteFormatNamePNG:
-					format = model.ImageFormatPng
-				}
-
-				url := fmt.Sprintf("//%s/emote/%s/%s", ctx.Config().CdnURL, ver.ID.Hex(), fi.Name)
-				img := EmoteFileStructureToModel(ctx, fi, format, url)
-				vimages[i] = img
+			switch fi.Format() {
+			case structures.EmoteFormatNameAVIF:
+				format = model.ImageFormatAvif
+			case structures.EmoteFormatNameGIF:
+				format = model.ImageFormatGif
+			case structures.EmoteFormatNamePNG:
+				format = model.ImageFormatPng
 			}
+
+			url := fmt.Sprintf("//%s/emote/%s/%s", ctx.Config().CdnURL, ver.ID.Hex(), fi.Name)
+			img := EmoteFileStructureToModel(ctx, &fi, format, url)
+			vimages[i] = img
 		}
 
 		if ver.ID == s.ID {

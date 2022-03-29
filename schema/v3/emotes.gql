@@ -37,7 +37,7 @@ type Emote {
   channels(page: Int, limit: Int): UserSearchResult!
     @goField(forceResolver: true)
 
-  images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
+  images(formats: [ImageFormat!]): [Image!]!
   versions: [EmoteVersion!]!
   listed: Boolean!
 
@@ -56,7 +56,7 @@ type EmotePartial {
   created_at: Time!
   owner_id: ObjectID!
   owner: User! @goField(forceResolver: true)
-  images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
+  images(formats: [ImageFormat!]): [Image!]!
   versions: [EmoteVersion!]!
   listed: Boolean!
 }
@@ -73,7 +73,7 @@ type EmoteVersion {
   name: String!
   description: String!
   timestamp: Time!
-  images(formats: [ImageFormat!]): [Image!]! @goField(forceResolver: true)
+  images(formats: [ImageFormat!]): [Image!]!
   lifecycle: Int!
   listed: Boolean!
 }

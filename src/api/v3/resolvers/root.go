@@ -44,10 +44,6 @@ func (r *Resolver) EmoteOps() generated.EmoteOpsResolver {
 	return emote.NewOps(r.Resolver)
 }
 
-func (r *Resolver) EmoteVersion() generated.EmoteVersionResolver {
-	return emote.NewVersion(r.Resolver)
-}
-
 func (r *Resolver) Mutation() generated.MutationResolver {
 	return mutation.New(r.Resolver)
 }
