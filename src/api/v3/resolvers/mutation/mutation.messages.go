@@ -124,18 +124,15 @@ func (r *Resolver) SendInboxMessage(ctx context.Context, recipientsArg []primiti
 		return nil, err
 	}
 
-	msg := r.Ctx.Inst().Query.Messages(ctx, bson.M{"_id": mb.Message.ID}, query.MessageQueryOptions{
+	msg, err := r.Ctx.Inst().Query.Messages(ctx, bson.M{"_id": mb.Message.ID}, query.MessageQueryOptions{
 		Actor:        actor,
 		Limit:        1,
 		ReturnUnread: true,
-	})
-	if msg.Error() != nil {
-		return nil, msg.Error()
-	}
-	if msg.Empty() {
-		return nil, errors.ErrNoItems()
+	}).First()
+	if err != nil {
+		return nil, err
 	}
 
 	// TODO
-	return helpers.MessageStructureToInboxModel(r.Ctx, msg.First()), nil
+	return helpers.MessageStructureToInboxModel(r.Ctx, msg), nil
 }

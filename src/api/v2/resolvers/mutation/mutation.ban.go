@@ -44,10 +44,10 @@ func (r *Resolver) BanUser(ctx context.Context, victimIDArg string, expireAtArg 
 	if err != nil {
 		return nil, errors.ErrBadObjectID()
 	}
-	if users := r.Ctx.Inst().Query.Users(ctx, bson.M{"_id": victimID}); users.Error() == nil {
-		victim = users.First()
+	if user, err := r.Ctx.Inst().Query.Users(ctx, bson.M{"_id": victimID}).First(); err == nil {
+		victim = user
 	} else {
-		return nil, users.Error()
+		return nil, err
 	}
 
 	// Create the ban

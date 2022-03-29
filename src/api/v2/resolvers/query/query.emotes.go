@@ -103,19 +103,19 @@ func (r *Resolver) SearchEmotes(
 		// Where visibility: 4, visibility_clear: 256, meaning emotes pending approval
 		if vis == v2structures.EmoteVisibilityUnlisted && visc == v2structures.EmoteVisibilityPermanentlyUnlisted {
 			// Fetch mod items
-			result := r.Ctx.Inst().Query.ModRequestMessages(ctx, query.ModRequestMessagesQueryOptions{
+			result, err := r.Ctx.Inst().Query.ModRequestMessages(ctx, query.ModRequestMessagesQueryOptions{
 				Actor: actor,
 				Targets: map[structures.ObjectKind]bool{
 					structures.ObjectKindEmote: true,
 				},
-			})
-			if result.Error() != nil {
-				return nil, result.Error()
+			}).Items()
+			if err != nil {
+				return nil, err
 			}
 
 			// Fetch emotes
-			emoteIDs := make([]primitive.ObjectID, len(result.Items()))
-			for i, msg := range result.Items() {
+			emoteIDs := make([]primitive.ObjectID, len(result))
+			for i, msg := range result {
 				mb := structures.NewMessageBuilder(msg)
 				req := mb.DecodeModRequest()
 				emoteIDs[i] = req.TargetID

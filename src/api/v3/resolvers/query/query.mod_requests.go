@@ -28,22 +28,22 @@ func (r *Resolver) ModRequests(ctx context.Context, afterIDArg *primitive.Object
 	if !afterID.IsZero() {
 		match["message_id"] = bson.M{"$gt": afterID}
 	}
-	messages := r.Ctx.Inst().Query.ModRequestMessages(ctx, query.ModRequestMessagesQueryOptions{
+	messages, err := r.Ctx.Inst().Query.ModRequestMessages(ctx, query.ModRequestMessagesQueryOptions{
 		Actor:  actor,
 		Filter: match,
 		Targets: map[structures.ObjectKind]bool{
 			structures.ObjectKindEmote: true,
 		},
-	})
-	if messages.Error() != nil {
-		if messages.Error().(errors.APIError).Code() == errors.ErrNoItems().Code() {
+	}).Items()
+	if err != nil {
+		if err.(errors.APIError).Code() == errors.ErrNoItems().Code() {
 			return []*model.ModRequestMessage{}, nil
 		}
-		return nil, messages.Error()
+		return nil, err
 	}
 
-	result := make([]*model.ModRequestMessage, len(messages.Items()))
-	for i, msg := range messages.Items() {
+	result := make([]*model.ModRequestMessage, len(messages))
+	for i, msg := range messages {
 		result[i] = helpers.MessageStructureToModRequestModel(r.Ctx, msg)
 	}
 	return result, nil

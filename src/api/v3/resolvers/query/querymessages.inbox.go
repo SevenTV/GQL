@@ -34,24 +34,24 @@ func (r *Resolver) Inbox(ctx context.Context, userID primitive.ObjectID, afterID
 	}
 
 	// Fetch target user
-	user := r.Ctx.Inst().Query.Users(ctx, bson.M{"_id": userID}).First()
-	if user == nil {
-		return nil, errors.ErrUnknownUser()
+	user, err := r.Ctx.Inst().Query.Users(ctx, bson.M{"_id": userID}).First()
+	if err != nil {
+		return nil, err
 	}
 
-	messages := r.Ctx.Inst().Query.InboxMessages(ctx, query.InboxMessagesQueryOptions{
+	messages, err := r.Ctx.Inst().Query.InboxMessages(ctx, query.InboxMessagesQueryOptions{
 		Actor:               actor,
 		User:                user,
 		Limit:               limit,
 		AfterID:             afterID,
 		SkipPermissionCheck: false,
-	})
-	if messages.Error() != nil {
-		return nil, messages.Error()
+	}).Items()
+	if err != nil {
+		return nil, err
 	}
 
-	result := make([]*model.InboxMessage, len(messages.Items()))
-	for i, msg := range messages.Items() {
+	result := make([]*model.InboxMessage, len(messages))
+	for i, msg := range messages {
 		result[i] = helpers.MessageStructureToInboxModel(r.Ctx, msg)
 	}
 
