@@ -38,7 +38,7 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 			// Fetch emotes
 			emotes, err := gCtx.Inst().Query.Emotes(ctx, bson.M{
 				"versions.id": bson.M{"$in": ids},
-			})
+			}).Items()
 
 			if err == nil {
 				m := make(map[primitive.ObjectID]*structures.Emote)

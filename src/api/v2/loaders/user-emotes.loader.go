@@ -27,7 +27,7 @@ func userEmotesLoader(gCtx global.Context) *loaders.UserEmotesLoader {
 				ids[i], _ = primitive.ObjectIDFromHex(k)
 			}
 
-			sets, err := gCtx.Inst().Query.EmoteSets(ctx, bson.M{"_id": bson.M{"$in": ids}})
+			sets, err := gCtx.Inst().Query.EmoteSets(ctx, bson.M{"_id": bson.M{"$in": ids}}).Items()
 			if err == nil {
 				m := make(map[primitive.ObjectID][]*model.Emote)
 				// iterate over sets
