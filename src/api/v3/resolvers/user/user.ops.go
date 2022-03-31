@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"time"
 
 	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/Common/mongo"
@@ -43,6 +44,19 @@ func (r *ResolverOps) Connections(ctx context.Context, obj *model.UserOps, id st
 	// Perform a mutation
 	var err error
 	if d.EmoteSetID != nil {
+		var conn structures.UserConnection
+		for _, con := range b.User.Connections {
+			if con.ID == id {
+				conn = *con
+				break
+			}
+		}
+		if conn.ID == "" {
+			return nil, errors.ErrUnknownUserConnection()
+		}
+		oldSetID := conn.EmoteSetID
+
+		setID := *d.EmoteSetID
 		if err = r.Ctx.Inst().Mutate.SetUserConnectionActiveEmoteSet(ctx, b, mutations.SetUserActiveEmoteSet{
 			EmoteSetID:   *d.EmoteSetID,
 			Platform:     structures.UserConnectionPlatformTwitch,
@@ -50,6 +64,44 @@ func (r *ResolverOps) Connections(ctx context.Context, obj *model.UserOps, id st
 			ConnectionID: id,
 		}); err != nil {
 			return nil, err
+		}
+
+		// Send legacy events
+		if conn.Platform == structures.UserConnectionPlatformTwitch {
+			sets := r.Ctx.Inst().Query.EmoteSets(ctx, bson.M{"_id": bson.M{"$in": bson.A{setID, oldSetID}}})
+			if !sets.Empty() {
+				go func() {
+					twd, err := conn.DecodeTwitch()
+					if err != nil {
+						return
+					}
+					var newSet *structures.EmoteSet
+					var oldSet *structures.EmoteSet
+					items, _ := sets.Items()
+					for _, es := range items {
+						switch es.ID {
+						case setID:
+							newSet = es
+						case oldSetID:
+							oldSet = es
+						}
+					}
+
+					if newSet != nil {
+						if oldSet != nil {
+							// Send "REMOVE" events to former set
+							for _, ae := range oldSet.Emotes {
+								events.PublishLegacyEventAPI(r.Ctx, "REMOVE", actor, oldSet, ae.Emote, twd.Login)
+								time.Sleep(time.Millisecond * 10)
+							}
+						}
+						for _, ae := range newSet.Emotes {
+							events.PublishLegacyEventAPI(r.Ctx, "ADD", actor, newSet, ae.Emote, twd.Login)
+							time.Sleep(time.Millisecond * 10)
+						}
+					}
+				}()
+			}
 		}
 	}
 	if err != nil {

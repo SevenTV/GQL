@@ -30,7 +30,7 @@ func (r *ResolverOps) Update(ctx context.Context, obj *model.EmoteOps, params mo
 		return nil, errors.ErrUnauthorized()
 	}
 
-	emotes, err := r.Ctx.Inst().Query.Emotes(ctx, bson.M{"versions.id": obj.ID})
+	emotes, err := r.Ctx.Inst().Query.Emotes(ctx, bson.M{"versions.id": obj.ID}).Items()
 	if err != nil {
 		return nil, err
 	}

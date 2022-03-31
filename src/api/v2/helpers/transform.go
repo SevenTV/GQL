@@ -17,6 +17,9 @@ var twitchPictureSizeRegExp = regexp.MustCompile("([0-9]{2,3})x([0-9]{2,3})")
 
 func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote {
 	version, _ := s.GetVersion(s.ID)
+	if version == nil {
+		return nil
+	}
 
 	width := make([]int, 4)
 	height := make([]int, 4)
@@ -34,7 +37,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 			width[pos] = int(f.Width)
 			height[pos] = int(f.Height)
 			urls[pos] = []string{
-				fmt.Sprintf("%dx", pos+1),
+				fmt.Sprintf("%d", pos+1),
 				fmt.Sprintf("//%s/emote/%s/%s", ctx.Config().CdnURL, version.ID.Hex(), f.Name),
 			}
 			pos++

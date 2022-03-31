@@ -30,7 +30,7 @@ func (r *Resolver) EditEmote(ctx context.Context, opt model.EmoteInput, reason *
 	}
 
 	// Fetch the emote
-	emotes, err := r.Ctx.Inst().Query.Emotes(ctx, bson.M{"versions.id": emoteID})
+	emotes, err := r.Ctx.Inst().Query.Emotes(ctx, bson.M{"versions.id": emoteID}).Items()
 	if err != nil {
 		return nil, errors.ErrInternalServerError().SetDetail(err.Error())
 	}
@@ -160,7 +160,7 @@ func (r *Resolver) DeleteEmote(ctx context.Context, id string, reason string) (*
 	}
 
 	// Fetch the emote
-	emotes, err := r.Ctx.Inst().Query.Emotes(ctx, bson.M{"versions.id": emoteID})
+	emotes, err := r.Ctx.Inst().Query.Emotes(ctx, bson.M{"versions.id": emoteID}).Items()
 	if err != nil {
 		return nil, errors.ErrInternalServerError().SetDetail(err.Error())
 	}

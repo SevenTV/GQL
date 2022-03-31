@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/SevenTV/Common/errors"
-	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/structures/v3/mutations"
 	"github.com/SevenTV/GQL/graph/v3/generated"
@@ -36,18 +35,28 @@ func (r *ResolverOps) Emotes(ctx context.Context, obj *model.EmoteSetOps, id pri
 		"emote_id":     id,
 	})
 
+	// Get the emote
+	emote, err := r.Ctx.Inst().Query.Emotes(ctx, bson.M{"_id": id}).First()
+	if err != nil {
+		if errors.Compare(err, errors.ErrNoItems()) {
+			return nil, errors.ErrUnknownEmote()
+		}
+		return nil, err
+	}
+
 	// Get the emote set
 	name := ""
 	if nameArg != nil {
 		name = *nameArg
 	}
-	b := structures.NewEmoteSetBuilder(nil)
-	if err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameEmoteSets).FindOne(ctx, bson.M{
-		"_id": obj.ID,
-	}).Decode(b.EmoteSet); err != nil {
-		logF.WithError(err).Error("mongo, couldn't find emote to add to set")
-		return nil, errors.ErrInternalServerError().SetDetail(err.Error())
+	set, err := r.Ctx.Inst().Query.EmoteSets(ctx, bson.M{"_id": obj.ID}).First()
+	if err != nil {
+		if errors.Compare(err, errors.ErrNoItems()) {
+			return nil, errors.ErrUnknownEmoteSet()
+		}
+		return nil, err
 	}
+	b := structures.NewEmoteSetBuilder(set)
 
 	// Mutate the thing
 	if err := r.Ctx.Inst().Mutate.EditEmotesInSet(ctx, b, mutations.EmoteSetMutationSetEmoteOptions{
@@ -76,6 +85,17 @@ func (r *ResolverOps) Emotes(ctx context.Context, obj *model.EmoteSetOps, id pri
 	// Publish an emote set update
 	go func() {
 		events.Publish(r.Ctx, "emote_sets", b.EmoteSet.ID)
+
+		// Legacy Event API v1
+		if set.Owner != nil {
+			tw, _ := set.Owner.Connections.Twitch()
+			if tw.EmoteSetID.IsZero() || tw.EmoteSetID != set.ID {
+				return // skip if target emote set isn't bound to user connection
+			}
+			if twd, _ := tw.DecodeTwitch(); twd != nil {
+				events.PublishLegacyEventAPI(r.Ctx, action.String(), actor, set, emote, twd.Login)
+			}
+		}
 	}()
 
 	setModel := helpers.EmoteSetStructureToModel(r.Ctx, b.EmoteSet)
