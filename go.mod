@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/99designs/gqlgen v0.17.2
-	github.com/SevenTV/Common v0.0.0-20220326035409-819db7414524
+	github.com/SevenTV/Common v0.0.0-20220420073351-4bb21ed6e8a5
 	github.com/bugsnag/panicwrap v1.3.4
 	github.com/fasthttp/router v1.4.7
 	github.com/fasthttp/websocket v1.5.0
@@ -43,6 +43,9 @@ require (
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/stringprep v1.0.3 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
+	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
+	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/text v0.3.7 // indirect
