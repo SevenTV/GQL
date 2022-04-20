@@ -2,8 +2,6 @@ module github.com/SevenTV/GQL
 
 go 1.18
 
-replace github.com/SevenTV/Common => ./Common
-
 require (
 	github.com/99designs/gqlgen v0.17.2
 	github.com/SevenTV/Common v0.0.0-20220326035409-819db7414524
@@ -15,7 +13,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1
 	github.com/vektah/gqlparser/v2 v2.4.1
-	go.mongodb.org/mongo-driver v1.8.4
+	go.mongodb.org/mongo-driver v1.9.0
 )
 
 require (
@@ -65,7 +63,7 @@ require (
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/valyala/fasthttp v1.34.0
 	github.com/xdg-go/scram v1.1.1 // indirect
-	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064 // indirect
-	golang.org/x/sys v0.0.0-20220325203850-36772127a21f // indirect
+	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
+	golang.org/x/sys v0.0.0-20220408201424-a24fb2fb8a0f // indirect
 	golang.org/x/tools v0.1.10 // indirect
 )

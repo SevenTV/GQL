@@ -21,7 +21,7 @@ linux:
 lint:
 	staticcheck ./...
 	go vet ./...
-	golangci-lint run
+#	golangci-lint run
 	yarn prettier --write .
 
 deps: go_installs
