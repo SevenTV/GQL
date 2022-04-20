@@ -18,7 +18,10 @@ func (r *Resolver) NamedEmoteSet(ctx context.Context, name model.EmoteSetName) (
 
 	switch name {
 	case model.EmoteSetNameGlobal:
-		sys := r.Ctx.Inst().Mongo.System(ctx)
+		sys, err := r.Ctx.Inst().Mongo.System(ctx)
+		if err != nil {
+			return nil, errors.ErrInternalServerError().SetDetail(err.Error())
+		}
 		setID = sys.EmoteSetID
 	}
 

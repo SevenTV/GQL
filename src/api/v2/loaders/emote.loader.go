@@ -41,11 +41,8 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 			}).Items()
 
 			if err == nil {
-				m := make(map[primitive.ObjectID]*structures.Emote)
+				m := make(map[primitive.ObjectID]structures.Emote)
 				for _, e := range emotes {
-					if e == nil {
-						continue
-					}
 					for _, ver := range e.Versions {
 						m[ver.ID] = e
 					}
@@ -54,7 +51,7 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 				for i, v := range ids {
 					if x, ok := m[v]; ok {
 						ver, _ := x.GetVersion(v)
-						if ver == nil || ver.IsUnavailable() {
+						if ver.ID.IsZero() || ver.IsUnavailable() {
 							continue
 						}
 						x.ID = v

@@ -37,11 +37,8 @@ func userByID(gCtx global.Context) *loaders.UserLoader {
 			}).Items()
 
 			if err == nil {
-				m := make(map[primitive.ObjectID]*structures.User)
+				m := make(map[primitive.ObjectID]structures.User)
 				for _, u := range users {
-					if u == nil {
-						continue
-					}
 					m[u.ID] = u
 				}
 

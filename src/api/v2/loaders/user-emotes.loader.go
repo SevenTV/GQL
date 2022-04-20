@@ -34,7 +34,10 @@ func userEmotesLoader(gCtx global.Context) *loaders.UserEmotesLoader {
 				for _, set := range sets {
 					// iterate over emotes of set
 					for _, ae := range set.Emotes {
-						em := helpers.EmoteStructureToModel(gCtx, ae.Emote)
+						if ae.Emote == nil {
+							continue
+						}
+						em := helpers.EmoteStructureToModel(gCtx, *ae.Emote)
 
 						// set "alias"?
 						if ae.Name != em.Name {

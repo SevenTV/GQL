@@ -45,11 +45,8 @@ func userLoader(gCtx global.Context, keyName string) *loaders.UserLoader {
 				keyName: bson.M{"$in": ids},
 			})
 			if err == nil {
-				m := make(map[interface{}]*structures.User)
+				m := make(map[interface{}]structures.User)
 				for _, u := range users {
-					if u == nil {
-						continue
-					}
 					switch keyName {
 					case "username":
 						m[u.Username] = u

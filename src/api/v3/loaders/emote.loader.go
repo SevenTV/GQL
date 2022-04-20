@@ -31,7 +31,7 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 
 			// Get roles (to assign to emote owners)
 			roles, _ := gCtx.Inst().Query.Roles(ctx, bson.M{})
-			roleMap := make(map[primitive.ObjectID]*structures.Role)
+			roleMap := make(map[primitive.ObjectID]structures.Role)
 			for _, role := range roles {
 				roleMap[role.ID] = role
 			}
@@ -43,11 +43,8 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 			}).Items()
 
 			if err == nil {
-				m := make(map[primitive.ObjectID]*structures.Emote)
+				m := make(map[primitive.ObjectID]structures.Emote)
 				for _, e := range emotes {
-					if e == nil {
-						continue
-					}
 					for _, ver := range e.Versions {
 						m[ver.ID] = e
 					}
@@ -56,7 +53,7 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 				for i, v := range keys {
 					if x, ok := m[v]; ok {
 						ver, _ := x.GetVersion(v)
-						if ver == nil || ver.IsUnavailable() {
+						if ver.IsUnavailable() {
 							continue
 						}
 						x.ID = v

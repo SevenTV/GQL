@@ -66,9 +66,12 @@ func DoAuth(ctx global.Context, t string) (*structures.User, errors.APIError) {
 	}
 
 	// Check bans
-	bans := ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{
+	bans, err := ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{
 		Filter: bson.M{"effects": bson.M{"$bitsAnySet": structures.BanEffectNoAuth | structures.BanEffectNoPermissions}},
 	})
+	if err != nil {
+		return nil, errors.ErrInternalServerError().SetDetail("Failed")
+	}
 	if ban, noAuth := bans.NoAuth[userID]; noAuth {
 		return nil, errors.ErrInsufficientPrivilege().SetDetail("You are banned!").SetFields(errors.Fields{
 			"ban": map[string]string{
@@ -78,8 +81,8 @@ func DoAuth(ctx global.Context, t string) (*structures.User, errors.APIError) {
 		})
 	}
 	if _, noRights := bans.NoPermissions[userID]; noRights {
-		user.Roles = []*structures.Role{structures.RevocationRole}
+		user.Roles = []structures.Role{structures.RevocationRole}
 	}
 
-	return user, nil
+	return &user, nil
 }

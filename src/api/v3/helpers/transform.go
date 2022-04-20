@@ -12,14 +12,15 @@ import (
 	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var twitchPictureSizeRegExp = regexp.MustCompile("([0-9]{2,3})x([0-9]{2,3})")
 
 // UserStructureToModel: Transform a user structure to a GQL mdoel
-func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
+func UserStructureToModel(ctx global.Context, s structures.User) *model.User {
 	tagColor := 0
-	if role := s.GetHighestRole(); role != nil {
+	if role := s.GetHighestRole(); !role.ID.IsZero() {
 		tagColor = int(role.Color)
 	}
 	roles := make([]*model.Role, len(s.Roles))
@@ -44,8 +45,8 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 		for _, con := range s.Connections {
 			switch con.Platform {
 			case structures.UserConnectionPlatformTwitch:
-				if d, err := con.DecodeTwitch(); err == nil {
-					avatarURL = twitchPictureSizeRegExp.ReplaceAllString(d.ProfileImageURL[6:], "70x70")
+				if con, err := structures.ConvertUserConnection[structures.UserConnectionDataTwitch](con); err == nil {
+					avatarURL = twitchPictureSizeRegExp.ReplaceAllString(con.Data.ProfileImageURL[6:], "70x70")
 				}
 			}
 		}
@@ -85,9 +86,9 @@ func UserStructureToPartialModel(ctx global.Context, m *model.User) *model.UserP
 }
 
 // UserEditorStructureToModel: Transform a user editor structure to a GQL model
-func UserEditorStructureToModel(ctx global.Context, s *structures.UserEditor) *model.UserEditor {
+func UserEditorStructureToModel(ctx global.Context, s structures.UserEditor) *model.UserEditor {
 	if s.User == nil {
-		s.User = structures.DeletedUser
+		s.User = &structures.DeletedUser
 	}
 
 	return &model.UserEditor{
@@ -95,26 +96,25 @@ func UserEditorStructureToModel(ctx global.Context, s *structures.UserEditor) *m
 		Permissions: int(s.Permissions),
 		Visible:     s.Visible,
 		AddedAt:     s.AddedAt,
-		User:        UserStructureToPartialModel(ctx, UserStructureToModel(ctx, s.User)),
+		User:        UserStructureToPartialModel(ctx, UserStructureToModel(ctx, *s.User)),
 	}
 }
 
 // UserConnectionStructureToModel: Transform a user connection structure to a GQL model
-func UserConnectionStructureToModel(ctx global.Context, s *structures.UserConnection) *model.UserConnection {
+func UserConnectionStructureToModel(ctx global.Context, s structures.UserConnection[bson.Raw]) *model.UserConnection {
 	var (
 		err         error
-		d           interface{}
 		displayName string
 	)
 	// Decode the connection data
 	switch s.Platform {
 	case structures.UserConnectionPlatformTwitch:
-		if d, err = s.DecodeTwitch(); err == nil {
-			displayName = d.(*structures.TwitchConnection).DisplayName
+		if s, err := structures.ConvertUserConnection[structures.UserConnectionDataTwitch](s); err == nil {
+			displayName = s.Data.DisplayName
 		}
 	case structures.UserConnectionPlatformYouTube:
-		if d, err = s.DecodeYouTube(); err == nil {
-			displayName = d.(*structures.YouTubeConnection).Title
+		if s, err := structures.ConvertUserConnection[structures.UserConnectionDataYoutube](s); err == nil {
+			displayName = s.Data.Title
 		}
 	}
 	if err != nil {
@@ -132,7 +132,7 @@ func UserConnectionStructureToModel(ctx global.Context, s *structures.UserConnec
 }
 
 // RoleStructureToModel: Transform a role structure to a GQL model
-func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
+func RoleStructureToModel(ctx global.Context, s structures.Role) *model.Role {
 	return &model.Role{
 		ID:        s.ID,
 		Name:      s.Name,
@@ -146,7 +146,7 @@ func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
 	}
 }
 
-func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote {
+func EmoteStructureToModel(ctx global.Context, s structures.Emote) *model.Emote {
 	images := make([]*model.Image, 0)
 	versions := make([]*model.EmoteVersion, len(s.Versions))
 	versionCount := int32(0)
@@ -196,7 +196,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 
 	owner := structures.DeletedUser
 	if s.Owner != nil {
-		owner = s.Owner
+		owner = *s.Owner
 	}
 	return &model.Emote{
 		ID:        s.ID,
@@ -233,23 +233,23 @@ func EmoteStructureToPartialModel(ctx global.Context, m *model.Emote) *model.Emo
 	}
 }
 
-func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model.EmoteSet {
+func EmoteSetStructureToModel(ctx global.Context, s structures.EmoteSet) *model.EmoteSet {
 	emotes := make([]*model.ActiveEmote, len(s.Emotes))
 	for i, e := range s.Emotes {
 		if e.Emote == nil {
-			e.Emote = structures.DeletedEmote
+			e.Emote = &structures.DeletedEmote
 		}
 		emotes[i] = &model.ActiveEmote{
 			ID:        e.ID,
 			Name:      e.Name,
 			Flags:     int(e.Flags),
 			Timestamp: e.Timestamp,
-			Emote:     EmoteStructureToModel(ctx, e.Emote),
+			Emote:     EmoteStructureToModel(ctx, *e.Emote),
 		}
 	}
 	var owner *model.User
 	if s.Owner != nil {
-		owner = UserStructureToModel(ctx, s.Owner)
+		owner = UserStructureToModel(ctx, *s.Owner)
 	}
 
 	return &model.EmoteSet{
@@ -263,7 +263,7 @@ func EmoteSetStructureToModel(ctx global.Context, s *structures.EmoteSet) *model
 	}
 }
 
-func EmoteVersionStructureToModel(ctx global.Context, s *structures.EmoteVersion, images []*model.Image) *model.EmoteVersion {
+func EmoteVersionStructureToModel(ctx global.Context, s structures.EmoteVersion, images []*model.Image) *model.EmoteVersion {
 	return &model.EmoteVersion{
 		ID:          s.ID,
 		Name:        s.Name,
@@ -297,39 +297,43 @@ func ActiveEmoteStructureToModel(ctx global.Context, s *structures.ActiveEmote) 
 	}
 }
 
-func MessageStructureToInboxModel(ctx global.Context, s *structures.Message) *model.InboxMessage {
-	mb := structures.NewMessageBuilder(s)
-	inb := mb.DecodeInbox()
+func MessageStructureToInboxModel(ctx global.Context, s structures.Message[structures.MessageDataInbox]) *model.InboxMessage {
+	author := structures.DeletedUser
+	if s.Author != nil {
+		author = *s.Author
+	}
 	return &model.InboxMessage{
 		ID:           s.ID,
 		Kind:         model.MessageKind(s.Kind.String()),
 		CreatedAt:    s.CreatedAt,
-		Author:       UserStructureToModel(ctx, s.Author),
+		Author:       UserStructureToModel(ctx, author),
 		Read:         s.Read,
 		ReadAt:       &time.Time{},
-		Subject:      inb.Subject,
-		Content:      inb.Content,
-		Important:    inb.Important,
-		Starred:      inb.Starred,
-		Pinned:       inb.Pinned,
-		Placeholders: utils.Ternary(inb.Placeholders == nil, map[string]string{}, inb.Placeholders),
+		Subject:      s.Data.Subject,
+		Content:      s.Data.Content,
+		Important:    s.Data.Important,
+		Starred:      s.Data.Starred,
+		Pinned:       s.Data.Pinned,
+		Placeholders: utils.Ternary(s.Data.Placeholders == nil, map[string]string{}, s.Data.Placeholders),
 	}
 }
 
-func MessageStructureToModRequestModel(ctx global.Context, s *structures.Message) *model.ModRequestMessage {
-	mb := structures.NewMessageBuilder(s)
-	req := mb.DecodeModRequest()
+func MessageStructureToModRequestModel(ctx global.Context, s structures.Message[structures.MessageDataModRequest]) *model.ModRequestMessage {
+	author := structures.DeletedUser
+	if s.Author != nil {
+		author = *s.Author
+	}
 	return &model.ModRequestMessage{
 		ID:         s.ID,
 		Kind:       model.MessageKind(s.Kind.String()),
 		CreatedAt:  s.CreatedAt,
-		Author:     UserStructureToModel(ctx, s.Author),
-		TargetKind: int(req.TargetKind),
-		TargetID:   req.TargetID,
+		Author:     UserStructureToModel(ctx, author),
+		TargetKind: int(s.Data.TargetKind),
+		TargetID:   s.Data.TargetID,
 	}
 }
 
-func BanStructureToModel(ctx global.Context, s *structures.Ban) *model.Ban {
+func BanStructureToModel(ctx global.Context, s structures.Ban) *model.Ban {
 	return &model.Ban{
 		ID:        s.ID,
 		Reason:    s.Reason,

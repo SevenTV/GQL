@@ -31,7 +31,7 @@ func (r *ResolverOps) Connections(ctx context.Context, obj *model.UserOps, id st
 		return nil, errors.ErrUnauthorized()
 	}
 
-	b := structures.NewUserBuilder(nil)
+	b := structures.NewUserBuilder(structures.DeletedUser)
 	if err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).FindOne(ctx, bson.M{
 		"_id": obj.ID,
 	}).Decode(b.User); err != nil {
@@ -44,14 +44,8 @@ func (r *ResolverOps) Connections(ctx context.Context, obj *model.UserOps, id st
 	// Perform a mutation
 	var err error
 	if d.EmoteSetID != nil {
-		var conn structures.UserConnection
-		for _, con := range b.User.Connections {
-			if con.ID == id {
-				conn = *con
-				break
-			}
-		}
-		if conn.ID == "" {
+		conn, _, err := b.User.Connections.Twitch()
+		if err == nil {
 			return nil, errors.ErrUnknownUserConnection()
 		}
 		oldSetID := conn.EmoteSetID
@@ -71,12 +65,8 @@ func (r *ResolverOps) Connections(ctx context.Context, obj *model.UserOps, id st
 			sets := r.Ctx.Inst().Query.EmoteSets(ctx, bson.M{"_id": bson.M{"$in": bson.A{setID, oldSetID}}})
 			if !sets.Empty() {
 				go func() {
-					twd, err := conn.DecodeTwitch()
-					if err != nil {
-						return
-					}
-					var newSet *structures.EmoteSet
-					var oldSet *structures.EmoteSet
+					var newSet structures.EmoteSet
+					var oldSet structures.EmoteSet
 					items, _ := sets.Items()
 					for _, es := range items {
 						switch es.ID {
@@ -87,16 +77,22 @@ func (r *ResolverOps) Connections(ctx context.Context, obj *model.UserOps, id st
 						}
 					}
 
-					if newSet != nil {
-						if oldSet != nil {
+					if !newSet.ID.IsZero() {
+						if !oldSet.ID.IsZero() {
 							// Send "REMOVE" events to former set
 							for _, ae := range oldSet.Emotes {
-								events.PublishLegacyEventAPI(r.Ctx, "REMOVE", actor, oldSet, ae.Emote, twd.Login)
+								if ae.Emote == nil {
+									continue
+								}
+								events.PublishLegacyEventAPI(r.Ctx, "REMOVE", actor, oldSet, *ae.Emote, conn.Data.Login)
 								time.Sleep(time.Millisecond * 10)
 							}
 						}
 						for _, ae := range newSet.Emotes {
-							events.PublishLegacyEventAPI(r.Ctx, "ADD", actor, newSet, ae.Emote, twd.Login)
+							if ae.Emote == nil {
+								continue
+							}
+							events.PublishLegacyEventAPI(r.Ctx, "ADD", actor, newSet, *ae.Emote, conn.Data.Login)
 							time.Sleep(time.Millisecond * 10)
 						}
 					}

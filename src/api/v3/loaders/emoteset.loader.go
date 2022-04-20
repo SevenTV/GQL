@@ -26,7 +26,7 @@ func emoteSetByID(gCtx global.Context) *loaders.EmoteSetLoader {
 
 			sets, err := gCtx.Inst().Query.EmoteSets(ctx, bson.M{"_id": bson.M{"$in": keys}}).Items()
 
-			m := make(map[primitive.ObjectID]*structures.EmoteSet)
+			m := make(map[primitive.ObjectID]structures.EmoteSet)
 			if err == nil {
 				for _, set := range sets {
 					m[set.ID] = set

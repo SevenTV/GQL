@@ -37,7 +37,7 @@ func (r *Resolver) ReadMessages(ctx context.Context, messageIds []primitive.Obje
 	}
 
 	// Mutate messages
-	messages := []*structures.Message{}
+	messages := []structures.Message[bson.Raw]{}
 	if err := cur.All(ctx, &messages); err != nil {
 		return 0, errors.ErrInternalServerError().SetDetail(err.Error())
 	}
@@ -106,12 +106,12 @@ func (r *Resolver) SendInboxMessage(ctx context.Context, recipientsArg []primiti
 	}
 
 	//
-	mb := structures.NewMessageBuilder(nil).
+	mb := structures.NewMessageBuilder(structures.Message[structures.MessageDataInbox]{}).
 		SetKind(structures.MessageKindInbox).
 		SetAuthorID(actor.ID).
 		SetTimestamp(time.Now()).
 		SetAnonymous(anonymous).
-		AsInbox(structures.MessageDataInbox{
+		SetData(structures.MessageDataInbox{
 			Subject:   subject,
 			Content:   content,
 			Important: important,
@@ -133,6 +133,9 @@ func (r *Resolver) SendInboxMessage(ctx context.Context, recipientsArg []primiti
 		return nil, err
 	}
 
-	// TODO
-	return helpers.MessageStructureToInboxModel(r.Ctx, msg), nil
+	inb, err := structures.ConvertMessage[structures.MessageDataInbox](msg)
+	if err != nil {
+		return nil, err
+	}
+	return helpers.MessageStructureToInboxModel(r.Ctx, inb), nil
 }

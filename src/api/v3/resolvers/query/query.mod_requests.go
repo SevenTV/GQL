@@ -44,7 +44,9 @@ func (r *Resolver) ModRequests(ctx context.Context, afterIDArg *primitive.Object
 
 	result := make([]*model.ModRequestMessage, len(messages))
 	for i, msg := range messages {
-		result[i] = helpers.MessageStructureToModRequestModel(r.Ctx, msg)
+		if msg, err := structures.ConvertMessage[structures.MessageDataModRequest](msg); err == nil {
+			result[i] = helpers.MessageStructureToModRequestModel(r.Ctx, msg)
+		}
 	}
 	return result, nil
 }

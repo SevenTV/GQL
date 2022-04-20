@@ -13,7 +13,7 @@ var Indexes = []mongo.IndexRef{
 		Index: mongo.IndexModel{
 			Keys: bson.M{"num_id": 1},
 			Options: &options.IndexOptions{
-				Unique: utils.BoolPointer(true),
+				Unique: utils.PointerOf(true),
 			},
 		},
 	},

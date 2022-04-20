@@ -34,9 +34,13 @@ func (r *Resolver) CurrentUser(ctx context.Context) (*model.User, error) {
 }
 
 func (r *Resolver) User(ctx context.Context, id primitive.ObjectID) (*model.User, error) {
-	if _, banned := r.Ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{ // remove emotes made by usersa who own nothing and are happy
+	bans, err := r.Ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{ // remove emotes made by usersa who own nothing and are happy
 		Filter: bson.M{"effects": bson.M{"$bitsAnySet": structures.BanEffectMemoryHole}},
-	}).MemoryHole[id]; banned {
+	})
+	if err != nil {
+		return nil, err
+	}
+	if _, ok := bans.MemoryHole[id]; ok {
 		return nil, errors.ErrUnknownUser()
 	}
 

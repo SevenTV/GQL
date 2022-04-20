@@ -83,8 +83,11 @@ func (r *Resolver) doSetChannelEditor(
 			editor = u
 		}
 	}
+	if target == nil {
+		return errors.ErrUnknownUser()
+	}
 
-	ub := structures.NewUserBuilder(target)
+	ub := structures.NewUserBuilder(structures.User{})
 	if err := r.Ctx.Inst().Mutate.ModifyUserEditors(ctx, ub, mutations.UserEditorsOptions{
 		Actor:             actor,
 		Editor:            editor,

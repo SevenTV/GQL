@@ -42,7 +42,7 @@ func (r *Resolver) AddChannelEmote(ctx context.Context, channelIDArg, emoteIDArg
 	if setID.IsZero() {
 		return nil, errors.ErrUnknownEmoteSet()
 	}
-	b := structures.NewEmoteSetBuilder(nil)
+	b := structures.NewEmoteSetBuilder(structures.EmoteSet{})
 	if err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameEmoteSets).FindOne(ctx, bson.M{
 		"_id": setID,
 	}).Decode(b.EmoteSet); err != nil {
@@ -82,7 +82,7 @@ func (r *Resolver) RemoveChannelEmote(ctx context.Context, channelIDArg, emoteID
 	if setID.IsZero() {
 		return nil, errors.ErrUnknownEmoteSet()
 	}
-	b := structures.NewEmoteSetBuilder(nil)
+	b := structures.NewEmoteSetBuilder(structures.EmoteSet{})
 	if err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameEmoteSets).FindOne(ctx, bson.M{
 		"_id": setID,
 	}).Decode(b.EmoteSet); err != nil {
@@ -128,7 +128,7 @@ func (r *Resolver) EditChannelEmote(ctx context.Context, channelIDArg string, em
 	if setID.IsZero() {
 		return nil, errors.ErrUnknownEmoteSet()
 	}
-	b := structures.NewEmoteSetBuilder(nil)
+	b := structures.NewEmoteSetBuilder(structures.EmoteSet{})
 	if err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameEmoteSets).FindOne(ctx, bson.M{
 		"_id": setID,
 	}).Decode(b.EmoteSet); err != nil {
