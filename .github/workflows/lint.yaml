@@ -27,8 +27,8 @@ jobs:
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2.4.0
-        with:
-          submodules: recursive
+
+      - run: rm go.work*
 
       - id: go-cache-paths
         run: |
