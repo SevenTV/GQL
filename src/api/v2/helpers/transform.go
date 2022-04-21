@@ -148,7 +148,7 @@ func UserStructureToModel(ctx global.Context, s structures.User) *model.User {
 	user.BroadcasterType = twConn.Data.BroadcasterType
 
 	// set avatar url to twitch cdn if none set in app
-	if avatarURL == "" {
+	if len(avatarURL) >= 6 {
 		user.ProfileImageURL = twitchPictureSizeRegExp.ReplaceAllString(twConn.Data.ProfileImageURL[6:], "70x70")
 	}
 
