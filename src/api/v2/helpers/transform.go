@@ -15,11 +15,8 @@ import (
 
 var twitchPictureSizeRegExp = regexp.MustCompile("([0-9]{2,3})x([0-9]{2,3})")
 
-func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote {
+func EmoteStructureToModel(ctx global.Context, s structures.Emote) *model.Emote {
 	version, _ := s.GetVersion(s.ID)
-	if version == nil {
-		return nil
-	}
 
 	width := make([]int, 4)
 	height := make([]int, 4)
@@ -57,7 +54,7 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 
 	owner := structures.DeletedUser
 	if s.Owner != nil {
-		owner = s.Owner
+		owner = *s.Owner
 	}
 
 	return &model.Emote{
@@ -79,15 +76,15 @@ func EmoteStructureToModel(ctx global.Context, s *structures.Emote) *model.Emote
 	}
 }
 
-func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
+func UserStructureToModel(ctx global.Context, s structures.User) *model.User {
 	highestRole := s.GetHighestRole()
 	rank := 0
-	if highestRole != nil && !highestRole.ID.IsZero() {
+	if !highestRole.ID.IsZero() {
 		rank = int(highestRole.Position)
 		highestRole.Allowed = s.FinalPermission()
 		highestRole.Denied = 0
 	} else {
-		highestRole = nil
+		highestRole = structures.NilRole
 	}
 
 	// The emote set attached to twitch connection
@@ -95,18 +92,9 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 	emoteSetID := ""
 
 	// Twitch/YT connections
-	var twConn *structures.UserConnection
-	var ytConn *structures.UserConnection
-
-	for _, conn := range s.Connections {
-		if ytConn == nil && conn.Platform == structures.UserConnectionPlatformYouTube {
-			ytConn = conn
-		} else if twConn == nil && conn.Platform == structures.UserConnectionPlatformTwitch {
-			twConn = conn
-			if emoteSetID == "" {
-				emoteSetID = conn.EmoteSetID.Hex()
-			}
-		}
+	twConn, _, err := s.Connections.Twitch()
+	if err == nil {
+		emoteSetID = twConn.EmoteSetID.Hex()
 	}
 
 	// Avatar URL
@@ -155,20 +143,16 @@ func UserStructureToModel(ctx global.Context, s *structures.User) *model.User {
 		// NotificationCount: 0,
 		// Cosmetics:         []*model.UserCosmetic{},
 	}
-	if twConn != nil {
-		user.TwitchID = twConn.ID
-		user.EmoteSlots = int(twConn.EmoteSlots)
-		d, err := twConn.DecodeTwitch()
-		if err == nil {
-			user.BroadcasterType = d.BroadcasterType
+	user.TwitchID = twConn.ID
+	user.EmoteSlots = int(twConn.EmoteSlots)
+	user.BroadcasterType = twConn.Data.BroadcasterType
 
-			// set avatar url to twitch cdn if none set in app
-			if avatarURL == "" {
-				user.ProfileImageURL = twitchPictureSizeRegExp.ReplaceAllString(d.ProfileImageURL[6:], "70x70")
-			}
-		}
+	// set avatar url to twitch cdn if none set in app
+	if avatarURL == "" && len(twConn.Data.ProfileImageURL) >= 6 {
+		user.ProfileImageURL = twitchPictureSizeRegExp.ReplaceAllString(twConn.Data.ProfileImageURL[6:], "70x70")
 	}
-	if ytConn != nil {
+
+	if ytConn, _, err := s.Connections.YouTube(); err == nil {
 		user.YoutubeID = ytConn.ID
 	}
 
@@ -191,11 +175,7 @@ func UserStructureToPartialModel(ctx global.Context, s *model.User) *model.UserP
 	}
 }
 
-func RoleStructureToModel(ctx global.Context, s *structures.Role) *model.Role {
-	if s == nil {
-		return nil
-	}
-
+func RoleStructureToModel(ctx global.Context, s structures.Role) *model.Role {
 	p := 0
 	switch s.Allowed {
 	case structures.RolePermissionCreateEmote:

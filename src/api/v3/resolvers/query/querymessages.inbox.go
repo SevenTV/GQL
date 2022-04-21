@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/SevenTV/Common/errors"
+	"github.com/SevenTV/Common/structures/v3"
 	"github.com/SevenTV/Common/structures/v3/query"
 	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/api/v3/auth"
@@ -41,7 +42,7 @@ func (r *Resolver) Inbox(ctx context.Context, userID primitive.ObjectID, afterID
 
 	messages, err := r.Ctx.Inst().Query.InboxMessages(ctx, query.InboxMessagesQueryOptions{
 		Actor:               actor,
-		User:                user,
+		User:                &user,
 		Limit:               limit,
 		AfterID:             afterID,
 		SkipPermissionCheck: false,
@@ -52,7 +53,9 @@ func (r *Resolver) Inbox(ctx context.Context, userID primitive.ObjectID, afterID
 
 	result := make([]*model.InboxMessage, len(messages))
 	for i, msg := range messages {
-		result[i] = helpers.MessageStructureToInboxModel(r.Ctx, msg)
+		if msg, err := structures.ConvertMessage[structures.MessageDataInbox](msg); err == nil {
+			result[i] = helpers.MessageStructureToInboxModel(r.Ctx, msg)
+		}
 	}
 
 	return result, nil

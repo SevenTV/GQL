@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/SevenTV/Common/dataloader"
 	"github.com/SevenTV/Common/structures/v3"
-	"github.com/SevenTV/GQL/graph/v3/loaders"
 	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/api/v3/helpers"
 	"github.com/SevenTV/GQL/src/global"
@@ -13,8 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func userByID(gCtx global.Context) *loaders.UserLoader {
-	return loaders.NewUserLoader(loaders.UserLoaderConfig{
+func userByID(gCtx global.Context) *UserLoader {
+	return dataloader.New(dataloader.Config[primitive.ObjectID, *model.User]{
 		Wait: time.Millisecond * 5,
 		Fetch: func(keys []primitive.ObjectID) ([]*model.User, []error) {
 			ctx, cancel := context.WithTimeout(gCtx, time.Second*10)
@@ -37,11 +37,8 @@ func userByID(gCtx global.Context) *loaders.UserLoader {
 			}).Items()
 
 			if err == nil {
-				m := make(map[primitive.ObjectID]*structures.User)
+				m := make(map[primitive.ObjectID]structures.User)
 				for _, u := range users {
-					if u == nil {
-						continue
-					}
 					m[u.ID] = u
 				}
 

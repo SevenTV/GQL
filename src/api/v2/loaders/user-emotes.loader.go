@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/SevenTV/GQL/graph/v2/loaders"
+	"github.com/SevenTV/Common/dataloader"
 	"github.com/SevenTV/GQL/graph/v2/model"
 	"github.com/SevenTV/GQL/src/api/v2/helpers"
 	"github.com/SevenTV/GQL/src/global"
@@ -12,8 +12,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func userEmotesLoader(gCtx global.Context) *loaders.UserEmotesLoader {
-	return loaders.NewUserEmotesLoader(loaders.UserEmotesLoaderConfig{
+func userEmotesLoader(gCtx global.Context) *dataloader.DataLoader[string, []*model.Emote] {
+	return dataloader.New(dataloader.Config[string, []*model.Emote]{
 		Wait: time.Millisecond * 25,
 		Fetch: func(keys []string) ([][]*model.Emote, []error) {
 			ctx, cancel := context.WithTimeout(gCtx, time.Second*10)
@@ -34,7 +34,10 @@ func userEmotesLoader(gCtx global.Context) *loaders.UserEmotesLoader {
 				for _, set := range sets {
 					// iterate over emotes of set
 					for _, ae := range set.Emotes {
-						em := helpers.EmoteStructureToModel(gCtx, ae.Emote)
+						if ae.Emote == nil {
+							continue
+						}
+						em := helpers.EmoteStructureToModel(gCtx, *ae.Emote)
 
 						// set "alias"?
 						if ae.Name != em.Name {

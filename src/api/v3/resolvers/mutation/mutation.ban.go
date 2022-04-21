@@ -31,7 +31,7 @@ func (r *Resolver) CreateBan(ctx context.Context, victimID primitive.ObjectID, r
 	// Fetch the victim user
 	var victim *structures.User
 	if users, _, err := r.Ctx.Inst().Query.SearchUsers(ctx, bson.M{"_id": victimID}, query.UserSearchOptions{Page: 1, Limit: 1}); err == nil && len(users) > 0 {
-		victim = users[0]
+		victim = &users[0]
 	} else {
 		if len(users) == 0 {
 			return nil, errors.ErrUnknownUser().SetDetail("Victim not found")
@@ -40,7 +40,7 @@ func (r *Resolver) CreateBan(ctx context.Context, victimID primitive.ObjectID, r
 	}
 
 	// Create the ban
-	bb := structures.NewBanBuilder(nil).
+	bb := structures.NewBanBuilder(structures.Ban{}).
 		SetActorID(actor.ID).
 		SetVictimID(victim.ID).
 		SetReason(reason).

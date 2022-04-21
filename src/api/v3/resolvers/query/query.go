@@ -34,9 +34,13 @@ func (r *Resolver) CurrentUser(ctx context.Context) (*model.User, error) {
 }
 
 func (r *Resolver) User(ctx context.Context, id primitive.ObjectID) (*model.User, error) {
-	if _, banned := r.Ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{ // remove emotes made by usersa who own nothing and are happy
+	bans, err := r.Ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{ // remove emotes made by usersa who own nothing and are happy
 		Filter: bson.M{"effects": bson.M{"$bitsAnySet": structures.BanEffectMemoryHole}},
-	}).MemoryHole[id]; banned {
+	})
+	if err != nil {
+		return nil, err
+	}
+	if _, ok := bans.MemoryHole[id]; ok {
 		return nil, errors.ErrUnknownUser()
 	}
 
@@ -64,7 +68,8 @@ func (r *Resolver) Roles(ctx context.Context) ([]*model.Role, error) {
 }
 
 func (r *Resolver) Role(ctx context.Context, id primitive.ObjectID) (*model.Role, error) {
-	return loaders.For(ctx).RoleByID.Load(id)
+	// return loaders.For(ctx).RoleByID.Load(id)
+	return nil, nil
 }
 
 func (r *Resolver) Reports(ctx context.Context, status *model.ReportStatus, limit *int, afterID *string, beforeID *string) ([]*model.Report, error) {
@@ -73,7 +78,8 @@ func (r *Resolver) Reports(ctx context.Context, status *model.ReportStatus, limi
 }
 
 func (r *Resolver) Report(ctx context.Context, id primitive.ObjectID) (*model.Report, error) {
-	return loaders.For(ctx).ReportByID.Load(id)
+	// return loaders.For(ctx).ReportByID.Load(id)
+	return nil, nil
 }
 
 type Sort struct {

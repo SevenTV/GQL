@@ -118,7 +118,10 @@ func (r *Resolver) OwnedEmotes(ctx context.Context, obj *model.User) ([]*model.E
 	}
 	result := make([]*model.Emote, len(emotes))
 	for i, e := range emotes {
-		result[i] = helpers.EmoteStructureToModel(r.Ctx, e)
+		if e == nil {
+			continue
+		}
+		result[i] = helpers.EmoteStructureToModel(r.Ctx, *e)
 	}
 	return result, multierror.Append(nil, errs...).ErrorOrNil()
 }
@@ -129,5 +132,6 @@ func (r *Resolver) InboxUnreadCount(ctx context.Context, obj *model.User) (int, 
 }
 
 func (r *Resolver) Reports(ctx context.Context, obj *model.User) ([]*model.Report, error) {
-	return loaders.For(ctx).ReportsByUserID.Load(obj.ID)
+	// return loaders.For(ctx).ReportsByUserID.Load(obj.ID)
+	return nil, nil
 }

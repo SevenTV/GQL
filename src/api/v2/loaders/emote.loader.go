@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/SevenTV/Common/dataloader"
 	"github.com/SevenTV/Common/structures/v3"
-	"github.com/SevenTV/GQL/graph/v2/loaders"
 	"github.com/SevenTV/GQL/graph/v2/model"
 	"github.com/SevenTV/GQL/src/api/v2/helpers"
 	"github.com/SevenTV/GQL/src/global"
@@ -13,8 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
-	return loaders.NewEmoteLoader(loaders.EmoteLoaderConfig{
+func emoteByID(gCtx global.Context) *dataloader.DataLoader[string, *model.Emote] {
+	return dataloader.New(dataloader.Config[string, *model.Emote]{
 		Wait: time.Millisecond * 25,
 		Fetch: func(keys []string) ([]*model.Emote, []error) {
 			ctx, cancel := context.WithTimeout(gCtx, time.Second*10)
@@ -41,11 +41,8 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 			}).Items()
 
 			if err == nil {
-				m := make(map[primitive.ObjectID]*structures.Emote)
+				m := make(map[primitive.ObjectID]structures.Emote)
 				for _, e := range emotes {
-					if e == nil {
-						continue
-					}
 					for _, ver := range e.Versions {
 						m[ver.ID] = e
 					}
@@ -54,7 +51,7 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 				for i, v := range ids {
 					if x, ok := m[v]; ok {
 						ver, _ := x.GetVersion(v)
-						if ver == nil || ver.IsUnavailable() {
+						if ver.ID.IsZero() || ver.IsUnavailable() {
 							continue
 						}
 						x.ID = v

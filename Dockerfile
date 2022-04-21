@@ -10,6 +10,7 @@ ARG VERSION
 ENV GQL_BUILDER=${BUILDER}
 ENV GQL_VERSION=${VERSION}
 
+RUN rm go.work*
 RUN apt-get install make git gcc && \
     make build_deps && \
     make

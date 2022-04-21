@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/SevenTV/Common/dataloader"
 	"github.com/SevenTV/Common/structures/v3"
-	"github.com/SevenTV/GQL/graph/v3/loaders"
 	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/api/v3/helpers"
 	"github.com/SevenTV/GQL/src/global"
@@ -13,8 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
-	return loaders.NewEmoteLoader(loaders.EmoteLoaderConfig{
+func emoteByID(gCtx global.Context) *EmoteLoader {
+	return dataloader.New(dataloader.Config[primitive.ObjectID, *model.Emote]{
 		Fetch: func(keys []primitive.ObjectID) ([]*model.Emote, []error) {
 			ctx, cancel := context.WithTimeout(gCtx, time.Second*10)
 			defer cancel()
@@ -31,7 +31,7 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 
 			// Get roles (to assign to emote owners)
 			roles, _ := gCtx.Inst().Query.Roles(ctx, bson.M{})
-			roleMap := make(map[primitive.ObjectID]*structures.Role)
+			roleMap := make(map[primitive.ObjectID]structures.Role)
 			for _, role := range roles {
 				roleMap[role.ID] = role
 			}
@@ -43,11 +43,8 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 			}).Items()
 
 			if err == nil {
-				m := make(map[primitive.ObjectID]*structures.Emote)
+				m := make(map[primitive.ObjectID]structures.Emote)
 				for _, e := range emotes {
-					if e == nil {
-						continue
-					}
 					for _, ver := range e.Versions {
 						m[ver.ID] = e
 					}
@@ -56,7 +53,7 @@ func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
 				for i, v := range keys {
 					if x, ok := m[v]; ok {
 						ver, _ := x.GetVersion(v)
-						if ver == nil || ver.IsUnavailable() {
+						if ver.IsUnavailable() {
 							continue
 						}
 						x.ID = v

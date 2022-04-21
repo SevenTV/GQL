@@ -58,10 +58,10 @@ func (r *Resolver) SearchEmotes(
 
 	// Define sorting
 	if sortByArg == nil {
-		sortByArg = utils.StringPointer("popularity")
+		sortByArg = utils.PointerOf("popularity")
 	}
 	if sortOrderArg == nil {
-		sortOrderArg = utils.IntPointer(0)
+		sortOrderArg = utils.PointerOf(0)
 	}
 	sortField, validField := sortFieldMap[*sortByArg]
 	sortOrder, validOrder := sortOrderMap[*sortOrderArg]
@@ -116,9 +116,9 @@ func (r *Resolver) SearchEmotes(
 			// Fetch emotes
 			emoteIDs := make([]primitive.ObjectID, len(result))
 			for i, msg := range result {
-				mb := structures.NewMessageBuilder(msg)
-				req := mb.DecodeModRequest()
-				emoteIDs[i] = req.TargetID
+				if msg, err := structures.ConvertMessage[structures.MessageDataModRequest](msg); err == nil {
+					emoteIDs[i] = msg.Data.TargetID
+				}
 			}
 			// Set to filter
 			filterDoc["versions.id"] = bson.M{
@@ -147,7 +147,7 @@ func (r *Resolver) SearchEmotes(
 		// Bring forward the latest version
 		if len(e.Versions) > 0 {
 			ver := e.GetLatestVersion(onlyListed)
-			if ver != nil {
+			if !ver.ID.IsZero() {
 				e.ID = ver.ID
 			}
 		}

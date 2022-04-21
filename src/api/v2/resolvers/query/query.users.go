@@ -43,9 +43,13 @@ func (r *Resolver) User(ctx context.Context, id string) (*model.User, error) {
 	// Check if banned
 	if !isMe && model != nil {
 		userID, _ := primitive.ObjectIDFromHex(model.ID)
-		if _, banned := r.Ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{ // remove emotes made by usersa who own nothing and are happy
+		bans, err := r.Ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{ // remove emotes made by usersa who own nothing and are happy
 			Filter: bson.M{"effects": bson.M{"$bitsAnySet": structures.BanEffectMemoryHole}},
-		}).MemoryHole[userID]; banned {
+		})
+		if err != nil {
+			return nil, err
+		}
+		if _, banned := bans.MemoryHole[userID]; banned {
 			return nil, errors.ErrUnknownUser()
 		}
 	}

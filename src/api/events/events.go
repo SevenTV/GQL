@@ -21,13 +21,13 @@ func PublishLegacyEventAPI(
 	ctx global.Context,
 	action string,
 	actor *structures.User,
-	set *structures.EmoteSet,
-	emote *structures.Emote,
+	set structures.EmoteSet,
+	emote structures.Emote,
 	channelLogin string,
 ) {
 	ae, _ := set.GetEmote(emote.ID)
 	name := emote.Name
-	if ae != nil {
+	if !ae.ID.IsZero() {
 		name = ae.Name
 	}
 

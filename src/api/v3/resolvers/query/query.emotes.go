@@ -42,8 +42,8 @@ func (r *Resolver) Emotes(ctx context.Context, queryValue string, pageArg *int, 
 	filter := filterArg
 	if filter == nil {
 		filter = &model.EmoteSearchFilter{
-			CaseSensitive: utils.BoolPointer(false),
-			ExactMatch:    utils.BoolPointer(false),
+			CaseSensitive: utils.PointerOf(false),
+			ExactMatch:    utils.PointerOf(false),
 		}
 	} else {
 		filter = filterArg
@@ -100,8 +100,7 @@ func (r *Resolver) Emotes(ctx context.Context, queryValue string, pageArg *int, 
 	for i, e := range result {
 		// Bring forward the latest version
 		if len(e.Versions) > 0 {
-			ver := e.GetLatestVersion(true)
-			if ver != nil {
+			if ver := e.GetLatestVersion(true); !ver.ID.IsZero() {
 				e.ID = ver.ID
 			}
 		}

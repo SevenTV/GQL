@@ -39,7 +39,7 @@ func (r *Resolver) BanUser(ctx context.Context, victimIDArg string, expireAtArg 
 	}
 
 	// Fetch the victim user
-	var victim *structures.User
+	var victim structures.User
 	victimID, err := primitive.ObjectIDFromHex(victimIDArg)
 	if err != nil {
 		return nil, errors.ErrBadObjectID()
@@ -51,7 +51,7 @@ func (r *Resolver) BanUser(ctx context.Context, victimIDArg string, expireAtArg 
 	}
 
 	// Create the ban
-	bb := structures.NewBanBuilder(nil).
+	bb := structures.NewBanBuilder(structures.Ban{}).
 		SetActorID(actor.ID).
 		SetVictimID(victim.ID).
 		SetReason(reason).
@@ -59,7 +59,7 @@ func (r *Resolver) BanUser(ctx context.Context, victimIDArg string, expireAtArg 
 		SetEffects(structures.BanEffect(structures.BanEffectMemoryHole | structures.BanEffectNoAuth | structures.BanEffectNoPermissions))
 	if err = r.Ctx.Inst().Mutate.CreateBan(ctx, bb, mutations.CreateBanOptions{
 		Actor:  actor,
-		Victim: victim,
+		Victim: &victim,
 	}); err != nil {
 		return nil, err
 	}
@@ -93,11 +93,14 @@ func (r *Resolver) UnbanUser(ctx context.Context, victimIDArg string, reason *st
 	// because this is v2, we don't really understand
 	// the concept of multiple bans with varying effects
 	// so unbanning from v2 will cancel out *all* active bans
-	bans := r.Ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{
+	bans, err := r.Ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{
 		Filter: bson.M{"victim_id": victimID},
-	}).All
+	})
+	if err != nil {
+		return nil, err
+	}
 
-	for _, ban := range bans {
+	for _, ban := range bans.All {
 		bb := structures.NewBanBuilder(ban)
 		// Change expire date to current date
 		// (equivalent of setting active: false in v2)

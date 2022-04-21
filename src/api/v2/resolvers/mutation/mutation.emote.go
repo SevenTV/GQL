@@ -185,5 +185,5 @@ func (r *Resolver) DeleteEmote(ctx context.Context, id string, reason string) (*
 	go func() {
 		events.Publish(r.Ctx, "emotes", emoteID)
 	}()
-	return utils.BoolPointer(true), nil
+	return utils.PointerOf(true), nil
 }
