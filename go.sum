@@ -40,10 +40,6 @@ github.com/99designs/gqlgen v0.17.2 h1:yczvlwMsfcVu/JtejqfrLwXuSP0yZFhmcss3caEvH
 github.com/99designs/gqlgen v0.17.2/go.mod h1:K5fzLKwtph+FFgh9j7nFbRUdBKvTcGnsta51fsMTn3o=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/SevenTV/Common v0.0.0-20220420073351-4bb21ed6e8a5 h1:wQogBysK7d6Qs0Y29qsmy7a48XL2V+21IFRYTgo+L6g=
-github.com/SevenTV/Common v0.0.0-20220420073351-4bb21ed6e8a5/go.mod h1:k1+/uNULz0uSb6IPHI6G8HJutERV3IzF6i3gVk5hYT0=
-github.com/SevenTV/Common v0.0.0-20220420151605-dbb7ba4ecf6d h1:iDgP235O+Ct0iVN9PqkE26Msxn/LLijWO490xVyigcA=
-github.com/SevenTV/Common v0.0.0-20220420151605-dbb7ba4ecf6d/go.mod h1:k1+/uNULz0uSb6IPHI6G8HJutERV3IzF6i3gVk5hYT0=
 github.com/SevenTV/Common v0.0.0-20220421001728-cb0c59aed01e h1:NRyp1l5xUaqogx+OvwRzP4dDfkdgvKHy/opQ1PaOrGo=
 github.com/SevenTV/Common v0.0.0-20220421001728-cb0c59aed01e/go.mod h1:k1+/uNULz0uSb6IPHI6G8HJutERV3IzF6i3gVk5hYT0=
 github.com/agnivade/levenshtein v1.0.1/go.mod h1:CURSv5d9Uaml+FovSIICkLbAUZ9S4RqaHDIsdSBg7lM=

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/SevenTV/Common/dataloader"
 	"github.com/SevenTV/Common/structures/v3"
-	"github.com/SevenTV/GQL/graph/v2/loaders"
 	"github.com/SevenTV/GQL/graph/v2/model"
 	"github.com/SevenTV/GQL/src/api/v2/helpers"
 	"github.com/SevenTV/GQL/src/global"
@@ -13,8 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func emoteByID(gCtx global.Context) *loaders.EmoteLoader {
-	return loaders.NewEmoteLoader(loaders.EmoteLoaderConfig{
+func emoteByID(gCtx global.Context) *dataloader.DataLoader[string, *model.Emote] {
+	return dataloader.New(dataloader.Config[string, *model.Emote]{
 		Wait: time.Millisecond * 25,
 		Fetch: func(keys []string) ([]*model.Emote, []error) {
 			ctx, cancel := context.WithTimeout(gCtx, time.Second*10)

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/SevenTV/Common/dataloader"
 	"github.com/SevenTV/Common/structures/v3"
-	"github.com/SevenTV/GQL/graph/v2/loaders"
 	"github.com/SevenTV/GQL/graph/v2/model"
 	"github.com/SevenTV/GQL/src/api/v2/helpers"
 	"github.com/SevenTV/GQL/src/global"
@@ -13,8 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func userLoader(gCtx global.Context, keyName string) *loaders.UserLoader {
-	return loaders.NewUserLoader(loaders.UserLoaderConfig{
+func userLoader(gCtx global.Context, keyName string) *UserLoader {
+	return dataloader.New(dataloader.Config[string, *model.User]{
 		Wait: time.Millisecond * 25,
 		Fetch: func(keys []string) ([]*model.User, []error) {
 			ctx, cancel := context.WithTimeout(gCtx, time.Second*10)

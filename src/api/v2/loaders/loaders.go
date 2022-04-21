@@ -3,19 +3,20 @@ package loaders
 import (
 	"context"
 
+	"github.com/SevenTV/Common/dataloader"
 	"github.com/SevenTV/Common/utils"
-	"github.com/SevenTV/GQL/graph/v2/loaders"
+	"github.com/SevenTV/GQL/graph/v2/model"
 	"github.com/SevenTV/GQL/src/global"
 )
 
 const LoadersKey = utils.Key("dataloadersv2")
 
 type Loaders struct {
-	UserByID       *loaders.UserLoader
-	UserByUsername *loaders.UserLoader
-	UserEmotes     *loaders.UserEmotesLoader
+	UserByID       *UserLoader
+	UserByUsername *UserLoader
+	UserEmotes     *UserEmotesLoader
 
-	EmoteByID *loaders.EmoteLoader
+	EmoteByID *EmoteLoader
 }
 
 func New(gCtx global.Context) *Loaders {
@@ -31,3 +32,9 @@ func New(gCtx global.Context) *Loaders {
 func For(ctx context.Context) *Loaders {
 	return ctx.Value(LoadersKey).(*Loaders)
 }
+
+type (
+	EmoteLoader      = dataloader.DataLoader[string, *model.Emote]
+	UserLoader       = dataloader.DataLoader[string, *model.User]
+	UserEmotesLoader = dataloader.DataLoader[string, []*model.Emote]
+)
