@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/99designs/gqlgen v0.17.2
-	github.com/SevenTV/Common v0.0.0-20220420073351-4bb21ed6e8a5
+	github.com/SevenTV/Common v0.0.0-20220421001728-cb0c59aed01e
 	github.com/bugsnag/panicwrap v1.3.4
 	github.com/fasthttp/router v1.4.7
 	github.com/fasthttp/websocket v1.5.0

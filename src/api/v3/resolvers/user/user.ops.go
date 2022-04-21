@@ -14,6 +14,7 @@ import (
 	"github.com/SevenTV/GQL/src/api/v3/auth"
 	"github.com/SevenTV/GQL/src/api/v3/helpers"
 	"github.com/SevenTV/GQL/src/api/v3/types"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -34,7 +35,7 @@ func (r *ResolverOps) Connections(ctx context.Context, obj *model.UserOps, id st
 	b := structures.NewUserBuilder(structures.DeletedUser)
 	if err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).FindOne(ctx, bson.M{
 		"_id": obj.ID,
-	}).Decode(b.User); err != nil {
+	}).Decode(&b.User); err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.ErrUnknownUser()
 		}
@@ -45,7 +46,7 @@ func (r *ResolverOps) Connections(ctx context.Context, obj *model.UserOps, id st
 	var err error
 	if d.EmoteSetID != nil {
 		conn, _, err := b.User.Connections.Twitch()
-		if err == nil {
+		if err != nil {
 			return nil, errors.ErrUnknownUserConnection()
 		}
 		oldSetID := conn.EmoteSetID
@@ -57,6 +58,7 @@ func (r *ResolverOps) Connections(ctx context.Context, obj *model.UserOps, id st
 			Actor:        actor,
 			ConnectionID: id,
 		}); err != nil {
+			logrus.WithError(err).WithField("connection_id", conn.ID).Error("failed to update user's active emote set")
 			return nil, err
 		}
 
