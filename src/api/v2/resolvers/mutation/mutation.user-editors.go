@@ -60,9 +60,9 @@ func (r *Resolver) doSetChannelEditor(
 	targetID primitive.ObjectID,
 	editorID primitive.ObjectID,
 ) error {
-	var target *structures.User
-	var editor *structures.User
-	users := []*structures.User{}
+	var target structures.User
+	var editor structures.User
+	users := []structures.User{}
 	cur, err := r.Ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Find(ctx, bson.M{
 		"_id": bson.M{"$in": bson.A{targetID, editorID}},
 	})
@@ -83,14 +83,14 @@ func (r *Resolver) doSetChannelEditor(
 			editor = u
 		}
 	}
-	if target == nil {
+	if target.ID.IsZero() {
 		return errors.ErrUnknownUser()
 	}
 
-	ub := structures.NewUserBuilder(structures.User{})
+	ub := structures.NewUserBuilder(target)
 	if err := r.Ctx.Inst().Mutate.ModifyUserEditors(ctx, ub, mutations.UserEditorsOptions{
 		Actor:             actor,
-		Editor:            editor,
+		Editor:            &editor,
 		EditorPermissions: structures.UserEditorPermissionModifyEmotes,
 		EditorVisible:     true,
 		Action:            action,
