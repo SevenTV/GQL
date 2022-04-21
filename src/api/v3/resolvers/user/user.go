@@ -132,5 +132,6 @@ func (r *Resolver) InboxUnreadCount(ctx context.Context, obj *model.User) (int, 
 }
 
 func (r *Resolver) Reports(ctx context.Context, obj *model.User) ([]*model.Report, error) {
-	return loaders.For(ctx).ReportsByUserID.Load(obj.ID)
+	// return loaders.For(ctx).ReportsByUserID.Load(obj.ID)
+	return nil, nil
 }

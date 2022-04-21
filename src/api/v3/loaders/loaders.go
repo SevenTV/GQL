@@ -5,7 +5,6 @@ import (
 
 	"github.com/SevenTV/Common/dataloader"
 	"github.com/SevenTV/Common/utils"
-	"github.com/SevenTV/GQL/graph/v3/loaders"
 	"github.com/SevenTV/GQL/graph/v3/model"
 	"github.com/SevenTV/GQL/src/global"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -15,25 +14,14 @@ const LoadersKey = utils.Key("dataloaders")
 
 type Loaders struct {
 	// User Loaders
-	UserByID       *UserLoader
-	UsersByEmoteID *loaders.BatchUserLoader
-	UsersByRoleID  *loaders.BatchUserLoader
+	UserByID *UserLoader
 
 	// Emote Loaders
-	EmoteByID         *EmoteLoader
-	EmotesByChannelID *loaders.BatchEmoteLoader
+	EmoteByID *EmoteLoader
 
 	// Emote Set Loaders
 	EmoteSetByID     *EmoteSetLoader
 	EmoteSetByUserID *BatchEmoteSetLoader
-
-	// Role Loaders
-	RoleByID *loaders.RoleLoader
-
-	// Report Loaders
-	ReportByID       *loaders.ReportLoader
-	ReportsByUserID  *loaders.BatchReportLoader
-	ReportsByEmoteID *loaders.BatchReportLoader
 }
 
 func New(gCtx global.Context) *Loaders {

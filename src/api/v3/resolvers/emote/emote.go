@@ -41,5 +41,6 @@ func (r *Resolver) ChannelCount(ctx context.Context, obj *model.Emote) (int, err
 }
 
 func (r *Resolver) Reports(ctx context.Context, obj *model.Emote) ([]*model.Report, error) {
-	return loaders.For(ctx).ReportsByEmoteID.Load(obj.ID)
+	// return loaders.For(ctx).ReportsByEmoteID.Load(obj.ID)
+	return nil, nil
 }

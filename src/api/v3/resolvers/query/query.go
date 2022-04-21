@@ -68,7 +68,8 @@ func (r *Resolver) Roles(ctx context.Context) ([]*model.Role, error) {
 }
 
 func (r *Resolver) Role(ctx context.Context, id primitive.ObjectID) (*model.Role, error) {
-	return loaders.For(ctx).RoleByID.Load(id)
+	// return loaders.For(ctx).RoleByID.Load(id)
+	return nil, nil
 }
 
 func (r *Resolver) Reports(ctx context.Context, status *model.ReportStatus, limit *int, afterID *string, beforeID *string) ([]*model.Report, error) {
@@ -77,7 +78,8 @@ func (r *Resolver) Reports(ctx context.Context, status *model.ReportStatus, limi
 }
 
 func (r *Resolver) Report(ctx context.Context, id primitive.ObjectID) (*model.Report, error) {
-	return loaders.For(ctx).ReportByID.Load(id)
+	// return loaders.For(ctx).ReportByID.Load(id)
+	return nil, nil
 }
 
 type Sort struct {
