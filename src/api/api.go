@@ -1,11 +1,14 @@
 package api
 
 import (
+	"encoding/json"
 	"time"
 
+	"github.com/SevenTV/Common/errors"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/api/middleware"
-	"github.com/SevenTV/GQL/src/api/v3/gql/loaders"
+	v2 "github.com/SevenTV/GQL/src/api/v2"
+	v3 "github.com/SevenTV/GQL/src/api/v3"
 	"github.com/SevenTV/GQL/src/global"
 	"github.com/fasthttp/router"
 	"github.com/sirupsen/logrus"
@@ -14,21 +17,35 @@ import (
 
 func New(gCtx global.Context) <-chan struct{} {
 	done := make(chan struct{})
-	loader := loaders.New(gCtx)
 
-	gql := GqlHandler(gCtx, loader)
+	gqlv3 := v3.GqlHandlerV3(gCtx)
+	gqlv2 := v2.GqlHandlerV2(gCtx)
 
 	router := router.New()
 
 	router.RedirectTrailingSlash = true
 	mid := func(ctx *fasthttp.RequestCtx) {
 		if err := middleware.Auth(gCtx)(ctx); err != nil {
-			ctx.Response.Header.Add("X-Auth-Failure", err.Error())
+			ctx.Response.Header.Add("X-Auth-Failure", err.Message())
 			goto handler
 		}
 
 	handler:
-		gql(ctx)
+		switch ctx.UserValue("v") {
+		case "v3":
+			gqlv3(ctx)
+		case "v2":
+			gqlv2(ctx)
+		default:
+			err := errors.ErrUnknownRoute()
+			b, _ := json.Marshal(map[string]interface{}{
+				"error":      err.Message(),
+				"error_code": err.Code(),
+			})
+			_, _ = ctx.Write(b)
+			ctx.SetContentType("application/json")
+			ctx.SetStatusCode(fasthttp.StatusNotFound)
+		}
 	}
 	router.GET("/{v}", mid)
 	router.POST("/{v}", mid)
@@ -59,6 +76,7 @@ func New(gCtx global.Context) <-chan struct{} {
 			// CORS
 			ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
 			ctx.Response.Header.Set("Access-Control-Allow-Headers", "*")
+			ctx.Response.Header.Set("Access-Control-Expose-Headers", "X-Collection-Size")
 			ctx.Response.Header.Set("Access-Control-Allow-Methods", "*")
 			ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
 			if ctx.IsOptions() {

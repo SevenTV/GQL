@@ -1,4 +1,4 @@
-FROM golang:1.17.3 as builder
+FROM golang:1.18 as builder
 
 WORKDIR /tmp/gql
 
@@ -10,6 +10,7 @@ ARG VERSION
 ENV GQL_BUILDER=${BUILDER}
 ENV GQL_VERSION=${VERSION}
 
+RUN rm go.work*
 RUN apt-get install make git gcc && \
     make build_deps && \
     make

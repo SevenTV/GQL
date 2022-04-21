@@ -6,12 +6,10 @@ import (
 
 	"github.com/SevenTV/Common/auth"
 	"github.com/SevenTV/Common/errors"
-	"github.com/SevenTV/Common/mongo"
 	"github.com/SevenTV/Common/structures/v3"
-	"github.com/SevenTV/Common/structures/v3/aggregations"
+	"github.com/SevenTV/Common/structures/v3/query"
 	"github.com/SevenTV/Common/utils"
 	"github.com/SevenTV/GQL/src/global"
-	"github.com/sirupsen/logrus"
 	"github.com/valyala/fasthttp"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -58,29 +56,9 @@ func DoAuth(ctx global.Context, t string) (*structures.User, errors.APIError) {
 		return nil, errors.ErrUnauthorized().SetDetail(err.Error())
 	}
 
-	// Version of parsed token
-	user := &structures.User{}
-
-	pipeline := mongo.Pipeline{{{Key: "$match", Value: bson.M{"_id": userID}}}}
-	pipeline = append(pipeline, aggregations.UserRelationRoles...)
-	pipeline = append(pipeline, aggregations.UserRelationBans...)
-	cur, err := ctx.Inst().Mongo.Collection(mongo.CollectionNameUsers).Aggregate(ctx, pipeline)
+	user, err := ctx.Inst().Query.Users(ctx, bson.M{"_id": userID}).First()
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, errors.ErrUnauthorized().SetDetail("Token has Unknown Bound User")
-		}
-
-		logrus.WithError(err).Error("mongo")
-		return nil, errors.ErrInternalServerError()
-	}
-	cur.Next(ctx)
-	err = cur.Decode(user)
-	if err != nil {
-		return nil, errors.ErrInternalServerError().SetDetail(err.Error())
-	}
-	err = cur.Close(ctx)
-	if err != nil {
-		return nil, errors.ErrInternalServerError().SetDetail(err.Error())
+		return nil, errors.From(err)
 	}
 
 	if user.TokenVersion != claims.TokenVersion {
@@ -88,24 +66,23 @@ func DoAuth(ctx global.Context, t string) (*structures.User, errors.APIError) {
 	}
 
 	// Check bans
-	for _, ban := range user.Bans {
-		// Check for No Auth effect
-		if ban.HasEffect(structures.BanEffectNoAuth) {
-			return nil, errors.ErrInsufficientPrivilege().SetDetail("You are banned!").SetFields(errors.Fields{
-				"ban": map[string]string{
-					"reason":    ban.Reason,
-					"expire_at": ban.ExpireAt.Format(time.RFC3339),
-				},
-			})
-		}
-		// Check for No Permissions effect
-		if ban.HasEffect(structures.BanEffectNoPermissions) {
-			user.Roles = []*structures.Role{structures.RevocationRole}
-
-		}
+	bans, err := ctx.Inst().Query.Bans(ctx, query.BanQueryOptions{
+		Filter: bson.M{"effects": bson.M{"$bitsAnySet": structures.BanEffectNoAuth | structures.BanEffectNoPermissions}},
+	})
+	if err != nil {
+		return nil, errors.ErrInternalServerError().SetDetail("Failed")
 	}
-	defaultRoles, _ := ctx.Inst().Query.Roles(ctx, bson.M{"default": true})
-	user.AddRoles(defaultRoles...)
+	if ban, noAuth := bans.NoAuth[userID]; noAuth {
+		return nil, errors.ErrInsufficientPrivilege().SetDetail("You are banned!").SetFields(errors.Fields{
+			"ban": map[string]string{
+				"reason":    ban.Reason,
+				"expire_at": ban.ExpireAt.Format(time.RFC3339),
+			},
+		})
+	}
+	if _, noRights := bans.NoPermissions[userID]; noRights {
+		user.Roles = []structures.Role{structures.RevocationRole}
+	}
 
-	return user, nil
+	return &user, nil
 }

@@ -21,7 +21,7 @@ linux:
 lint:
 	staticcheck ./...
 	go vet ./...
-	golangci-lint run
+#	golangci-lint run
 	yarn prettier --write .
 
 deps: go_installs
@@ -29,31 +29,15 @@ deps: go_installs
 	yarn
 
 build_deps:
-	go install github.com/99designs/gqlgen@v0.15.1
-	go install github.com/seventv/dataloaden@cc5ac4900
+	go install github.com/99designs/gqlgen@v0.17.2
 
 go_installs: build_deps
-	go install honnef.co/go/tools/cmd/staticcheck@latest
+	go install honnef.co/go/tools/cmd/staticcheck@generics
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 gql:
-	gqlgen
-
-	cd graph/loaders && dataloaden UserLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.User"
-	cd graph/loaders && dataloaden BatchUserLoader string "[]*github.com/SevenTV/GQL/graph/model.User"
-
-	cd graph/loaders && dataloaden EmoteLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.Emote"
-	cd graph/loaders && dataloaden BatchEmoteLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "[]*github.com/SevenTV/GQL/graph/model.Emote"
-
-	cd graph/loaders && dataloaden EmoteSetLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.EmoteSet"
-	cd graph/loaders && dataloaden BatchEmoteSetLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "[]*github.com/SevenTV/GQL/graph/model.EmoteSet"
-
-	cd graph/loaders && dataloaden RoleLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.Role"
-
-	cd graph/loaders && dataloaden ConnectionLoader string "*github.com/SevenTV/GQL/graph/model.UserConnection"
-
-	cd graph/loaders && dataloaden ReportLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "*github.com/SevenTV/GQL/graph/model.Report"
-	cd graph/loaders && dataloaden BatchReportLoader "go.mongodb.org/mongo-driver/bson/primitive.ObjectID" "[]*github.com/SevenTV/GQL/graph/model.Report"
+	gqlgen --config ./gqlgen.v3.yml
+	gqlgen --config ./gqlgen.v2.yml
 
 test:
 	go test -count=1 -cover ./...
