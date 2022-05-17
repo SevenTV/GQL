@@ -1,3 +1,3 @@
 # GQL
 
-7TV API v3 | GQL
+**This repository has moved to [SevenTV/API](github.com/SevenTV/API)**
